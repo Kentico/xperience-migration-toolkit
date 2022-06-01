@@ -8,6 +8,7 @@ using Migration.Toolkit.Core.Behaviors;
 using Migration.Toolkit.Core.CmsResource;
 using Migration.Toolkit.Core.CmsSettingsKey;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrateDataProtection;
 using Migration.Toolkit.Core.MigrateForms;
 using Migration.Toolkit.Core.MigrateMediaLibraries;
 using Migration.Toolkit.Core.MigratePages;
@@ -80,6 +81,11 @@ public static class DependencyInjectionExtensions
         
         services.AddMediatR(typeof(DependencyInjectionExtensions));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestHandlingBehavior<,>));
+        // cms data protection
+        services.AddTransient<IEntityMapper<KX13.Models.CmsConsent, KXO.Models.CmsConsent>, CmsConsentMapper>();
+        services.AddTransient<IEntityMapper<KX13.Models.CmsConsentArchive, KXO.Models.CmsConsentArchive>, CmsConsentArchiveMapper>();
+        services.AddTransient<IEntityMapper<KX13.Models.CmsConsentAgreement, KXO.Models.CmsConsentAgreement>, CmsConsentAgreementMapper>();
+        services.AddTransient<MigrateDataProtectionCommandHandler>();
 
         // IPipelineBehavior 
         return services;

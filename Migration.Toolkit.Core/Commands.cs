@@ -24,7 +24,7 @@ public record MigrateContactManagementCommand(): IRequest<GenericCommandResult>,
     public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
 }
 
-public record MigrateDataProtectionCommand(): IRequest<GenericCommandResult>, ICommand
+public record MigrateDataProtectionCommand(int? BatchSize) : IRequest<GenericCommandResult>, ICommand
 {
     public static string Moniker => "data-protection";
     public static string MonikerFriendly => "Data protection";

@@ -73,10 +73,33 @@ void WriteCommandDesc(string desc, string commandMoniker)
 
 bool RequireParameter(string paramName, out string paramValue)
 {
-    if (Array.IndexOf(args, "--culture") is int cIdx and > -1 && args.Length > cIdx + 1)
+    if (Array.IndexOf(args, paramName) is int cIdx and > -1 && args.Length > cIdx + 1)
     {
         paramValue = args[cIdx + 1];
         return true;
+    }
+
+    Console.WriteLine(Red($"Parameter {paramName} is reqiured."));
+    paramValue = null;
+    return false;
+}
+
+bool RequireNumberParameter(string paramName, out int? paramValue)
+{
+    if (Array.IndexOf(args, paramName) is int cIdx and > -1 && args.Length > cIdx + 1)
+    {
+        if(int.TryParse(args[cIdx + 1], out var value))
+        {
+            paramValue = value;
+            return true;
+        }
+        else
+        {
+            Console.WriteLine(Red($"Parameter {paramName} is not int."));
+            paramValue = null;
+            return false;
+        }
+        
     }
 
     Console.WriteLine(Red($"Parameter {paramName} is reqiured."));
@@ -176,7 +199,8 @@ while (argsQ.TryDequeue(out var arg))
 
     if (arg == $"--{MigrateDataProtectionCommand.Moniker}")
     {
-        commands.Add(new MigrateDataProtectionCommand());
+        RequireNumberParameter("--batchSize", out var batchSize);
+        commands.Add(new MigrateDataProtectionCommand(batchSize));
         continue;
     }
 

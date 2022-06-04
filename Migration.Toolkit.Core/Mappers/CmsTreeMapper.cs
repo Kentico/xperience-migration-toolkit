@@ -21,7 +21,7 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
     
-    public ModelMappingResult<KXO.Models.CmsTree> Map(KX13.Models.CmsTree? source, KXO.Models.CmsTree? target)
+    public IModelMappingResult<KXO.Models.CmsTree> Map(KX13.Models.CmsTree? source, KXO.Models.CmsTree? target)
     {
         if (source is null)
         {

@@ -12,7 +12,7 @@ public class CmsConsentMapper : IEntityMapper<KX13.Models.CmsConsent, KXO.Models
         _logger = logger;
     }
     
-    public ModelMappingResult<KXO.Models.CmsConsent> Map(KX13.Models.CmsConsent? source, KXO.Models.CmsConsent? target)
+    public IModelMappingResult<KXO.Models.CmsConsent> Map(KX13.Models.CmsConsent? source, KXO.Models.CmsConsent? target)
     {
         if (source is null)
         {

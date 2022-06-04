@@ -21,7 +21,7 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
 
-    public ModelMappingResult<KXO.Models.CmsForm> Map(KX13.Models.CmsForm? source, KXO.Models.CmsForm? target)
+    public IModelMappingResult<KXO.Models.CmsForm> Map(KX13.Models.CmsForm? source, KXO.Models.CmsForm? target)
     {
         if (source is null)
         {
@@ -86,7 +86,7 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         return new ModelMappingSuccess<KXO.Models.CmsForm>(target, newInstance);
     }
 
-    public ModelMappingResult<BizFormInfo> Map(KX13.Models.CmsForm? source, BizFormInfo? target)
+    public IModelMappingResult<BizFormInfo> Map(KX13.Models.CmsForm? source, BizFormInfo? target)
     {
         if (source is null)
         {

@@ -18,7 +18,7 @@ public class CmsRoleMapper : IEntityMapper<KX13.Models.CmsRole, KXO.Models.CmsRo
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
 
-    public ModelMappingResult<KXO.Models.CmsRole> Map(KX13.Models.CmsRole? source, KXO.Models.CmsRole? target)
+    public IModelMappingResult<KXO.Models.CmsRole> Map(KX13.Models.CmsRole? source, KXO.Models.CmsRole? target)
     {
         if (source is null)
         {

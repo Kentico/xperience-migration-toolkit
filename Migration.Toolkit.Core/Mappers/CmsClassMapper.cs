@@ -18,7 +18,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
     
-    public ModelMappingResult<CmsClass> Map(KX13.Models.CmsClass? source, CmsClass? target)
+    public IModelMappingResult<CmsClass> Map(KX13.Models.CmsClass? source, CmsClass? target)
     {
         if (source is null)
         {
@@ -102,7 +102,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         return new ModelMappingSuccess<CmsClass>(target, newInstance);
     }
 
-    public ModelMappingResult<DataClassInfo> Map(KX13.Models.CmsClass? source, DataClassInfo? target)
+    public IModelMappingResult<DataClassInfo> Map(KX13.Models.CmsClass? source, DataClassInfo? target)
     {
         if (source is null)
         {

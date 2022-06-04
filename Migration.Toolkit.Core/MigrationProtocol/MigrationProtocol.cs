@@ -7,7 +7,7 @@ public class NullMigrationProtocol: IMigrationProtocol
 {
     // TODO tk: 2022-05-18 get configuration, protocol detail: All, Required
     
-    public void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target, ModelMappingResult<TTarget> mapped)
+    public void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target, IModelMappingResult<TTarget> mapped)
     {
         // TODO tk: 2022-05-18 write to protocol that manual action needs to be done - HandbookReference is used to point into user handbook for further instructions
     }
@@ -47,7 +47,7 @@ public class NullMigrationProtocol: IMigrationProtocol
         
     }
 
-    public void MappedTarget<TTarget>(ModelMappingResult<TTarget> mapped)
+    public void MappedTarget<TTarget>(IModelMappingResult<TTarget> mapped)
     {
         // TODO tk: 2022-05-18 log serialized mapping result conditionally
     }
@@ -62,7 +62,7 @@ public class NullMigrationProtocol: IMigrationProtocol
         // TODO tk: 2022-05-18 log serialized source fetch conditionally
     }
 
-    public void Success<TSource, TTarget>(TSource source, TTarget target, ModelMappingResult<TTarget> mapped)
+    public void Success<TSource, TTarget>(TSource source, TTarget target, IModelMappingResult<TTarget> mapped)
     {
         // TODO tk: 2022-05-18 write successful migration of entity
     }

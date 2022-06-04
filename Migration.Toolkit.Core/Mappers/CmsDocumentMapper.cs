@@ -15,7 +15,7 @@ public class CmsDocumentMapper : IEntityMapper<KX13.Models.CmsDocument, KXO.Mode
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
 
-    public ModelMappingResult<KXO.Models.CmsDocument> Map(KX13.Models.CmsDocument? source, KXO.Models.CmsDocument? target)
+    public IModelMappingResult<KXO.Models.CmsDocument> Map(KX13.Models.CmsDocument? source, KXO.Models.CmsDocument? target)
     {
         if (source is null)
         {

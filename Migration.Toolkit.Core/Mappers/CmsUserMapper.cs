@@ -18,7 +18,7 @@ public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUse
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
     
-    public ModelMappingResult<KXO.Models.CmsUser> Map(KX13.Models.CmsUser? source, KXO.Models.CmsUser? target)
+    public IModelMappingResult<KXO.Models.CmsUser> Map(KX13.Models.CmsUser? source, KXO.Models.CmsUser? target)
     {
         if (source is null)
         {

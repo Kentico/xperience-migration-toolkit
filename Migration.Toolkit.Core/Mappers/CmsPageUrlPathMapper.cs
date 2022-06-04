@@ -19,7 +19,7 @@ public class CmsPageUrlPathMapper : IEntityMapper<KX13.Models.CmsPageUrlPath, KX
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
     
-    public ModelMappingResult<KXO.Models.CmsPageUrlPath> Map(KX13.Models.CmsPageUrlPath? source, KXO.Models.CmsPageUrlPath? target)
+    public IModelMappingResult<KXO.Models.CmsPageUrlPath> Map(KX13.Models.CmsPageUrlPath? source, KXO.Models.CmsPageUrlPath? target)
     {
         if (source is null)
         {

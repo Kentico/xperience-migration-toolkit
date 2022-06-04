@@ -14,7 +14,7 @@ public class CmsSiteMapper: IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSit
         _logger = logger;
     }
     
-    public ModelMappingResult<KXO.Models.CmsSite> Map(KX13.Models.CmsSite? source, KXO.Models.CmsSite? target)
+    public IModelMappingResult<KXO.Models.CmsSite> Map(KX13.Models.CmsSite? source, KXO.Models.CmsSite? target)
     {
         if (source is null)
         {

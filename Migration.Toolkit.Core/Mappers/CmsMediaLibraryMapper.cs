@@ -18,7 +18,7 @@ public class CmsMediaLibraryMapper: IEntityMapper<KX13.Models.MediaLibrary, KXO.
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
     
-    public ModelMappingResult<KXO.Models.MediaLibrary> Map(KX13.Models.MediaLibrary? source, KXO.Models.MediaLibrary? target)
+    public IModelMappingResult<KXO.Models.MediaLibrary> Map(KX13.Models.MediaLibrary? source, KXO.Models.MediaLibrary? target)
     {
         if (source is null)
         {

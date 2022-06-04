@@ -13,7 +13,7 @@ public class DebugMigrationProtocol: IMigrationProtocol
         _logger = logger;
     }
     
-    public void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target, ModelMappingResult<TTarget> mapped)
+    public void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target, IModelMappingResult<TTarget> mapped)
     {
         _logger.LogDebug("NeedsManualAction<{sourceType}, {targetType}>: {handBookRef} - Mapped:{mapped}", typeof(TSource).FullName, typeof(TTarget), handbookRef, mapped);
     }
@@ -23,7 +23,7 @@ public class DebugMigrationProtocol: IMigrationProtocol
         _logger.LogDebug("NeedsManualAction<{sourceType}, {targetType}>: {handBookRef}", typeof(TSource).FullName, typeof(TTarget), handbookRef);
     }
 
-    public void MappedTarget<TTarget>(ModelMappingResult<TTarget> mapped)
+    public void MappedTarget<TTarget>(IModelMappingResult<TTarget> mapped)
     {
         
     }
@@ -38,7 +38,7 @@ public class DebugMigrationProtocol: IMigrationProtocol
         _logger.LogDebug("FetchedSource: {type}: {source}", typeof(TSource).FullName, source);
     }
 
-    public void Success<TSource, TTarget>(TSource source, TTarget target, ModelMappingResult<TTarget> mapped)
+    public void Success<TSource, TTarget>(TSource source, TTarget target, IModelMappingResult<TTarget> mapped)
     {
         
     }

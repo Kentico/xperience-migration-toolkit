@@ -18,7 +18,7 @@ public class CmsAclMapper: IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
     
-    public ModelMappingResult<KXO.Models.CmsAcl> Map(KX13.Models.CmsAcl? source, KXO.Models.CmsAcl? target)
+    public IModelMappingResult<KXO.Models.CmsAcl> Map(KX13.Models.CmsAcl? source, KXO.Models.CmsAcl? target)
     {
         if (source is null)
         {

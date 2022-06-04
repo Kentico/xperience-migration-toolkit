@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 
-namespace Migration.Toolkit.Core.CmsResource;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.CmsResource, Migration.Toolkit.KXO.Models.CmsResource>
 {
@@ -12,7 +12,7 @@ public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.Cms
         _logger = logger;
     }
 
-    public ModelMappingResult<Migration.Toolkit.KXO.Models.CmsResource> Map(Migration.Toolkit.KX13.Models.CmsResource? source,
+    public IModelMappingResult<Migration.Toolkit.KXO.Models.CmsResource> Map(Migration.Toolkit.KX13.Models.CmsResource? source,
         Migration.Toolkit.KXO.Models.CmsResource? target)
     {
         if (source is null)
@@ -28,11 +28,12 @@ public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.Cms
             target = new Migration.Toolkit.KXO.Models.CmsResource();
             newInstance = true;
         }
-        else if (source.ResourceName != target.ResourceName)
+        else if (source.ResourceGuid != target.ResourceGuid)
         {
             // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsResource>();
+            _logger.LogTrace("Assertion failed, entity key mismatch on resources S={sourceGuild}, T={targetGuid}", source.ResourceGuid, target.ResourceGuid);
+            // allowing to run through, same resource is not required for target instance
+            // return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsResource>();
         }
 
         // map entity

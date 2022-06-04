@@ -22,7 +22,7 @@ public class CmsMediaFileMapper: IEntityMapper<KX13.Models.MediaFile, KXO.Models
         _migrationProtocol = migrationProtocol;
     }
     
-    public ModelMappingResult<KXO.Models.MediaFile> Map(KX13.Models.MediaFile? source, KXO.Models.MediaFile? target)
+    public IModelMappingResult<KXO.Models.MediaFile> Map(KX13.Models.MediaFile? source, KXO.Models.MediaFile? target)
     {
         if (source is null)
         {

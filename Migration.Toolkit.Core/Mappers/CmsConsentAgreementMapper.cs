@@ -15,7 +15,7 @@ public class CmsConsentAgreementMapper : IEntityMapper<KX13.Models.CmsConsentAgr
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
 
-    public ModelMappingResult<KXO.Models.CmsConsentAgreement> Map(KX13.Models.CmsConsentAgreement? source, KXO.Models.CmsConsentAgreement? target)
+    public IModelMappingResult<KXO.Models.CmsConsentAgreement> Map(KX13.Models.CmsConsentAgreement? source, KXO.Models.CmsConsentAgreement? target)
     {
         if (source is null)
         {

@@ -1,5 +1,7 @@
 using CMS.DataEngine;
+using CMS.OnlineForms;
 using Microsoft.Extensions.Logging;
+using TableManager = CMS.DataProviderSQL.TableManager;
 
 namespace Migration.Toolkit.KXO.Api;
 
@@ -19,7 +21,6 @@ public class KxoClassFacade
     public void SetClass(DataClassInfo dataClassInfo)
     {
         // TODO tk: 2022-05-30  dataClassInfo.ClassConnectionString - check, might cause unexpected behavior
-        
         DataClassInfoProvider.SetDataClassInfo(dataClassInfo);
     }
 

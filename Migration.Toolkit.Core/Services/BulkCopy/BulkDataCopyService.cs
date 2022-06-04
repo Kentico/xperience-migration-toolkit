@@ -92,7 +92,7 @@ public class BulkDataCopyService
         var filteredReader = new FilteredDbDataReader(reader, dataFilter);
         sqlBulkCopy.WriteToServer(filteredReader);
         
-        _logger.LogInformation("Copy of {tableName} finished!", tableName);
+        _logger.LogInformation("Copy of {tableName} finished! Total={total}, TotalCopied={totalCopied}", tableName, filteredReader.TotalItems, filteredReader.TotalNonFiltered);
     }
 
     private static StringBuilder BuildSelectQuery(string tableName, (string columnName, int ordinalPosition)[] sourceColumns)

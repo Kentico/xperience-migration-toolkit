@@ -115,7 +115,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         {
             var lookup = alreadyExistingDocuments[classGuid];
             var bulkCopyRequest = new BulkCopyRequest(
-                tableName, s => !autoIncrementColumns.Contains(s), reader => lookup.Contains(reader.GetInt32(autoIncrementColumns.Single())), 1500
+                tableName, s => !autoIncrementColumns.Contains(s), reader => !lookup.Contains(reader.GetInt32(autoIncrementColumns.Single())), 1500
             );
             if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(tableName))
             {

@@ -4,11 +4,13 @@ namespace Migration.Toolkit.Core.Services.BulkCopy;
 
 public class FilteredDbDataReader: DataReaderProxyBase
 {
-    private readonly Func<DbDataReader, bool> _skipPredicate;
+    private readonly Func<DbDataReader, bool> _includePredicate;
+    public int TotalItems { get; private set; } = 0;
+    public int TotalNonFiltered { get; private set; } = 0;
 
-    public FilteredDbDataReader(DbDataReader innerReader, Func<DbDataReader, bool> skipPredicate) : base(innerReader)
+    public FilteredDbDataReader(DbDataReader innerReader, Func<DbDataReader, bool> includePredicate) : base(innerReader)
     {
-        _skipPredicate = skipPredicate;
+        _includePredicate = includePredicate;
     }
 
     public override bool Read()
@@ -17,11 +19,13 @@ public class FilteredDbDataReader: DataReaderProxyBase
         {
             if (base.Read())
             {
-                if (_skipPredicate(_innerReader))
+                TotalItems++;
+                if (!_includePredicate(_innerReader))
                 {
                     continue;
                 }
 
+                TotalNonFiltered++;
                 return true;
             }
 

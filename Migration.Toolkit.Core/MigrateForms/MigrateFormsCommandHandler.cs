@@ -1,0 +1,393 @@
+﻿using System.Collections.Immutable;
+using System.Xml.Linq;
+using CMS.DataEngine;
+using CMS.OnlineForms;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Migration.Toolkit.Common;
+using Migration.Toolkit.Core.Abstractions;
+using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.Core.Services.BulkCopy;
+using Migration.Toolkit.KX13.Context;
+using Migration.Toolkit.KX13.Models;
+using Migration.Toolkit.KXO.Api;
+using Migration.Toolkit.KXO.Context;
+using TableManager = CMS.DataProviderSQL.TableManager;
+
+namespace Migration.Toolkit.Core.MigrateForms;
+
+public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, GenericCommandResult>, IDisposable
+{
+    private readonly ILogger<MigrateFormsCommandHandler> _logger;
+    private readonly IDbContextFactory<KxoContext> _kxoContextFactory;
+    private readonly IDbContextFactory<KX13Context> _kx13ContextFactory;
+    private readonly IEntityMapper<CmsClass, DataClassInfo> _dataClassMapper;
+    private readonly IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm> _cmsFormMapper;
+    private readonly KxoFormFacade _kxoFormFacade;
+    private readonly KxoClassFacade _kxoClassFacade;
+    private readonly BulkDataCopyService _bulkDataCopyService;
+    private readonly ToolkitConfiguration _toolkitConfiguration;
+    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
+    private readonly IMigrationProtocol _migrationProtocol;
+
+    private KxoContext _kxoContext;
+
+    public MigrateFormsCommandHandler(
+        ILogger<MigrateFormsCommandHandler> logger,
+        IDbContextFactory<KXO.Context.KxoContext> kxoContextFactory,
+        IDbContextFactory<KX13.Context.KX13Context> kx13ContextFactory,
+        IEntityMapper<KX13.Models.CmsClass, DataClassInfo> dataClassMapper,
+        IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm> cmsFormMapper,
+        KxoFormFacade kxoFormFacade,
+        KxoClassFacade kxoClassFacade,
+        BulkDataCopyService bulkDataCopyService,
+        ToolkitConfiguration toolkitConfiguration,
+        PrimaryKeyMappingContext primaryKeyMappingContext,
+        IMigrationProtocol migrationProtocol
+    )
+    {
+        _logger = logger;
+        _kxoContextFactory = kxoContextFactory;
+        _kx13ContextFactory = kx13ContextFactory;
+        _dataClassMapper = dataClassMapper;
+        _cmsFormMapper = cmsFormMapper;
+        _kxoFormFacade = kxoFormFacade;
+        _kxoClassFacade = kxoClassFacade;
+        _bulkDataCopyService = bulkDataCopyService;
+        _toolkitConfiguration = toolkitConfiguration;
+        _primaryKeyMappingContext = primaryKeyMappingContext;
+        _migrationProtocol = migrationProtocol;
+        _kxoContext = kxoContextFactory.CreateDbContext();
+    }
+
+    public async Task<GenericCommandResult> Handle(MigrateFormsCommand request, CancellationToken cancellationToken)
+    {
+        var explicitSiteIdMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+
+        await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var cmsClassForms = kx13Context.CmsClasses
+            .Include(c => c.CmsForms)
+            .Where(x => x.ClassIsForm == true)
+            .OrderBy(x => x.ClassId)
+            .AsEnumerable();
+
+        foreach (var kx13Class in cmsClassForms)
+        {
+            _migrationProtocol.FetchedSource(kx13Class);
+
+            if (kx13Class.ClassConnectionString != _toolkitConfiguration.SourceConnectionString &&
+                string.IsNullOrWhiteSpace(kx13Class.ClassConnectionString))
+            {
+                _migrationProtocol.Warning(HandbookReferences.CmsClassClassConnectionStringIsDifferent, kx13Class);
+                _logger.LogWarning($"CmsClass: {kx13Class.ClassName} => ClassConnectionString is different from source connection string needs attention!");
+            }
+
+            // TODO tk: 2022-06-01 kx13Class.Sites condition
+            if (!kx13Class.CmsForms.Any(f => explicitSiteIdMapping.Contains(f.FormSiteId)))
+            {
+                _logger.LogWarning($"CmsClass: {kx13Class.ClassName} => Class site is not migrated => skipping.");
+                continue;
+            }
+
+            var kxoDataClass = _kxoClassFacade.GetClass(kx13Class.ClassGuid);
+            _migrationProtocol.FetchedTarget(kxoDataClass);
+
+            SaveUsingKxoApi(kx13Class, kxoDataClass);
+
+            foreach (var kx13CmsForm in kx13Class.CmsForms)
+            {
+                _migrationProtocol.FetchedSource(kx13CmsForm);
+
+                var kxoCmsForm = _kxoContext.CmsForms.FirstOrDefault(f => f.FormGuid == kx13CmsForm.FormGuid);
+
+                _migrationProtocol.FetchedTarget(kxoCmsForm);
+
+                var mapped = _cmsFormMapper.Map(kx13CmsForm, kxoCmsForm);
+                _migrationProtocol.MappedTarget(mapped);
+                mapped.LogResult(_logger);
+
+                switch (mapped)
+                {
+                    case ModelMappingSuccess<KXO.Models.CmsForm>(var cmsForm, var newInstance):
+                        ArgumentNullException.ThrowIfNull(cmsForm, nameof(cmsForm));
+
+                        _migrationProtocol.Success(kx13Class, cmsForm, mapped);
+                        
+                        if (newInstance)
+                        {
+                            _kxoContext.CmsForms.Add(cmsForm);
+                        }
+                        else
+                        {
+                            _kxoContext.CmsForms.Update(cmsForm);
+                        }
+
+                        await _kxoContext.SaveChangesAsync(cancellationToken);
+                        
+                        _logger.LogInformation(newInstance
+                            ? $"CmsForm: {cmsForm.FormName} was inserted."
+                            : $"CmsForm: {cmsForm.FormName} was updated.");
+
+                        _primaryKeyMappingContext.SetMapping<KX13.Models.CmsForm>(
+                            r => r.FormId,
+                            kx13Class.ClassId,
+                            cmsForm.FormId
+                        );
+
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(mapped));
+                }
+
+
+                XNamespace nsSchema = "http://www.w3.org/2001/XMLSchema";
+                XNamespace msSchema = "urn:schemas-microsoft-com:xml-msdata";
+                var xDoc = XDocument.Parse(kx13Class.ClassXmlSchema);
+                var autoIncrementColumns = xDoc.Descendants(nsSchema + "element")
+                    .Where(x => x.Attribute(msSchema + "AutoIncrement")?.Value == "true")
+                    .Select(x => x.Attribute("name").Value).ToImmutableHashSet();
+
+
+                var result = (kx13Class.ClassTableName, kx13Class.ClassGuid, autoIncrementColumns);
+                _logger.LogTrace("Class '{classGuild}' Resolved as: {result}", kx13Class.ClassGuid, result);
+
+
+                // check if data is present in target tables
+                if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(kx13Class.ClassTableName))
+                {
+                    _logger.LogError("Data exists in target coupled data table '{tableName}' - cannot migrate, skipping form data migration.", result.ClassTableName);
+                    // TODO tk: 2022-06-01 migrate data manually or delete all data
+                    continue;
+                }
+
+                var bulkCopyRequest = new BulkCopyRequest(
+                    kx13Class.ClassTableName, s => !autoIncrementColumns.Contains(s), reader => true,
+                    1500
+                );
+
+                _logger.LogTrace("Bulk data copy request: {request}", bulkCopyRequest);
+                _bulkDataCopyService.CopyTableToTable(bulkCopyRequest);
+              
+                // BizFormHelper.Create()
+                // new CMS.DataEngine.TableManager(_toolkitConfiguration.TargetConnectionString).CreateTable();
+                // kx13ClassCmsForm
+            }
+            // await SaveUsingEntityFramework(cancellationToken, kx13CmsClassesDocumentType, kxoCmsClass, kxoContext);
+        }
+
+
+        // var kx13CmsForms = kx13Context.CmsForms
+        //         .Where(x => explicitSiteIdMapping.Contains(x.FormSiteId))
+        //         .OrderBy(t => t.FormId)
+        //     ;
+        //
+        // foreach (var kx13CmsForm in kx13CmsForms)
+        // {
+        //     _migrationProtocol.FetchedSource(kx13CmsForm);
+        //
+        //     var kxoCmsForm = await _kxoContext.CmsForms
+        //         // .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
+        //         .FirstOrDefaultAsync(x => x.FormGuid == kx13CmsForm.FormGuid, cancellationToken: cancellationToken);
+        //
+        //     _migrationProtocol.FetchedTarget(kxoCmsForm);
+        //
+        //     // TODO tk: 2022-05-20 any reasons why form shouldn't be migrated?
+        //     
+        //     var mapped = _cmsFormMapper.Map(kx13CmsForm, new BizFormInfo());
+        //     _migrationProtocol.MappedTarget(mapped);
+        //     mapped.LogResult(_logger);
+        //
+        //     switch (mapped)
+        //     {
+        //         case ModelMappingSuccess<BizFormInfo>(var cmsForm, var newInstance):
+        //             ArgumentNullException.ThrowIfNull(cmsForm, nameof(cmsForm));
+        //
+        //             // if (newInstance)
+        //             // {
+        //             //     _kxoContext.CmsForms.Add(cmsForm);
+        //             // }
+        //             // else
+        //             // {
+        //             //     _kxoContext.CmsForms.Update(cmsForm);
+        //             // }
+        //             //
+        //             // try
+        //             // {
+        //             //     await _kxoContext.SaveChangesAsync(cancellationToken);
+        //             //
+        //             //     _migrationProtocol.Success(kx13CmsForm, cmsForm, mapped);
+        //             //     _logger.LogInformation(newInstance
+        //             //         ? $"CmsForm: {cmsForm.FormName} with NodeGuid '{cmsForm.FormGuid}' was inserted."
+        //             //         : $"CmsForm: {cmsForm.FormName} with NodeGuid '{cmsForm.FormGuid}' was updated.");
+        //             // }
+        //             // catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
+        //             // {
+        //             //     throw;
+        //             // }
+        //
+        //             // TODO tk: 2022-05-20 migrate coupled data here!
+        //             //
+        //             // _primaryKeyMappingContext.SetMapping<KX13.Models.CmsForm>(
+        //             //     r => r.FormId,
+        //             //     kx13CmsForm.FormId,
+        //             //     cmsForm.FormId
+        //             // );
+        //
+        //             break;
+        //         default:
+        //             throw new ArgumentOutOfRangeException(nameof(mapped));
+        //     }
+        //
+        //     // await SaveUsingEntityFramework(cancellationToken, kx13CmsForm, kxoCmsForm);
+        // }
+
+        return new GenericCommandResult();
+    }
+
+    private void SaveUsingKxoApi(CmsClass kx13Class, DataClassInfo kxoDataClass)
+    {
+        var mapped = _dataClassMapper.Map(kx13Class, kxoDataClass);
+        _migrationProtocol.MappedTarget(mapped);
+        mapped.LogResult(_logger);
+
+        switch (mapped)
+        {
+            case ModelMappingSuccess<DataClassInfo>(var dataClassInfo, var newInstance):
+                ArgumentNullException.ThrowIfNull(dataClassInfo, nameof(dataClassInfo));
+
+                _kxoClassFacade.SetClass(dataClassInfo);
+
+                _migrationProtocol.Success(kx13Class, dataClassInfo, mapped);
+
+                _logger.LogInformation(newInstance
+                    ? $"CmsClass: {dataClassInfo.ClassName} was inserted."
+                    : $"CmsClass: {dataClassInfo.ClassName} was updated.");
+
+                _primaryKeyMappingContext.SetMapping<KX13.Models.CmsClass>(
+                    r => r.ClassId,
+                    kx13Class.ClassId,
+                    dataClassInfo.ClassID
+                );
+
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(mapped));
+        }
+    }
+
+    private async Task SaveUsingEntityFramework(CancellationToken cancellationToken, CmsForm kx13CmsForm, KXO.Models.CmsForm? kxoCmsForm)
+    {
+        // var mapped = _cmsFormMapper.Map(kx13CmsForm, kxoCmsForm);
+        // _migrationProtocol.MappedTarget(mapped);
+        // mapped.LogResult(_logger);
+        //
+        // switch (mapped)
+        // {
+        //     case ModelMappingSuccess<KXO.Models.CmsForm>(var cmsForm, var newInstance):
+        //         ArgumentNullException.ThrowIfNull(cmsForm, nameof(cmsForm));
+        //
+        //         if (newInstance)
+        //         {
+        //             _kxoContext.CmsForms.Add(cmsForm);
+        //         }
+        //         else
+        //         {
+        //             _kxoContext.CmsForms.Update(cmsForm);
+        //         }
+        //
+        //         try
+        //         {
+        //             await _kxoContext.SaveChangesAsync(cancellationToken);
+        //
+        //             _migrationProtocol.Success(kx13CmsForm, cmsForm, mapped);
+        //             _logger.LogInformation(newInstance
+        //                 ? $"CmsForm: {cmsForm.FormName} with NodeGuid '{cmsForm.FormGuid}' was inserted."
+        //                 : $"CmsForm: {cmsForm.FormName} with NodeGuid '{cmsForm.FormGuid}' was updated.");
+        //         }
+        //         catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
+        //         {
+        //             throw;
+        //         }
+        //
+        //         // TODO tk: 2022-05-20 migrate coupled data here!
+        //
+        //         _primaryKeyMappingContext.SetMapping<KX13.Models.CmsForm>(
+        //             r => r.FormId,
+        //             kx13CmsForm.FormId,
+        //             cmsForm.FormId
+        //         );
+        //
+        //         break;
+        //     default:
+        //         throw new ArgumentOutOfRangeException(nameof(mapped));
+        // }
+    }
+
+    private async Task RequireMigratedCmsClass(CancellationToken cancellationToken, KX13Context kx13Context)
+    {
+        // TODO tk: 2022-05-20 class migration - shared component
+        // var kx13CmsPageUrlPaths = kx13Context.CmsPageUrlPaths
+        //     .Where(x => _globalConfiguration.SiteIdMapping.Keys.Contains(x.PageUrlPathSiteId));
+        //
+        // foreach (var kx13CmsPageUrlPath in kx13CmsPageUrlPaths)
+        // {
+        //     _migrationProtocol.FetchedSource(kx13CmsPageUrlPath);
+        //
+        //     var kxoCmsPageUrlPaths = await _kxoContext.CmsPageUrlPaths
+        //         .FirstOrDefaultAsync(x => x.PageUrlPathGuid == kx13CmsPageUrlPath.PageUrlPathGuid, cancellationToken: cancellationToken);
+        //
+        //     _migrationProtocol.FetchedTarget(kxoCmsPageUrlPaths);
+        //
+        //     var mapped = _pageUrlPathMapper.Map(kx13CmsPageUrlPath, kxoCmsPageUrlPaths);
+        //     _migrationProtocol.MappedTarget(mapped);
+        //     mapped.LogResult(_logger);
+        //
+        //     switch (mapped)
+        //     {
+        //         case ModelMappingSuccess<KXO.Models.CmsPageUrlPath>(var cmsPageUrlPath, var newInstance):
+        //             ArgumentNullException.ThrowIfNull(cmsPageUrlPath, nameof(cmsPageUrlPath));
+        //
+        //             if (newInstance)
+        //             {
+        //                 _kxoContext.CmsPageUrlPaths.Add(cmsPageUrlPath);
+        //             }
+        //             else
+        //             {
+        //                 _kxoContext.CmsPageUrlPaths.Update(cmsPageUrlPath);
+        //             }
+        //
+        //             try
+        //             {
+        //                 await _kxoContext.SaveChangesAsync(cancellationToken);
+        //
+        //                 _migrationProtocol.Success(kx13CmsPageUrlPath, cmsPageUrlPath, mapped);
+        //                 _logger.LogInformation(newInstance
+        //                     ? $"CmsPageUrlPath: {cmsPageUrlPath.PageUrlPathGuid} was inserted."
+        //                     : $"CmsPageUrlPath: {cmsPageUrlPath.PageUrlPathGuid} was updated.");
+        //             }
+        //             catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
+        //             {
+        //                 throw;
+        //             }
+        //
+        //             _primaryKeyMappingContext.SetMapping<KX13.Models.CmsPageUrlPath>(
+        //                 r => r.PageUrlPathId,
+        //                 kx13CmsPageUrlPath.PageUrlPathId,
+        //                 cmsPageUrlPath.PageUrlPathId
+        //             );
+        //
+        //             break;
+        //         default:
+        //             throw new ArgumentOutOfRangeException(nameof(mapped));
+        //     }
+        // }
+    }
+
+    public void Dispose()
+    {
+        _kxoContext.Dispose();
+    }
+}

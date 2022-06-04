@@ -9,7 +9,7 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection UseKxoApi(this IServiceCollection services, IConfiguration configuration, string? applicationPhysicalPath = null)
     {
         Service.Use<IConfiguration>(configuration);
-        if (applicationPhysicalPath != null && File.Exists(applicationPhysicalPath))
+        if (applicationPhysicalPath != null && Directory.Exists(applicationPhysicalPath))
         {
             CMS.Base.SystemContext.WebApplicationPhysicalPath = applicationPhysicalPath;    
         }
@@ -17,8 +17,8 @@ public static class DependencyInjectionExtensions
         services.AddSingleton<KxoApiInitializer>();
 
         services.AddSingleton<KxoClassFacade>();
-        // ConnectionHelper.ConnectionString = _configuration.TargetConnectionString;
-        
+        services.AddSingleton<KxoFormFacade>();
+
         return services;
     }
 }

@@ -59,6 +59,8 @@ public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCom
         var cmsClassesDocumentTypes = kx13Context.CmsClasses.Where(x => x.ClassIsDocumentType).OrderBy(x => x.ClassId).AsEnumerable();
         _logger.LogInformation("Selected source CMS_Classes, took: {took}", sw.Elapsed);
         
+        // TODO tk: 2022-06-01 kx13Class.Sites condition
+        
         foreach (var kx13Class in cmsClassesDocumentTypes)
         {
             _migrationProtocol.FetchedSource(kx13Class);

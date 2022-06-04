@@ -3,16 +3,16 @@ using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 using Migration.Toolkit.Core.MigrationProtocol;
 
-namespace Migration.Toolkit.Core.MigrateMediaLibraries;
+namespace Migration.Toolkit.Core.Mappers;
 
-public class MediaFileMapper: IEntityMapper<KX13.Models.MediaFile, KXO.Models.MediaFile>
+public class CmsMediaFileMapper: IEntityMapper<KX13.Models.MediaFile, KXO.Models.MediaFile>
 {
-    private readonly ILogger<MediaFileMapper> _logger;
+    private readonly ILogger<CmsMediaFileMapper> _logger;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
     private readonly IMigrationProtocol _migrationProtocol;
 
-    public MediaFileMapper(
-        ILogger<MediaFileMapper> logger,
+    public CmsMediaFileMapper(
+        ILogger<CmsMediaFileMapper> logger,
         PrimaryKeyMappingContext primaryKeyMappingContext,
         IMigrationProtocol migrationProtocol
         )

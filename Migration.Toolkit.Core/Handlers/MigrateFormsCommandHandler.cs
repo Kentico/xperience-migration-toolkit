@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Xml.Linq;
 using CMS.DataEngine;
-using CMS.OnlineForms;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,9 +13,8 @@ using Migration.Toolkit.KX13.Context;
 using Migration.Toolkit.KX13.Models;
 using Migration.Toolkit.KXO.Api;
 using Migration.Toolkit.KXO.Context;
-using TableManager = CMS.DataProviderSQL.TableManager;
 
-namespace Migration.Toolkit.Core.MigrateForms;
+namespace Migration.Toolkit.Core.Handlers;
 
 public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, GenericCommandResult>, IDisposable
 {

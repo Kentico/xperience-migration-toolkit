@@ -2,7 +2,7 @@
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 
-namespace Migration.Toolkit.Core.MigratePages;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsPageUrlPathMapper : IEntityMapper<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath>
 {

@@ -10,7 +10,7 @@ using Migration.Toolkit.KX13.Context;
 using Migration.Toolkit.KX13.Models;
 using Migration.Toolkit.KXO.Context;
 
-namespace Migration.Toolkit.Core.MigrateSettingKeys;
+namespace Migration.Toolkit.Core.Handlers;
 
 // TODO tk: 2022-06-01 Q - dle jakého klíče přenášet kategorie settings? jen pro klíče, které budou přeneseny do cílové instance?
 

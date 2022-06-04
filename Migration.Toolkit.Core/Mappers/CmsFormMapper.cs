@@ -1,12 +1,11 @@
-﻿using CMS.DataEngine;
-using CMS.FormEngine;
+﻿using CMS.FormEngine;
 using CMS.OnlineForms;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 
-namespace Migration.Toolkit.Core.MigrateForms;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm>, IEntityMapper<KX13.Models.CmsForm, BizFormInfo>
 {

@@ -2,7 +2,7 @@
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 
-namespace Migration.Toolkit.Core.MigrateDataProtection;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsConsentArchiveMapper : IEntityMapper<KX13.Models.CmsConsentArchive, KXO.Models.CmsConsentArchive>
 {

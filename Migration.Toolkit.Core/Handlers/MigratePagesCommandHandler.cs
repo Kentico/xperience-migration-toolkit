@@ -12,7 +12,7 @@ using Migration.Toolkit.Core.Services.BulkCopy;
 using Migration.Toolkit.KX13.Context;
 using Migration.Toolkit.KXO.Context;
 
-namespace Migration.Toolkit.Core.MigratePages;
+namespace Migration.Toolkit.Core.Handlers;
 
 public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, CommandResult>, IDisposable
 {
@@ -114,9 +114,8 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         foreach (var (tableName, classGuid, autoIncrementColumns) in coupledDataToMigrate)
         {
             var lookup = alreadyExistingDocuments[classGuid];
-            var bulkCopyRequest = new BulkCopyRequest(
-                tableName, s => !autoIncrementColumns.Contains(s), reader => !lookup.Contains(reader.GetInt32(autoIncrementColumns.Single())), 1500
-            );
+            var bulkCopyRequest = new BulkCopyRequest(tableName, s => !autoIncrementColumns.Contains(s),
+                reader => !lookup.Contains(reader.GetInt32(autoIncrementColumns.Single())), 1500);
             if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(tableName))
             {
                 _logger.LogError("Data exists in target coupled data table '{tableName}' - cannot migrate.", tableName);

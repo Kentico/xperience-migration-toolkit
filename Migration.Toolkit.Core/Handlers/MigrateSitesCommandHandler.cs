@@ -7,7 +7,7 @@ using Migration.Toolkit.Core.MigrationProtocol;
 using Migration.Toolkit.KX13.Context;
 using Migration.Toolkit.KXO.Context;
 
-namespace Migration.Toolkit.Core.MigrateSites;
+namespace Migration.Toolkit.Core.Handlers;
 
 // ReSharper disable once UnusedType.Global
 public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, GenericCommandResult>, IDisposable

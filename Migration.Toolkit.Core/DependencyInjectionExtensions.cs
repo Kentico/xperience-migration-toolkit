@@ -9,14 +9,8 @@ using Migration.Toolkit.Core.Behaviors;
 using Migration.Toolkit.Core.CmsResource;
 using Migration.Toolkit.Core.CmsSettingsKey;
 using Migration.Toolkit.Core.Contexts;
-using Migration.Toolkit.Core.MigrateDataProtection;
-using Migration.Toolkit.Core.MigrateForms;
-using Migration.Toolkit.Core.MigrateMediaLibraries;
-using Migration.Toolkit.Core.MigratePages;
-using Migration.Toolkit.Core.MigratePageTypes;
-using Migration.Toolkit.Core.MigrateSettingKeys;
-using Migration.Toolkit.Core.MigrateSites;
-using Migration.Toolkit.Core.MigrateUsers;
+using Migration.Toolkit.Core.Handlers;
+using Migration.Toolkit.Core.Mappers;
 using Migration.Toolkit.Core.MigrationProtocol;
 using Migration.Toolkit.Core.Services;
 using Migration.Toolkit.Core.Services.BulkCopy;
@@ -73,8 +67,8 @@ public static class DependencyInjectionExtensions
         services.AddTransient<IEntityMapper<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath>, CmsPageUrlPathMapper>();
 
         // media libraries
-        services.AddTransient<IEntityMapper<KX13.Models.MediaFile, KXO.Models.MediaFile>, MediaFileMapper>();
-        services.AddTransient<IEntityMapper<KX13.Models.MediaLibrary, KXO.Models.MediaLibrary>, MediaLibraryMapper>();
+        services.AddTransient<IEntityMapper<KX13.Models.MediaFile, KXO.Models.MediaFile>, CmsMediaFileMapper>();
+        services.AddTransient<IEntityMapper<KX13.Models.MediaLibrary, KXO.Models.MediaLibrary>, CmsMediaLibraryMapper>();
         
         // sites
         services.AddTransient<IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSite>, CmsSiteMapper>();

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 
-namespace Migration.Toolkit.Core.MigrateSites;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsSiteMapper: IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSite>
 {

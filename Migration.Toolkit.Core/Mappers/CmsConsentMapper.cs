@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 
-namespace Migration.Toolkit.Core.MigrateDataProtection;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsConsentMapper : IEntityMapper<KX13.Models.CmsConsent, KXO.Models.CmsConsent>
 {

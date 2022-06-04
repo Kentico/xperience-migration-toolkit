@@ -2,15 +2,15 @@
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 
-namespace Migration.Toolkit.Core.MigrateMediaLibraries;
+namespace Migration.Toolkit.Core.Mappers;
 
-public class MediaLibraryMapper: IEntityMapper<KX13.Models.MediaLibrary, KXO.Models.MediaLibrary>
+public class CmsMediaLibraryMapper: IEntityMapper<KX13.Models.MediaLibrary, KXO.Models.MediaLibrary>
 {
-    private readonly ILogger<MediaLibraryMapper> _logger;
+    private readonly ILogger<CmsMediaLibraryMapper> _logger;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
 
-    public MediaLibraryMapper(
-        ILogger<MediaLibraryMapper> logger,
+    public CmsMediaLibraryMapper(
+        ILogger<CmsMediaLibraryMapper> logger,
         PrimaryKeyMappingContext primaryKeyMappingContext
         )
     {

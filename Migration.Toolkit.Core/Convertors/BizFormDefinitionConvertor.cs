@@ -11,6 +11,6 @@ public class BizFormDefinitionConvertor
 
         var formInfo = new FormInfo(formDefinitionXml);
         
-        formInfo.
+        // formInfo.
     }
 }

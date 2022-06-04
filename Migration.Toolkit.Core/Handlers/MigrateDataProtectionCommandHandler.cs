@@ -8,7 +8,7 @@ using Migration.Toolkit.Core.MigrationProtocol;
 using Migration.Toolkit.KX13.Context;
 using Migration.Toolkit.KXO.Context;
 
-namespace Migration.Toolkit.Core.MigrateDataProtection;
+namespace Migration.Toolkit.Core.Handlers;
 
 public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataProtectionCommand, GenericCommandResult>, IDisposable
 {

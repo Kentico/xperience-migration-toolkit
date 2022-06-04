@@ -9,7 +9,7 @@ using Migration.Toolkit.Core.MigrationProtocol;
 using Migration.Toolkit.KX13.Context;
 using Migration.Toolkit.KXO.Context;
 
-namespace Migration.Toolkit.Core.MigrateUsers;
+namespace Migration.Toolkit.Core.Handlers;
 
 public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, GenericCommandResult>, IDisposable
 {

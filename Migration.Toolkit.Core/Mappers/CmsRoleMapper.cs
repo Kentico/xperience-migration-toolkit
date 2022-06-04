@@ -2,7 +2,7 @@
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 
-namespace Migration.Toolkit.Core.MigrateUsers;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsRoleMapper : IEntityMapper<KX13.Models.CmsRole, KXO.Models.CmsRole>
 {

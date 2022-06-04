@@ -12,7 +12,7 @@ using Migration.Toolkit.KX13.Models;
 using Migration.Toolkit.KXO.Api;
 using Migration.Toolkit.KXO.Context;
 
-namespace Migration.Toolkit.Core.MigratePageTypes;
+namespace Migration.Toolkit.Core.Handlers;
 
 public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCommand, MigratePageTypesResult>
 {

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 
-namespace Migration.Toolkit.Core.MigrateSettingKeys;
+namespace Migration.Toolkit.Core.Mappers;
 
 public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>
 {
@@ -59,5 +59,26 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
         target.KeyExplanationText = source.KeyExplanationText;
 
         return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsSettingsKey>(target, newInstance);
+    }
+}
+
+public record CmsSettingsKeyKey(string KeyName, int? SiteId, Guid KeyGuid)
+{
+    public override string ToString()
+    {
+        return $"KN={KeyName.PadLeft(60,' ')} SID={SiteId} G={KeyGuid}";
+    }
+
+    public static CmsSettingsKeyKey? From(Migration.Toolkit.KX13.Models.CmsSettingsKey? cmsSettingsKey) =>
+        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId, cmsSettingsKey.KeyGuid);
+
+    public static CmsSettingsKeyKey? From(Migration.Toolkit.KXO.Models.CmsSettingsKey? cmsSettingsKey) =>
+        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId, cmsSettingsKey.KeyGuid);
+    
+    public static CmsSettingsKeyKey From(string? keyName, int? siteId, Guid keyGuid)
+    {
+        ArgumentNullException.ThrowIfNull(keyName);
+        
+        return new(keyName, siteId, keyGuid);
     }
 }

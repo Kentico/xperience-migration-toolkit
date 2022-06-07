@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.KX13.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
@@ -8,16 +9,19 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
 {
     private readonly ILogger<CmsTreeMapper> _logger;
     private readonly IEntityMapper<KX13.Models.CmsDocument, KXO.Models.CmsDocument> _documentMapper;
+    private readonly IEntityMapper<CmsPageUrlPath, KXO.Models.CmsPageUrlPath> _cmsPageUrlPathMapper;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
 
     public CmsTreeMapper(
         ILogger<CmsTreeMapper> logger, 
         IEntityMapper<KX13.Models.CmsDocument, KXO.Models.CmsDocument> documentMapper,
+        IEntityMapper<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath> cmsPageUrlPathMapper,
         PrimaryKeyMappingContext primaryKeyMappingContext
         )
     {
         _logger = logger;
         _documentMapper = documentMapper;
+        _cmsPageUrlPathMapper = cmsPageUrlPathMapper;
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
     
@@ -65,6 +69,26 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
             if (mapped is { Success: true, NewInstance: true })
             {
                 target.CmsDocuments.Add(mapped.Item!);
+            }
+        }
+        
+        var aggregatedResult = new AggregatedResult<Migration.Toolkit.KXO.Models.CmsTree>(target, newInstance);
+        // _cmsPageUrlPathMapper
+        foreach (var sourceCmsPageUrlPath in source.CmsPageUrlPaths)
+        {
+            var targetCmsUrlPath = target.CmsPageUrlPaths.FirstOrDefault(x => x.PageUrlPathGuid == sourceCmsPageUrlPath.PageUrlPathGuid);
+            switch (_cmsPageUrlPathMapper.Map(sourceCmsPageUrlPath, targetCmsUrlPath))
+            {
+                case { Success: true } result:
+                {
+                    // ok
+                    break;
+                }
+                case { Success: false } result:
+                {
+                    aggregatedResult.AddResult(result);
+                    return aggregatedResult;
+                }
             }
         }
 

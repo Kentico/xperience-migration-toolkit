@@ -156,7 +156,7 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                 // check if data is present in target tables
                 if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(kx13Class.ClassTableName))
                 {
-                    _logger.LogError("Data exists in target coupled data table '{tableName}' - cannot migrate, skipping form data migration.", result.ClassTableName);
+                    _logger.LogWarning("Data exists in target coupled data table '{tableName}' - cannot migrate, skipping form data migration.", result.ClassTableName);
                     // TODO tk: 2022-06-01 migrate data manually or delete all data
                     continue;
                 }
@@ -168,79 +168,9 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
 
                 _logger.LogTrace("Bulk data copy request: {request}", bulkCopyRequest);
                 _bulkDataCopyService.CopyTableToTable(bulkCopyRequest);
-              
-                // BizFormHelper.Create()
-                // new CMS.DataEngine.TableManager(_toolkitConfiguration.TargetConnectionString).CreateTable();
-                // kx13ClassCmsForm
             }
             // await SaveUsingEntityFramework(cancellationToken, kx13CmsClassesDocumentType, kxoCmsClass, kxoContext);
         }
-
-
-        // var kx13CmsForms = kx13Context.CmsForms
-        //         .Where(x => explicitSiteIdMapping.Contains(x.FormSiteId))
-        //         .OrderBy(t => t.FormId)
-        //     ;
-        //
-        // foreach (var kx13CmsForm in kx13CmsForms)
-        // {
-        //     _migrationProtocol.FetchedSource(kx13CmsForm);
-        //
-        //     var kxoCmsForm = await _kxoContext.CmsForms
-        //         // .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
-        //         .FirstOrDefaultAsync(x => x.FormGuid == kx13CmsForm.FormGuid, cancellationToken: cancellationToken);
-        //
-        //     _migrationProtocol.FetchedTarget(kxoCmsForm);
-        //
-        //     // TODO tk: 2022-05-20 any reasons why form shouldn't be migrated?
-        //     
-        //     var mapped = _cmsFormMapper.Map(kx13CmsForm, new BizFormInfo());
-        //     _migrationProtocol.MappedTarget(mapped);
-        //     mapped.LogResult(_logger);
-        //
-        //     switch (mapped)
-        //     {
-        //         case ModelMappingSuccess<BizFormInfo>(var cmsForm, var newInstance):
-        //             ArgumentNullException.ThrowIfNull(cmsForm, nameof(cmsForm));
-        //
-        //             // if (newInstance)
-        //             // {
-        //             //     _kxoContext.CmsForms.Add(cmsForm);
-        //             // }
-        //             // else
-        //             // {
-        //             //     _kxoContext.CmsForms.Update(cmsForm);
-        //             // }
-        //             //
-        //             // try
-        //             // {
-        //             //     await _kxoContext.SaveChangesAsync(cancellationToken);
-        //             //
-        //             //     _migrationProtocol.Success(kx13CmsForm, cmsForm, mapped);
-        //             //     _logger.LogInformation(newInstance
-        //             //         ? $"CmsForm: {cmsForm.FormName} with NodeGuid '{cmsForm.FormGuid}' was inserted."
-        //             //         : $"CmsForm: {cmsForm.FormName} with NodeGuid '{cmsForm.FormGuid}' was updated.");
-        //             // }
-        //             // catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
-        //             // {
-        //             //     throw;
-        //             // }
-        //
-        //             // TODO tk: 2022-05-20 migrate coupled data here!
-        //             //
-        //             // _primaryKeyMappingContext.SetMapping<KX13.Models.CmsForm>(
-        //             //     r => r.FormId,
-        //             //     kx13CmsForm.FormId,
-        //             //     cmsForm.FormId
-        //             // );
-        //
-        //             break;
-        //         default:
-        //             throw new ArgumentOutOfRangeException(nameof(mapped));
-        //     }
-        //
-        //     // await SaveUsingEntityFramework(cancellationToken, kx13CmsForm, kxoCmsForm);
-        // }
 
         return new GenericCommandResult();
     }

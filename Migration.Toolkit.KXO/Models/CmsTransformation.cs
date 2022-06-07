@@ -18,9 +18,6 @@ namespace Migration.Toolkit.KXO.Models
         public string TransformationType { get; set; } = null!;
         [Column("TransformationClassID")]
         public int TransformationClassId { get; set; }
-        [Column("TransformationVersionGUID")]
-        [StringLength(50)]
-        public string? TransformationVersionGuid { get; set; }
         [Column("TransformationGUID")]
         public Guid TransformationGuid { get; set; }
         public DateTime TransformationLastModified { get; set; }

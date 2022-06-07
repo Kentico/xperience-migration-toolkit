@@ -10,7 +10,6 @@ namespace Migration.Toolkit.KXO.Models
     [Index("ContactGuid", Name = "IX_OM_Contact_ContactGUID", IsUnique = true)]
     [Index("ContactLastName", Name = "IX_OM_Contact_ContactLastName")]
     [Index("ContactOwnerUserId", Name = "IX_OM_Contact_ContactOwnerUserID")]
-    [Index("ContactPersonaId", "ContactLastName", Name = "IX_OM_Contact_ContactPersonaID_ContactLastName")]
     [Index("ContactStateId", Name = "IX_OM_Contact_ContactStateID")]
     [Index("ContactStatusId", Name = "IX_OM_Contact_ContactStatusID")]
     public partial class OmContact
@@ -22,7 +21,6 @@ namespace Migration.Toolkit.KXO.Models
             OmAccountAccountSecondaryContacts = new HashSet<OmAccount>();
             OmAccountContacts = new HashSet<OmAccountContact>();
             OmMemberships = new HashSet<OmMembership>();
-            OmScoreContactRules = new HashSet<OmScoreContactRule>();
             OmVisitorToContacts = new HashSet<OmVisitorToContact>();
         }
 
@@ -78,8 +76,6 @@ namespace Migration.Toolkit.KXO.Models
         [StringLength(100)]
         public string? ContactCompanyName { get; set; }
         public bool? ContactSalesForceLeadReplicationRequired { get; set; }
-        [Column("ContactPersonaID")]
-        public int? ContactPersonaId { get; set; }
 
         [ForeignKey("ContactCountryId")]
         [InverseProperty("OmContacts")]
@@ -103,8 +99,6 @@ namespace Migration.Toolkit.KXO.Models
         public virtual ICollection<OmAccountContact> OmAccountContacts { get; set; }
         [InverseProperty("Contact")]
         public virtual ICollection<OmMembership> OmMemberships { get; set; }
-        [InverseProperty("Contact")]
-        public virtual ICollection<OmScoreContactRule> OmScoreContactRules { get; set; }
         [InverseProperty("VisitorToContactContact")]
         public virtual ICollection<OmVisitorToContact> OmVisitorToContacts { get; set; }
     }

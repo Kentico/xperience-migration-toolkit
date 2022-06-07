@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.KXO.Context
@@ -27,6 +27,7 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<AnalyticsStatistic> AnalyticsStatistics { get; set; } = null!;
         public virtual DbSet<AnalyticsWeekHit> AnalyticsWeekHits { get; set; } = null!;
         public virtual DbSet<AnalyticsYearHit> AnalyticsYearHits { get; set; } = null!;
+        public virtual DbSet<CdMigration> CdMigrations { get; set; } = null!;
         public virtual DbSet<CiFileMetadatum> CiFileMetadata { get; set; } = null!;
         public virtual DbSet<CiMigration> CiMigrations { get; set; } = null!;
         public virtual DbSet<CmsAcl> CmsAcls { get; set; } = null!;
@@ -38,7 +39,6 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<CmsAutomationHistory> CmsAutomationHistories { get; set; } = null!;
         public virtual DbSet<CmsAutomationState> CmsAutomationStates { get; set; } = null!;
         public virtual DbSet<CmsAutomationTemplate> CmsAutomationTemplates { get; set; } = null!;
-        public virtual DbSet<CmsAvatar> CmsAvatars { get; set; } = null!;
         public virtual DbSet<CmsCategory> CmsCategories { get; set; } = null!;
         public virtual DbSet<CmsClass> CmsClasses { get; set; } = null!;
         public virtual DbSet<CmsConsent> CmsConsents { get; set; } = null!;
@@ -55,9 +55,6 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<CmsExternalLogin> CmsExternalLogins { get; set; } = null!;
         public virtual DbSet<CmsForm> CmsForms { get; set; } = null!;
         public virtual DbSet<CmsFormFeaturedField> CmsFormFeaturedFields { get; set; } = null!;
-        public virtual DbSet<CmsFormUserControl> CmsFormUserControls { get; set; } = null!;
-        public virtual DbSet<CmsHelpTopic> CmsHelpTopics { get; set; } = null!;
-        public virtual DbSet<CmsLayout> CmsLayouts { get; set; } = null!;
         public virtual DbSet<CmsLicenseKey> CmsLicenseKeys { get; set; } = null!;
         public virtual DbSet<CmsMacroIdentity> CmsMacroIdentities { get; set; } = null!;
         public virtual DbSet<CmsMacroRule> CmsMacroRules { get; set; } = null!;
@@ -66,21 +63,15 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<CmsMembership> CmsMemberships { get; set; } = null!;
         public virtual DbSet<CmsMembershipUser> CmsMembershipUsers { get; set; } = null!;
         public virtual DbSet<CmsMetaFile> CmsMetaFiles { get; set; } = null!;
-        public virtual DbSet<CmsModuleLicenseKey> CmsModuleLicenseKeys { get; set; } = null!;
-        public virtual DbSet<CmsModuleUsageCounter> CmsModuleUsageCounters { get; set; } = null!;
         public virtual DbSet<CmsObjectSetting> CmsObjectSettings { get; set; } = null!;
         public virtual DbSet<CmsObjectVersionHistory> CmsObjectVersionHistories { get; set; } = null!;
         public virtual DbSet<CmsObjectWorkflowTrigger> CmsObjectWorkflowTriggers { get; set; } = null!;
         public virtual DbSet<CmsPageFormerUrlPath> CmsPageFormerUrlPaths { get; set; } = null!;
-        public virtual DbSet<CmsPageTemplate> CmsPageTemplates { get; set; } = null!;
-        public virtual DbSet<CmsPageTemplateCategory> CmsPageTemplateCategories { get; set; } = null!;
         public virtual DbSet<CmsPageTemplateConfiguration> CmsPageTemplateConfigurations { get; set; } = null!;
         public virtual DbSet<CmsPageUrlPath> CmsPageUrlPaths { get; set; } = null!;
         public virtual DbSet<CmsPermission> CmsPermissions { get; set; } = null!;
         public virtual DbSet<CmsPersonalization> CmsPersonalizations { get; set; } = null!;
         public virtual DbSet<CmsQuery> CmsQueries { get; set; } = null!;
-        public virtual DbSet<CmsRelationship> CmsRelationships { get; set; } = null!;
-        public virtual DbSet<CmsRelationshipName> CmsRelationshipNames { get; set; } = null!;
         public virtual DbSet<CmsResource> CmsResources { get; set; } = null!;
         public virtual DbSet<CmsResourceLibrary> CmsResourceLibraries { get; set; } = null!;
         public virtual DbSet<CmsResourceString> CmsResourceStrings { get; set; } = null!;
@@ -104,7 +95,6 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<CmsTranslationSubmission> CmsTranslationSubmissions { get; set; } = null!;
         public virtual DbSet<CmsTranslationSubmissionItem> CmsTranslationSubmissionItems { get; set; } = null!;
         public virtual DbSet<CmsTree> CmsTrees { get; set; } = null!;
-        public virtual DbSet<CmsUielement> CmsUielements { get; set; } = null!;
         public virtual DbSet<CmsUser> CmsUsers { get; set; } = null!;
         public virtual DbSet<CmsUserCulture> CmsUserCultures { get; set; } = null!;
         public virtual DbSet<CmsUserMacroIdentity> CmsUserMacroIdentities { get; set; } = null!;
@@ -116,13 +106,6 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<CmsWebFarmServerMonitoring> CmsWebFarmServerMonitorings { get; set; } = null!;
         public virtual DbSet<CmsWebFarmServerTask> CmsWebFarmServerTasks { get; set; } = null!;
         public virtual DbSet<CmsWebFarmTask> CmsWebFarmTasks { get; set; } = null!;
-        public virtual DbSet<CmsWebPart> CmsWebParts { get; set; } = null!;
-        public virtual DbSet<CmsWebPartCategory> CmsWebPartCategories { get; set; } = null!;
-        public virtual DbSet<CmsWebPartContainer> CmsWebPartContainers { get; set; } = null!;
-        public virtual DbSet<CmsWebPartLayout> CmsWebPartLayouts { get; set; } = null!;
-        public virtual DbSet<CmsWidget> CmsWidgets { get; set; } = null!;
-        public virtual DbSet<CmsWidgetCategory> CmsWidgetCategories { get; set; } = null!;
-        public virtual DbSet<CmsWidgetRole> CmsWidgetRoles { get; set; } = null!;
         public virtual DbSet<CmsWorkflow> CmsWorkflows { get; set; } = null!;
         public virtual DbSet<CmsWorkflowAction> CmsWorkflowActions { get; set; } = null!;
         public virtual DbSet<CmsWorkflowHistory> CmsWorkflowHistories { get; set; } = null!;
@@ -175,8 +158,18 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<ComTaxClassState> ComTaxClassStates { get; set; } = null!;
         public virtual DbSet<ComVolumeDiscount> ComVolumeDiscounts { get; set; } = null!;
         public virtual DbSet<ComWishlist> ComWishlists { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreAboutUsSection> DancingGoatCoreAboutUsSections { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreArticle> DancingGoatCoreArticles { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreCafe> DancingGoatCoreCaves { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreCoffee> DancingGoatCoreCoffees { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreContact> DancingGoatCoreContacts { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreHomeSection> DancingGoatCoreHomeSections { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreReference> DancingGoatCoreReferences { get; set; } = null!;
+        public virtual DbSet<DancingGoatCoreSocialLink> DancingGoatCoreSocialLinks { get; set; } = null!;
         public virtual DbSet<ExportHistory> ExportHistories { get; set; } = null!;
         public virtual DbSet<ExportTask> ExportTasks { get; set; } = null!;
+        public virtual DbSet<FormDancingGoatCoreCoffeeSampleList> FormDancingGoatCoreCoffeeSampleLists { get; set; } = null!;
+        public virtual DbSet<FormDancingGoatCoreContactUsNew> FormDancingGoatCoreContactUsNews { get; set; } = null!;
         public virtual DbSet<IntegrationConnector> IntegrationConnectors { get; set; } = null!;
         public virtual DbSet<IntegrationSyncLog> IntegrationSyncLogs { get; set; } = null!;
         public virtual DbSet<IntegrationSynchronization> IntegrationSynchronizations { get; set; } = null!;
@@ -213,13 +206,8 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<OmContactRole> OmContactRoles { get; set; } = null!;
         public virtual DbSet<OmContactStatus> OmContactStatuses { get; set; } = null!;
         public virtual DbSet<OmMembership> OmMemberships { get; set; } = null!;
-        public virtual DbSet<OmRule> OmRules { get; set; } = null!;
-        public virtual DbSet<OmScore> OmScores { get; set; } = null!;
-        public virtual DbSet<OmScoreContactRule> OmScoreContactRules { get; set; } = null!;
         public virtual DbSet<OmTrackedWebsite> OmTrackedWebsites { get; set; } = null!;
         public virtual DbSet<OmVisitorToContact> OmVisitorToContacts { get; set; } = null!;
-        public virtual DbSet<PersonasPersona> PersonasPersonas { get; set; } = null!;
-        public virtual DbSet<PersonasPersonaContactHistory> PersonasPersonaContactHistories { get; set; } = null!;
         public virtual DbSet<StagingServer> StagingServers { get; set; } = null!;
         public virtual DbSet<StagingSynchronization> StagingSynchronizations { get; set; } = null!;
         public virtual DbSet<StagingTask> StagingTasks { get; set; } = null!;
@@ -231,8 +219,6 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<TempPageBuilderWidget> TempPageBuilderWidgets { get; set; } = null!;
         public virtual DbSet<ViewCmsAclitemItemsAndOperator> ViewCmsAclitemItemsAndOperators { get; set; } = null!;
         public virtual DbSet<ViewCmsObjectVersionHistoryUserJoined> ViewCmsObjectVersionHistoryUserJoineds { get; set; } = null!;
-        public virtual DbSet<ViewCmsPageTemplateCategoryPageTemplateJoined> ViewCmsPageTemplateCategoryPageTemplateJoineds { get; set; } = null!;
-        public virtual DbSet<ViewCmsRelationshipJoined> ViewCmsRelationshipJoineds { get; set; } = null!;
         public virtual DbSet<ViewCmsResourceStringJoined> ViewCmsResourceStringJoineds { get; set; } = null!;
         public virtual DbSet<ViewCmsResourceTranslatedJoined> ViewCmsResourceTranslatedJoineds { get; set; } = null!;
         public virtual DbSet<ViewCmsRoleResourcePermissionJoined> ViewCmsRoleResourcePermissionJoineds { get; set; } = null!;
@@ -242,8 +228,6 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<ViewCmsUserRoleJoined> ViewCmsUserRoleJoineds { get; set; } = null!;
         public virtual DbSet<ViewCmsUserRoleMembershipRole> ViewCmsUserRoleMembershipRoles { get; set; } = null!;
         public virtual DbSet<ViewCmsUserRoleMembershipRoleValidOnlyJoined> ViewCmsUserRoleMembershipRoleValidOnlyJoineds { get; set; } = null!;
-        public virtual DbSet<ViewCmsWebPartCategoryWebpartJoined> ViewCmsWebPartCategoryWebpartJoineds { get; set; } = null!;
-        public virtual DbSet<ViewCmsWidgetCategoryWidgetJoined> ViewCmsWidgetCategoryWidgetJoineds { get; set; } = null!;
         public virtual DbSet<ViewComSkuoptionCategoryOptionCategoryJoined> ViewComSkuoptionCategoryOptionCategoryJoineds { get; set; } = null!;
         public virtual DbSet<ViewIntegrationTaskJoined> ViewIntegrationTaskJoineds { get; set; } = null!;
         public virtual DbSet<ViewMembershipMembershipUserJoined> ViewMembershipMembershipUserJoineds { get; set; } = null!;
@@ -253,14 +237,7 @@ namespace Migration.Toolkit.KXO.Context
         public virtual DbSet<ViewOmAccountJoined> ViewOmAccountJoineds { get; set; } = null!;
         public virtual DbSet<ViewOmContactGroupMemberAccountJoined> ViewOmContactGroupMemberAccountJoineds { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=10.1.1.44;Database=Kentico.Devnet.Local;User Id=sa;Password=Or8*B71fe_sE;");
-            }
-        }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -455,6 +432,11 @@ namespace Migration.Toolkit.KXO.Context
                     .HasForeignKey(d => d.HitsStatisticsId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Analytics_YearHits_HitsStatisticsID_Analytics_Statistics");
+            });
+
+            modelBuilder.Entity<CdMigration>(entity =>
+            {
+                entity.Property(e => e.DateApplied).HasDefaultValueSql("(sysdatetime())");
             });
 
             modelBuilder.Entity<CiFileMetadatum>(entity =>
@@ -663,15 +645,6 @@ namespace Migration.Toolkit.KXO.Context
                 entity.Property(e => e.TemplateDisplayName).HasDefaultValueSql("(N'')");
 
                 entity.Property(e => e.TemplateLastModified).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
-            });
-
-            modelBuilder.Entity<CmsAvatar>(entity =>
-            {
-                entity.HasKey(e => e.AvatarId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.AvatarName, "IX_CMS_Avatar_AvatarName")
-                    .IsClustered();
             });
 
             modelBuilder.Entity<CmsCategory>(entity =>
@@ -1052,11 +1025,7 @@ namespace Migration.Toolkit.KXO.Context
 
                 entity.Property(e => e.FormAfterSubmitMode).HasDefaultValueSql("(N'')");
 
-                entity.Property(e => e.FormConfirmationEmailSubject).HasDefaultValueSql("(N'')");
-
                 entity.Property(e => e.FormDisplayName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.FormEmailAttachUploadedDocs).HasDefaultValueSql("((0))");
 
                 entity.Property(e => e.FormLastModified).HasDefaultValueSql("('9/17/2012 1:37:08 PM')");
 
@@ -1101,53 +1070,6 @@ namespace Migration.Toolkit.KXO.Context
             modelBuilder.Entity<CmsFormFeaturedField>(entity =>
             {
                 entity.Property(e => e.FormFeaturedFieldMapping).HasDefaultValueSql("(N'')");
-            });
-
-            modelBuilder.Entity<CmsFormUserControl>(entity =>
-            {
-                entity.HasKey(e => e.UserControlId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.UserControlDisplayName, "IX_CMS_FormUserControl_UserControlDisplayName")
-                    .IsClustered();
-
-                entity.Property(e => e.UserControlIsSystem).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.UserControlPriority).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.UserControlShowInCustomTables).HasDefaultValueSql("((0))");
-
-                entity.HasOne(d => d.UserControlParent)
-                    .WithMany(p => p.InverseUserControlParent)
-                    .HasForeignKey(d => d.UserControlParentId)
-                    .HasConstraintName("FK_CMS_FormUserControl_UserControlParentID_CMS_FormUserControl");
-
-                entity.HasOne(d => d.UserControlResource)
-                    .WithMany(p => p.CmsFormUserControls)
-                    .HasForeignKey(d => d.UserControlResourceId)
-                    .HasConstraintName("FK_CMS_FormUserControl_UserControlResourceID_CMS_Resource");
-            });
-
-            modelBuilder.Entity<CmsHelpTopic>(entity =>
-            {
-                entity.Property(e => e.HelpTopicLink).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.HelpTopicName).HasDefaultValueSql("(N'')");
-
-                entity.HasOne(d => d.HelpTopicUielement)
-                    .WithMany(p => p.CmsHelpTopics)
-                    .HasForeignKey(d => d.HelpTopicUielementId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_HelpTopic_HelpTopicUIElementID_CMS_UIElement");
-            });
-
-            modelBuilder.Entity<CmsLayout>(entity =>
-            {
-                entity.Property(e => e.LayoutCode).HasDefaultValueSql("('<cms:CMSWebPartZone ZoneID=\"zoneA\" runat=\"server\" />')");
-
-                entity.Property(e => e.LayoutCodeName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.LayoutDisplayName).HasDefaultValueSql("(N'')");
             });
 
             modelBuilder.Entity<CmsLicenseKey>(entity =>
@@ -1257,30 +1179,6 @@ namespace Migration.Toolkit.KXO.Context
                     .HasConstraintName("FK_CMS_MetaFile_MetaFileSiteID_CMS_Site");
             });
 
-            modelBuilder.Entity<CmsModuleLicenseKey>(entity =>
-            {
-                entity.Property(e => e.ModuleLicenseKeyLastModified).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
-
-                entity.Property(e => e.ModuleLicenseKeyLicense).HasDefaultValueSql("(N'')");
-
-                entity.HasOne(d => d.ModuleLicenseKeyResource)
-                    .WithMany(p => p.CmsModuleLicenseKeys)
-                    .HasForeignKey(d => d.ModuleLicenseKeyResourceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_ModuleLicenseKey_ModuleLicenseKeyResourceID_CMS_Resource");
-            });
-
-            modelBuilder.Entity<CmsModuleUsageCounter>(entity =>
-            {
-                entity.HasIndex(e => e.ModuleUsageCounterName, "IX_CMS_ModuleUsageCounter_ModuleUsageCounterName")
-                    .IsUnique()
-                    .IsClustered();
-
-                entity.Property(e => e.ModuleUsageCounterId).ValueGeneratedOnAdd();
-
-                entity.Property(e => e.ModuleUsageCounterName).HasDefaultValueSql("(N'')");
-            });
-
             modelBuilder.Entity<CmsObjectSetting>(entity =>
             {
                 entity.Property(e => e.ObjectSettingsObjectType).HasDefaultValueSql("('')");
@@ -1372,56 +1270,6 @@ namespace Migration.Toolkit.KXO.Context
                     .HasConstraintName("FK_CMS_PageFormerUrlPath_PageFormerUrlPathSiteID_CMS_Site");
             });
 
-            modelBuilder.Entity<CmsPageTemplate>(entity =>
-            {
-                entity.HasKey(e => e.PageTemplateId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.PageTemplateCategoryId, "IX_CMS_PageTemplate_PageTemplateCategoryID")
-                    .IsClustered();
-
-                entity.Property(e => e.PageTemplateCodeName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.PageTemplateDisplayName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.PageTemplateIconClass).HasDefaultValueSql("(N'icon-layout')");
-
-                entity.Property(e => e.PageTemplateIsLayout).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.PageTemplateType).HasDefaultValueSql("(N'portal')");
-
-                entity.HasOne(d => d.PageTemplateCategory)
-                    .WithMany(p => p.CmsPageTemplates)
-                    .HasForeignKey(d => d.PageTemplateCategoryId)
-                    .HasConstraintName("FK_CMS_PageTemplate_PageTemplateCategoryID_CMS_PageTemplateCategory");
-
-                entity.HasOne(d => d.PageTemplateLayoutNavigation)
-                    .WithMany(p => p.CmsPageTemplates)
-                    .HasForeignKey(d => d.PageTemplateLayoutId)
-                    .HasConstraintName("FK_CMS_PageTemplate_PageTemplateLayoutID_CMS_Layout");
-            });
-
-            modelBuilder.Entity<CmsPageTemplateCategory>(entity =>
-            {
-                entity.HasKey(e => e.CategoryId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.CategoryPath, "IX_CMS_PageTemplateCategory_CategoryPath")
-                    .IsUnique()
-                    .IsClustered();
-
-                entity.Property(e => e.CategoryChildCount).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.CategoryDisplayName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.CategoryTemplateChildCount).HasDefaultValueSql("((0))");
-
-                entity.HasOne(d => d.CategoryParent)
-                    .WithMany(p => p.InverseCategoryParent)
-                    .HasForeignKey(d => d.CategoryParentId)
-                    .HasConstraintName("FK_CMS_PageTemplateCategory_CategoryParentID_CMS_PageTemplateCategory");
-            });
-
             modelBuilder.Entity<CmsPageTemplateConfiguration>(entity =>
             {
                 entity.Property(e => e.PageTemplateConfigurationLastModified).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
@@ -1500,53 +1348,6 @@ namespace Migration.Toolkit.KXO.Context
                     .WithMany(p => p.CmsQueries)
                     .HasForeignKey(d => d.ClassId)
                     .HasConstraintName("FK_CMS_Query_ClassID_CMS_Class");
-            });
-
-            modelBuilder.Entity<CmsRelationship>(entity =>
-            {
-                entity.HasOne(d => d.LeftNode)
-                    .WithMany(p => p.CmsRelationshipLeftNodes)
-                    .HasForeignKey(d => d.LeftNodeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_Relationship_LeftNodeID_CMS_Tree");
-
-                entity.HasOne(d => d.RelationshipName)
-                    .WithMany(p => p.CmsRelationships)
-                    .HasForeignKey(d => d.RelationshipNameId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_Relationship_RelationshipNameID_CMS_RelationshipName");
-
-                entity.HasOne(d => d.RightNode)
-                    .WithMany(p => p.CmsRelationshipRightNodes)
-                    .HasForeignKey(d => d.RightNodeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_Relationship_RightNodeID_CMS_Tree");
-            });
-
-            modelBuilder.Entity<CmsRelationshipName>(entity =>
-            {
-                entity.Property(e => e.RelationshipDisplayName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.RelationshipName).HasDefaultValueSql("('')");
-
-                entity.HasMany(d => d.Sites)
-                    .WithMany(p => p.RelationshipNames)
-                    .UsingEntity<Dictionary<string, object>>(
-                        "CmsRelationshipNameSite",
-                        l => l.HasOne<CmsSite>().WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_CMS_RelationshipNameSite_SiteID_CMS_Site"),
-                        r => r.HasOne<CmsRelationshipName>().WithMany().HasForeignKey("RelationshipNameId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_CMS_RelationshipNameSite_RelationshipNameID_CMS_RelationshipName"),
-                        j =>
-                        {
-                            j.HasKey("RelationshipNameId", "SiteId");
-
-                            j.ToTable("CMS_RelationshipNameSite");
-
-                            j.HasIndex(new[] { "SiteId" }, "IX_CMS_RelationshipNameSite_SiteID");
-
-                            j.IndexerProperty<int>("RelationshipNameId").HasColumnName("RelationshipNameID");
-
-                            j.IndexerProperty<int>("SiteId").HasColumnName("SiteID");
-                        });
             });
 
             modelBuilder.Entity<CmsResource>(entity =>
@@ -2016,43 +1817,6 @@ namespace Migration.Toolkit.KXO.Context
                     .HasConstraintName("FK_CMS_Tree_NodeSKUID_COM_SKU");
             });
 
-            modelBuilder.Entity<CmsUielement>(entity =>
-            {
-                entity.HasKey(e => e.ElementId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => new { e.ElementResourceId, e.ElementLevel, e.ElementParentId, e.ElementOrder, e.ElementCaption }, "IX_CMS_UIElement_ElementResourceID_ElementLevel_ElementParentID_ElementOrder_ElementCaption")
-                    .IsClustered();
-
-                entity.Property(e => e.ElementCheckModuleReadPermission).HasDefaultValueSql("((1))");
-
-                entity.Property(e => e.ElementIsCustom).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.ElementIsGlobalApplication).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.ElementIsMenu).HasDefaultValueSql("((0))");
-
-                entity.Property(e => e.ElementName).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.ElementSize).HasDefaultValueSql("((0))");
-
-                entity.HasOne(d => d.ElementPageTemplate)
-                    .WithMany(p => p.CmsUielements)
-                    .HasForeignKey(d => d.ElementPageTemplateId)
-                    .HasConstraintName("FK_CMS_UIElement_ElementPageTemplateID_CMS_PageTemplate");
-
-                entity.HasOne(d => d.ElementParent)
-                    .WithMany(p => p.InverseElementParent)
-                    .HasForeignKey(d => d.ElementParentId)
-                    .HasConstraintName("FK_CMS_UIElement_ElementParentID_CMS_UIElement");
-
-                entity.HasOne(d => d.ElementResource)
-                    .WithMany(p => p.CmsUielements)
-                    .HasForeignKey(d => d.ElementResourceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_UIElement_ElementResourceID_CMS_Resource");
-            });
-
             modelBuilder.Entity<CmsUser>(entity =>
             {
                 entity.Property(e => e.UserName).HasDefaultValueSql("(N'')");
@@ -2226,171 +1990,6 @@ namespace Migration.Toolkit.KXO.Context
                 entity.Property(e => e.TaskIsMemory).HasDefaultValueSql("((0))");
 
                 entity.Property(e => e.TaskType).HasDefaultValueSql("(N'')");
-            });
-
-            modelBuilder.Entity<CmsWebPart>(entity =>
-            {
-                entity.Property(e => e.WebPartDisplayName).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.WebPartFileName).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.WebPartLastModified).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
-
-                entity.Property(e => e.WebPartName).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.WebPartProperties).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.WebPartSkipInsertProperties).HasDefaultValueSql("((0))");
-
-                entity.HasOne(d => d.WebPartCategory)
-                    .WithMany(p => p.CmsWebParts)
-                    .HasForeignKey(d => d.WebPartCategoryId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_WebPart_WebPartCategoryID_CMS_WebPartCategory");
-
-                entity.HasOne(d => d.WebPartParent)
-                    .WithMany(p => p.InverseWebPartParent)
-                    .HasForeignKey(d => d.WebPartParentId)
-                    .HasConstraintName("FK_CMS_WebPart_WebPartParentID_CMS_WebPart");
-
-                entity.HasOne(d => d.WebPartResource)
-                    .WithMany(p => p.CmsWebParts)
-                    .HasForeignKey(d => d.WebPartResourceId)
-                    .HasConstraintName("FK_CMS_WebPart_WebPartResourceID_CMS_Resource");
-            });
-
-            modelBuilder.Entity<CmsWebPartCategory>(entity =>
-            {
-                entity.HasKey(e => e.CategoryId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.CategoryPath, "IX_CMS_WebPartCategory_CategoryPath")
-                    .IsUnique()
-                    .IsClustered();
-
-                entity.Property(e => e.CategoryPath).HasDefaultValueSql("('')");
-
-                entity.HasOne(d => d.CategoryParent)
-                    .WithMany(p => p.InverseCategoryParent)
-                    .HasForeignKey(d => d.CategoryParentId)
-                    .HasConstraintName("FK_CMS_WebPartCategory_CategoryParentID_CMS_WebPartCategory");
-            });
-
-            modelBuilder.Entity<CmsWebPartContainer>(entity =>
-            {
-                entity.HasKey(e => e.ContainerId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.ContainerDisplayName, "IX_CMS_WebPartContainer_ContainerDisplayName")
-                    .IsClustered();
-
-                entity.Property(e => e.ContainerDisplayName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.ContainerName).HasDefaultValueSql("('')");
-
-                entity.HasMany(d => d.Sites)
-                    .WithMany(p => p.Containers)
-                    .UsingEntity<Dictionary<string, object>>(
-                        "CmsWebPartContainerSite",
-                        l => l.HasOne<CmsSite>().WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_CMS_WebPartContainerSite_SiteID_CMS_Site"),
-                        r => r.HasOne<CmsWebPartContainer>().WithMany().HasForeignKey("ContainerId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_CMS_WebPartContainerSite_ContainerID_CMS_WebPartContainer"),
-                        j =>
-                        {
-                            j.HasKey("ContainerId", "SiteId");
-
-                            j.ToTable("CMS_WebPartContainerSite");
-
-                            j.HasIndex(new[] { "SiteId" }, "IX_CMS_WebPartContainerSite_SiteID");
-
-                            j.IndexerProperty<int>("ContainerId").HasColumnName("ContainerID");
-
-                            j.IndexerProperty<int>("SiteId").HasColumnName("SiteID");
-                        });
-            });
-
-            modelBuilder.Entity<CmsWebPartLayout>(entity =>
-            {
-                entity.HasKey(e => e.WebPartLayoutId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => new { e.WebPartLayoutWebPartId, e.WebPartLayoutCodeName }, "IX_CMS_WebPartLayout_WebPartLayoutWebPartID_WebPartLayoutCodeName")
-                    .IsClustered();
-
-                entity.Property(e => e.WebPartLayoutCodeName).HasDefaultValueSql("('')");
-
-                entity.Property(e => e.WebPartLayoutDisplayName).HasDefaultValueSql("('')");
-
-                entity.HasOne(d => d.WebPartLayoutWebPart)
-                    .WithMany(p => p.CmsWebPartLayouts)
-                    .HasForeignKey(d => d.WebPartLayoutWebPartId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_WebPartLayout_WebPartLayoutWebPartID_CMS_WebPart");
-            });
-
-            modelBuilder.Entity<CmsWidget>(entity =>
-            {
-                entity.HasKey(e => e.WidgetId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => new { e.WidgetCategoryId, e.WidgetDisplayName }, "IX_CMS_Widget_WidgetCategoryID_WidgetDisplayName")
-                    .IsClustered();
-
-                entity.Property(e => e.WidgetSecurity).HasDefaultValueSql("((2))");
-
-                entity.HasOne(d => d.WidgetCategory)
-                    .WithMany(p => p.CmsWidgets)
-                    .HasForeignKey(d => d.WidgetCategoryId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_Widget_WidgetCategoryID_CMS_WidgetCategory");
-
-                entity.HasOne(d => d.WidgetLayout)
-                    .WithMany(p => p.CmsWidgets)
-                    .HasForeignKey(d => d.WidgetLayoutId)
-                    .HasConstraintName("FK_CMS_Widget_WidgetLayoutID_CMS_WebPartLayout");
-
-                entity.HasOne(d => d.WidgetWebPart)
-                    .WithMany(p => p.CmsWidgets)
-                    .HasForeignKey(d => d.WidgetWebPartId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_Widget_WidgetWebPartID_CMS_WebPart");
-            });
-
-            modelBuilder.Entity<CmsWidgetCategory>(entity =>
-            {
-                entity.HasKey(e => e.WidgetCategoryId)
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.WidgetCategoryPath, "IX_CMS_WidgetCategory_CategoryPath")
-                    .IsUnique()
-                    .IsClustered();
-
-                entity.HasOne(d => d.WidgetCategoryParent)
-                    .WithMany(p => p.InverseWidgetCategoryParent)
-                    .HasForeignKey(d => d.WidgetCategoryParentId)
-                    .HasConstraintName("FK_CMS_WidgetCategory_WidgetCategoryParentID_CMS_WidgetCategory");
-            });
-
-            modelBuilder.Entity<CmsWidgetRole>(entity =>
-            {
-                entity.HasKey(e => new { e.WidgetId, e.RoleId, e.PermissionId });
-
-                entity.HasOne(d => d.Permission)
-                    .WithMany(p => p.CmsWidgetRoles)
-                    .HasForeignKey(d => d.PermissionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_WidgetRole_PermissionID_CMS_Permission");
-
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.CmsWidgetRoles)
-                    .HasForeignKey(d => d.RoleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_WidgetRole_RoleID_CMS_Role");
-
-                entity.HasOne(d => d.Widget)
-                    .WithMany(p => p.CmsWidgetRoles)
-                    .HasForeignKey(d => d.WidgetId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CMS_WidgetRole_WidgetID_CMS_Widget");
             });
 
             modelBuilder.Entity<CmsWorkflow>(entity =>
@@ -3670,6 +3269,90 @@ namespace Migration.Toolkit.KXO.Context
                     .HasConstraintName("FK_COM_Wishlist_UserID_CMS_User");
             });
 
+            modelBuilder.Entity<DancingGoatCoreAboutUsSection>(entity =>
+            {
+                entity.Property(e => e.AboutUsSectionHeading).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.AboutUsSectionText).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<DancingGoatCoreArticle>(entity =>
+            {
+                entity.Property(e => e.ArticleSummary).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ArticleText).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ArticleTitle).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<DancingGoatCoreCafe>(entity =>
+            {
+                entity.Property(e => e.CafeCity).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.CafeCountry).HasDefaultValueSql("(N'USA')");
+
+                entity.Property(e => e.CafeName).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.CafePhone).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.CafeStreet).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.CafeZipCode).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<DancingGoatCoreCoffee>(entity =>
+            {
+                entity.Property(e => e.CoffeeDescription).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.CoffeeShortDescription).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<DancingGoatCoreContact>(entity =>
+            {
+                entity.Property(e => e.ContactCity).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ContactCountry).HasDefaultValueSql("(N'USA')");
+
+                entity.Property(e => e.ContactEmail).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ContactName).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ContactPhone).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ContactStreet).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ContactZipCode).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<DancingGoatCoreHomeSection>(entity =>
+            {
+                entity.Property(e => e.HomeSectionHeading).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.HomeSectionText).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<DancingGoatCoreReference>(entity =>
+            {
+                entity.Property(e => e.ReferenceDescription).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ReferenceImage).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ReferenceName).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.ReferenceText).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<DancingGoatCoreSocialLink>(entity =>
+            {
+                entity.Property(e => e.SocialLinkIcon).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.SocialLinkName).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.SocialLinkTitle).HasDefaultValueSql("(N'Follow us')");
+
+                entity.Property(e => e.SocialLinkUrl).HasDefaultValueSql("(N'')");
+            });
+
             modelBuilder.Entity<ExportHistory>(entity =>
             {
                 entity.HasKey(e => e.ExportId)
@@ -3697,6 +3380,38 @@ namespace Migration.Toolkit.KXO.Context
                     .WithMany(p => p.ExportTasks)
                     .HasForeignKey(d => d.TaskSiteId)
                     .HasConstraintName("FK_Export_Task_TaskSiteID_CMS_Site");
+            });
+
+            modelBuilder.Entity<FormDancingGoatCoreCoffeeSampleList>(entity =>
+            {
+                entity.Property(e => e.Address).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.City).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.Country).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.Email).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.FirstName).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.FormInserted).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
+
+                entity.Property(e => e.FormUpdated).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
+
+                entity.Property(e => e.LastName).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.Zipcode).HasDefaultValueSql("(N'')");
+            });
+
+            modelBuilder.Entity<FormDancingGoatCoreContactUsNew>(entity =>
+            {
+                entity.Property(e => e.FormInserted).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
+
+                entity.Property(e => e.FormUpdated).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
+
+                entity.Property(e => e.UserEmail).HasDefaultValueSql("(N'')");
+
+                entity.Property(e => e.UserMessage).HasDefaultValueSql("(N'')");
             });
 
             modelBuilder.Entity<IntegrationConnector>(entity =>
@@ -4286,54 +4001,6 @@ namespace Migration.Toolkit.KXO.Context
                     .HasConstraintName("FK_OM_Membership_OM_Contact");
             });
 
-            modelBuilder.Entity<OmRule>(entity =>
-            {
-                entity.Property(e => e.RuleDisplayName).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.RuleName).HasDefaultValueSql("(N'[_][_]AUTO[_][_]')");
-
-                entity.Property(e => e.RuleType).HasDefaultValueSql("((1))");
-
-                entity.HasOne(d => d.RuleScore)
-                    .WithMany(p => p.OmRules)
-                    .HasForeignKey(d => d.RuleScoreId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OM_Rule_OM_Score");
-            });
-
-            modelBuilder.Entity<OmScore>(entity =>
-            {
-                entity.HasIndex(e => e.ScorePersonaId, "IX_OM_Score_ScorePersonaID")
-                    .IsUnique()
-                    .HasFilter("([ScorePersonaID] IS NOT NULL)");
-
-                entity.HasOne(d => d.ScorePersona)
-                    .WithOne(p => p.OmScore)
-                    .HasForeignKey<OmScore>(d => d.ScorePersonaId)
-                    .HasConstraintName("FK_OM_Score_Personas_Persona");
-            });
-
-            modelBuilder.Entity<OmScoreContactRule>(entity =>
-            {
-                entity.HasOne(d => d.Contact)
-                    .WithMany(p => p.OmScoreContactRules)
-                    .HasForeignKey(d => d.ContactId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OM_ScoreContactRule_OM_Contact");
-
-                entity.HasOne(d => d.Rule)
-                    .WithMany(p => p.OmScoreContactRules)
-                    .HasForeignKey(d => d.RuleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OM_ScoreContactRule_OM_Rule");
-
-                entity.HasOne(d => d.Score)
-                    .WithMany(p => p.OmScoreContactRules)
-                    .HasForeignKey(d => d.ScoreId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OM_ScoreContactRule_OM_Score");
-            });
-
             modelBuilder.Entity<OmTrackedWebsite>(entity =>
             {
                 entity.Property(e => e.TrackedWebsiteDisplayName).HasDefaultValueSql("(N'')");
@@ -4356,27 +4023,6 @@ namespace Migration.Toolkit.KXO.Context
                     .HasForeignKey(d => d.VisitorToContactContactId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_OM_VisitorToContact_OM_Contact_Cascade");
-            });
-
-            modelBuilder.Entity<PersonasPersona>(entity =>
-            {
-                entity.Property(e => e.PersonaDisplayName).HasDefaultValueSql("(N'')");
-
-                entity.Property(e => e.PersonaEnabled).HasDefaultValueSql("((1))");
-
-                entity.Property(e => e.PersonaName).HasDefaultValueSql("(N'[_][_]AUTO[_][_]')");
-
-                entity.Property(e => e.PersonaPointsThreshold).HasDefaultValueSql("((100))");
-            });
-
-            modelBuilder.Entity<PersonasPersonaContactHistory>(entity =>
-            {
-                entity.Property(e => e.PersonaContactHistoryDate).HasDefaultValueSql("('1/1/0001 12:00:00 AM')");
-
-                entity.HasOne(d => d.PersonaContactHistoryPersona)
-                    .WithMany(p => p.PersonasPersonaContactHistories)
-                    .HasForeignKey(d => d.PersonaContactHistoryPersonaId)
-                    .HasConstraintName("FK_Personas_PersonaContactHistory_Personas_Persona");
             });
 
             modelBuilder.Entity<StagingServer>(entity =>
@@ -4507,16 +4153,6 @@ namespace Migration.Toolkit.KXO.Context
                 entity.ToView("View_CMS_ObjectVersionHistoryUser_Joined");
             });
 
-            modelBuilder.Entity<ViewCmsPageTemplateCategoryPageTemplateJoined>(entity =>
-            {
-                entity.ToView("View_CMS_PageTemplateCategoryPageTemplate_Joined");
-            });
-
-            modelBuilder.Entity<ViewCmsRelationshipJoined>(entity =>
-            {
-                entity.ToView("View_CMS_Relationship_Joined");
-            });
-
             modelBuilder.Entity<ViewCmsResourceStringJoined>(entity =>
             {
                 entity.ToView("View_CMS_ResourceString_Joined");
@@ -4562,16 +4198,6 @@ namespace Migration.Toolkit.KXO.Context
             modelBuilder.Entity<ViewCmsUserRoleMembershipRoleValidOnlyJoined>(entity =>
             {
                 entity.ToView("View_CMS_UserRole_MembershipRole_ValidOnly_Joined");
-            });
-
-            modelBuilder.Entity<ViewCmsWebPartCategoryWebpartJoined>(entity =>
-            {
-                entity.ToView("View_CMS_WebPartCategoryWebpart_Joined");
-            });
-
-            modelBuilder.Entity<ViewCmsWidgetCategoryWidgetJoined>(entity =>
-            {
-                entity.ToView("View_CMS_WidgetCategoryWidget_Joined");
             });
 
             modelBuilder.Entity<ViewComSkuoptionCategoryOptionCategoryJoined>(entity =>

@@ -21,14 +21,6 @@ namespace Migration.Toolkit.KXO.Models
         public string FormDisplayName { get; set; } = null!;
         [StringLength(100)]
         public string FormName { get; set; } = null!;
-        [StringLength(998)]
-        public string? FormSendToEmail { get; set; }
-        [StringLength(254)]
-        public string? FormSendFromEmail { get; set; }
-        [StringLength(250)]
-        public string? FormEmailSubject { get; set; }
-        public string? FormEmailTemplate { get; set; }
-        public bool? FormEmailAttachUploadedDocs { get; set; }
         [Column("FormClassID")]
         public int FormClassId { get; set; }
         public int FormItems { get; set; }
@@ -37,13 +29,6 @@ namespace Migration.Toolkit.KXO.Models
         public string? FormSubmitButtonText { get; set; }
         [Column("FormSiteID")]
         public int FormSiteId { get; set; }
-        [StringLength(254)]
-        public string? FormConfirmationEmailField { get; set; }
-        public string? FormConfirmationTemplate { get; set; }
-        [StringLength(254)]
-        public string? FormConfirmationSendFromEmail { get; set; }
-        [StringLength(250)]
-        public string? FormConfirmationEmailSubject { get; set; }
         public int? FormAccess { get; set; }
         [StringLength(255)]
         public string? FormSubmitButtonImage { get; set; }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Data;
+using System.Security.Cryptography.Xml;
 using System.Xml.Linq;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -99,7 +100,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         {
             if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(tableName))
             {
-                _logger.LogError("Data exists in target coupled data table '{tableName}' - cannot migrate.", tableName);
+                _logger.LogWarning("Data exists in target coupled data table '{tableName}' - cannot migrate.", tableName);
                 anyDataPresent = true;
             }
         }
@@ -107,7 +108,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         if (anyDataPresent)
         {
             // TODO tk: 2022-06-01 command fatal
-            _logger.LogError("Command failed.");
+            _logger.LogWarning("Some coupled data synchronization was skipped.");
             return new CommandFailureResult();
         }
 
@@ -128,10 +129,11 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         }
         
         await RequireMigratedCmsAcls(kx13Context, explicitSiteIdMapping, cancellationToken);
-        
+
         var kx13CmsTrees = kx13Context.CmsTrees
                 .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
                 .Include(t => t.NodeClass)
+                .Include(t => t.CmsPageUrlPaths)
                 .Where(x => explicitSiteIdMapping.Contains(x.NodeSiteId))
                 .OrderBy(t => t.NodeLevel)
                 .ThenBy(t => t.NodeParentId)
@@ -144,8 +146,10 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
             _migrationProtocol.FetchedSource(kx13CmsTree);
 
             var kxoCmsTree = await _kxoContext.CmsTrees
-                .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
-                .FirstOrDefaultAsync(x => x.NodeGuid == kx13CmsTree.NodeGuid, cancellationToken: cancellationToken);
+                    .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
+                    .Include(t => t.CmsPageUrlPaths)
+                    .FirstOrDefaultAsync(x => x.NodeGuid == kx13CmsTree.NodeGuid, cancellationToken: cancellationToken)
+                ;
 
             _migrationProtocol.FetchedTarget(kxoCmsTree);
 
@@ -233,9 +237,9 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                     throw new ArgumentOutOfRangeException(nameof(mapped));
             }
         }
-        
-        // TODO tk: 2022-05-19 reorder method arguments
-        await RequireMigratedCmsPageUrlPaths(cancellationToken, kx13Context, explicitSiteIdMapping);
+
+        // TODO tk: 2022-06-08 method cannot be used in current impl, synced documents must be reflected in url path search 
+        // await RequireMigratedCmsPageUrlPaths(cancellationToken, kx13Context, explicitSiteIdMapping);
         
         return new GenericCommandResult();
     }
@@ -309,8 +313,16 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         {
             _migrationProtocol.FetchedSource(kx13CmsPageUrlPath);
 
+            var sourceSiteId = _primaryKeyMappingContext.RequireMapFromSource<K13M.CmsSite>(s => s.SiteId, kx13CmsPageUrlPath.PageUrlPathSiteId);
+            
+            // PageUrlPathUrlPathHash, PageUrlPathCulture, PageUrlPathSiteID
             var kxoCmsPageUrlPaths = await _kxoContext.CmsPageUrlPaths
-                .FirstOrDefaultAsync(x => x.PageUrlPathGuid == kx13CmsPageUrlPath.PageUrlPathGuid, cancellationToken: cancellationToken);
+                .FirstOrDefaultAsync(x =>
+                        x.PageUrlPathGuid == kx13CmsPageUrlPath.PageUrlPathGuid,
+                        // x.PageUrlPathUrlPathHash == kx13CmsPageUrlPath.PageUrlPathUrlPathHash &&
+                        // x.PageUrlPathCulture == kx13CmsPageUrlPath.PageUrlPathCulture &&
+                        // x.PageUrlPathSiteId == sourceSiteId,
+                    cancellationToken: cancellationToken);
 
             _migrationProtocol.FetchedTarget(kxoCmsPageUrlPaths);
 

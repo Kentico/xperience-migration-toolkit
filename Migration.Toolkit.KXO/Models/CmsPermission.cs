@@ -11,7 +11,6 @@ namespace Migration.Toolkit.KXO.Models
     {
         public CmsPermission()
         {
-            CmsWidgetRoles = new HashSet<CmsWidgetRole>();
             MediaLibraryRolePermissions = new HashSet<MediaLibraryRolePermission>();
             Roles = new HashSet<CmsRole>();
         }
@@ -41,8 +40,6 @@ namespace Migration.Toolkit.KXO.Models
         [ForeignKey("ResourceId")]
         [InverseProperty("CmsPermissions")]
         public virtual CmsResource? Resource { get; set; }
-        [InverseProperty("Permission")]
-        public virtual ICollection<CmsWidgetRole> CmsWidgetRoles { get; set; }
         [InverseProperty("Permission")]
         public virtual ICollection<MediaLibraryRolePermission> MediaLibraryRolePermissions { get; set; }
 

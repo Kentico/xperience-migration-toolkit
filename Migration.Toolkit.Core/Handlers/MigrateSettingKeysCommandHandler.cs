@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using DocumentFormat.OpenXml.Bibliography;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

@@ -19,18 +19,12 @@ namespace Migration.Toolkit.KXO.Models
         [Column("FormClassID")]
         public int FormClassId { get; set; }
         public string? FormDefinition { get; set; }
-        public string? FormLayout { get; set; }
         [Column("FormGUID")]
         public Guid FormGuid { get; set; }
         public DateTime FormLastModified { get; set; }
         [Column("FormCoupledClassID")]
         public int? FormCoupledClassId { get; set; }
         public bool? FormHideNewParentFields { get; set; }
-        [StringLength(50)]
-        public string? FormLayoutType { get; set; }
-        [Column("FormVersionGUID")]
-        [StringLength(50)]
-        public string? FormVersionGuid { get; set; }
         [StringLength(400)]
         public string? FormCustomizedColumns { get; set; }
         public bool? FormIsCustom { get; set; }

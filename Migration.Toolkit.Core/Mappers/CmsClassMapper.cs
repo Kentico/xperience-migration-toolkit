@@ -52,7 +52,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassFormDefinition = source.ClassFormDefinition;
         target.ClassNodeNameSource = source.ClassNodeNameSource;
         target.ClassTableName = source.ClassTableName;
-        target.ClassFormLayout = source.ClassFormLayout;
+        // target.ClassFormLayout = source.ClassFormLayout;
         target.ClassShowAsSystemTable = source.ClassShowAsSystemTable;
         target.ClassUsePublishFromTo = source.ClassUsePublishFromTo;
         target.ClassShowTemplateSelection = source.ClassShowTemplateSelection;
@@ -83,8 +83,8 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassContactOverwriteEnabled = source.ClassContactOverwriteEnabled;
         target.ClassConnectionString = source.ClassConnectionString;
         target.ClassIsProductSection = source.ClassIsProductSection;
-        target.ClassFormLayoutType = source.ClassFormLayoutType;
-        target.ClassVersionGuid = source.ClassVersionGuid;
+        // target.ClassFormLayoutType = source.ClassFormLayoutType;
+        // target.ClassVersionGuid = source.ClassVersionGuid;
         target.ClassDefaultObjectType = source.ClassDefaultObjectType;
         target.ClassIsForm = source.ClassIsForm;
         target.ClassCustomizedColumns = source.ClassCustomizedColumns;
@@ -136,7 +136,8 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassFormDefinition = source.ClassFormDefinition;
         target.ClassNodeNameSource = source.ClassNodeNameSource;
         target.ClassTableName = source.ClassTableName;
-        target.ClassFormLayout = source.ClassFormLayout;
+        // TODO tk: 2022-06-07 check if convertible
+        // target.ClassFormLayout = source.ClassFormLayout;
         target.ClassShowAsSystemTable = source.ClassShowAsSystemTable.UseKenticoDefault();
         target.ClassUsePublishFromTo = source.ClassUsePublishFromTo.UseKenticoDefault();
         target.ClassShowTemplateSelection = source.ClassShowTemplateSelection.UseKenticoDefault();
@@ -151,8 +152,10 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassContactOverwriteEnabled = source.ClassContactOverwriteEnabled.UseKenticoDefault();
         target.ClassConnectionString = source.ClassConnectionString;
         target.ClassIsProductSection = source.ClassIsProductSection.UseKenticoDefault();
-        target.ClassFormLayoutType = source.ClassFormLayoutType.AsEnum<LayoutTypeEnum>();
-        target.ClassVersionGUID = source.ClassVersionGuid;
+        // TODO tk: 2022-06-07 check if convertible
+        // target.ClassFormLayoutType = source.ClassFormLayoutType.AsEnum<LayoutTypeEnum>();
+        // TODO tk: 2022-06-07 check if convertible
+        // target.ClassVersionGUID = source.ClassVersionGuid;
         target.ClassDefaultObjectType = source.ClassDefaultObjectType;
         target.ClassIsForm = source.ClassIsForm.UseKenticoDefault();
         target.ClassCustomizedColumns = source.ClassCustomizedColumns;

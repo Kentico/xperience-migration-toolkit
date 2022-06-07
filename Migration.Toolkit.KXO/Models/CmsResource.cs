@@ -11,14 +11,10 @@ namespace Migration.Toolkit.KXO.Models
         public CmsResource()
         {
             CmsClasses = new HashSet<CmsClass>();
-            CmsFormUserControls = new HashSet<CmsFormUserControl>();
-            CmsModuleLicenseKeys = new HashSet<CmsModuleLicenseKey>();
             CmsPermissions = new HashSet<CmsPermission>();
             CmsResourceLibraries = new HashSet<CmsResourceLibrary>();
             CmsScheduledTasks = new HashSet<CmsScheduledTask>();
             CmsSettingsCategories = new HashSet<CmsSettingsCategory>();
-            CmsUielements = new HashSet<CmsUielement>();
-            CmsWebParts = new HashSet<CmsWebPart>();
             CmsWorkflowActions = new HashSet<CmsWorkflowAction>();
             Sites = new HashSet<CmsSite>();
         }
@@ -51,10 +47,6 @@ namespace Migration.Toolkit.KXO.Models
 
         [InverseProperty("ClassResource")]
         public virtual ICollection<CmsClass> CmsClasses { get; set; }
-        [InverseProperty("UserControlResource")]
-        public virtual ICollection<CmsFormUserControl> CmsFormUserControls { get; set; }
-        [InverseProperty("ModuleLicenseKeyResource")]
-        public virtual ICollection<CmsModuleLicenseKey> CmsModuleLicenseKeys { get; set; }
         [InverseProperty("Resource")]
         public virtual ICollection<CmsPermission> CmsPermissions { get; set; }
         [InverseProperty("ResourceLibraryResource")]
@@ -63,10 +55,6 @@ namespace Migration.Toolkit.KXO.Models
         public virtual ICollection<CmsScheduledTask> CmsScheduledTasks { get; set; }
         [InverseProperty("CategoryResource")]
         public virtual ICollection<CmsSettingsCategory> CmsSettingsCategories { get; set; }
-        [InverseProperty("ElementResource")]
-        public virtual ICollection<CmsUielement> CmsUielements { get; set; }
-        [InverseProperty("WebPartResource")]
-        public virtual ICollection<CmsWebPart> CmsWebParts { get; set; }
         [InverseProperty("ActionResource")]
         public virtual ICollection<CmsWorkflowAction> CmsWorkflowActions { get; set; }
 

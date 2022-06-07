@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
 

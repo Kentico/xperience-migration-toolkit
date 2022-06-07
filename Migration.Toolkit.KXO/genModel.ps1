@@ -1,5 +1,5 @@
 ﻿param([string]$connection)
-dotnet ef dbcontext scaffold $connection Microsoft.EntityFrameworkCore.SqlServer --output-dir Models --context-dir Context --context KxoContext --data-annotations
+dotnet ef dbcontext scaffold $connection Microsoft.EntityFrameworkCore.SqlServer --output-dir Models --context-dir Context --context KxoContext --data-annotations --force
 
 # Remove connection string
 $workDir = $MyInvocation.MyCommand.Path

@@ -44,7 +44,6 @@ namespace Migration.Toolkit.KXO.Models
         public string ClassNodeNameSource { get; set; } = null!;
         [StringLength(100)]
         public string? ClassTableName { get; set; }
-        public string? ClassFormLayout { get; set; }
         public bool? ClassShowAsSystemTable { get; set; }
         public bool? ClassUsePublishFromTo { get; set; }
         public bool? ClassShowTemplateSelection { get; set; }
@@ -87,11 +86,6 @@ namespace Migration.Toolkit.KXO.Models
         [StringLength(100)]
         public string? ClassConnectionString { get; set; }
         public bool? ClassIsProductSection { get; set; }
-        [StringLength(50)]
-        public string? ClassFormLayoutType { get; set; }
-        [Column("ClassVersionGUID")]
-        [StringLength(50)]
-        public string? ClassVersionGuid { get; set; }
         [StringLength(100)]
         public string? ClassDefaultObjectType { get; set; }
         public bool? ClassIsForm { get; set; }

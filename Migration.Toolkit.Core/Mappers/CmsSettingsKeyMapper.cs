@@ -33,7 +33,7 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
             target = new Migration.Toolkit.KXO.Models.CmsSettingsKey();
             newInstance = true;
         }
-        else if (CmsSettingsKeyKey.From(source) != CmsSettingsKeyKey.From(target))
+        else if (CmsSettingsKeyKey.From(source.KeyName, _primaryKeyMappingContext.MapFromSource<K13M.CmsSite>(s=>s.SiteId, source.SiteId)) != CmsSettingsKeyKey.From(target.KeyName, target.SiteId))
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
@@ -84,23 +84,23 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
     }
 }
 
-public record CmsSettingsKeyKey(string KeyName, int? SiteId, Guid KeyGuid)
+public record CmsSettingsKeyKey(string KeyName, int? SiteId)//, Guid KeyGuid)
 {
     public override string ToString()
     {
-        return $"KN={KeyName.PadLeft(60,' ')} SID={SiteId} G={KeyGuid}";
+        return $"KN={KeyName.PadLeft(60,' ')} SID={SiteId}";
     }
 
     public static CmsSettingsKeyKey? From(Migration.Toolkit.KX13.Models.CmsSettingsKey? cmsSettingsKey) =>
-        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId, cmsSettingsKey.KeyGuid);
+        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId);//, cmsSettingsKey.KeyGuid);
 
     public static CmsSettingsKeyKey? From(Migration.Toolkit.KXO.Models.CmsSettingsKey? cmsSettingsKey) =>
-        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId, cmsSettingsKey.KeyGuid);
-    
-    public static CmsSettingsKeyKey From(string? keyName, int? siteId, Guid keyGuid)
+        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId);// , cmsSettingsKey.KeyGuid);
+
+    public static CmsSettingsKeyKey From(string? keyName, int? siteId) //, Guid keyGuid)
     {
         ArgumentNullException.ThrowIfNull(keyName);
-        
-        return new(keyName, siteId, keyGuid);
+
+        return new(keyName, siteId); //, keyGuid);
     }
 }

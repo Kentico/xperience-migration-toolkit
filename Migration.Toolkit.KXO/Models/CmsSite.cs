@@ -81,10 +81,8 @@ namespace Migration.Toolkit.KXO.Models
             StagingServers = new HashSet<StagingServer>();
             StagingTasks = new HashSet<StagingTask>();
             Classes = new HashSet<CmsClass>();
-            Containers = new HashSet<CmsWebPartContainer>();
             Cultures = new HashSet<CmsCulture>();
             Indices = new HashSet<CmsSearchIndex>();
-            RelationshipNames = new HashSet<CmsRelationshipName>();
             Resources = new HashSet<CmsResource>();
         }
 
@@ -250,16 +248,10 @@ namespace Migration.Toolkit.KXO.Models
         public virtual ICollection<CmsClass> Classes { get; set; }
         [ForeignKey("SiteId")]
         [InverseProperty("Sites")]
-        public virtual ICollection<CmsWebPartContainer> Containers { get; set; }
-        [ForeignKey("SiteId")]
-        [InverseProperty("Sites")]
         public virtual ICollection<CmsCulture> Cultures { get; set; }
         [ForeignKey("IndexSiteId")]
         [InverseProperty("IndexSites")]
         public virtual ICollection<CmsSearchIndex> Indices { get; set; }
-        [ForeignKey("SiteId")]
-        [InverseProperty("Sites")]
-        public virtual ICollection<CmsRelationshipName> RelationshipNames { get; set; }
         [ForeignKey("SiteId")]
         [InverseProperty("Sites")]
         public virtual ICollection<CmsResource> Resources { get; set; }

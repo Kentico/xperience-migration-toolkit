@@ -23,8 +23,6 @@ namespace Migration.Toolkit.KXO.Models
             CmsDocuments = new HashSet<CmsDocument>();
             CmsPageFormerUrlPaths = new HashSet<CmsPageFormerUrlPath>();
             CmsPageUrlPaths = new HashSet<CmsPageUrlPath>();
-            CmsRelationshipLeftNodes = new HashSet<CmsRelationship>();
-            CmsRelationshipRightNodes = new HashSet<CmsRelationship>();
             ComMultiBuyDiscountTrees = new HashSet<ComMultiBuyDiscountTree>();
             InverseNodeLinkedNode = new HashSet<CmsTree>();
             InverseNodeOriginalNode = new HashSet<CmsTree>();
@@ -100,10 +98,6 @@ namespace Migration.Toolkit.KXO.Models
         public virtual ICollection<CmsPageFormerUrlPath> CmsPageFormerUrlPaths { get; set; }
         [InverseProperty("PageUrlPathNode")]
         public virtual ICollection<CmsPageUrlPath> CmsPageUrlPaths { get; set; }
-        [InverseProperty("LeftNode")]
-        public virtual ICollection<CmsRelationship> CmsRelationshipLeftNodes { get; set; }
-        [InverseProperty("RightNode")]
-        public virtual ICollection<CmsRelationship> CmsRelationshipRightNodes { get; set; }
         [InverseProperty("Node")]
         public virtual ICollection<ComMultiBuyDiscountTree> ComMultiBuyDiscountTrees { get; set; }
         [InverseProperty("NodeLinkedNode")]

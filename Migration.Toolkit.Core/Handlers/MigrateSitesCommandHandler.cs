@@ -61,7 +61,6 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
 
             var mapped = _cmsSiteMapper.Map(kx13CmsSite, kxoCmsSite);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {

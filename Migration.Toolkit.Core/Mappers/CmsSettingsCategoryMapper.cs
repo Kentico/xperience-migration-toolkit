@@ -23,7 +23,7 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSettingsCategory>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSettingsCategory>().Log(_logger);
         }
 
         var newInstance = false;
@@ -61,7 +61,7 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
                 case { Success: false } result:
                 {
                     aggregatedResult.AddResult(result);
-                    return aggregatedResult;
+                    return aggregatedResult.Log(_logger);
                 }
             }
         }
@@ -82,7 +82,7 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
                 case { Success: false } result:
                 {
                     aggregatedResult.AddResult(result);
-                    return aggregatedResult;
+                    return aggregatedResult.Log(_logger);
                 }
             }
         }
@@ -98,6 +98,6 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
         target.CategoryIsGroup = source.CategoryIsGroup;
         target.CategoryIsCustom = source.CategoryIsCustom;
 
-        return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsSettingsCategory>(target, newInstance);
+        return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsSettingsCategory>(target, newInstance).Log(_logger);
     }
 }

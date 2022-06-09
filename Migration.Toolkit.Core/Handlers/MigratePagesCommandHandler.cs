@@ -172,7 +172,6 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
 
             var mapped = _treeMapper.Map(kx13CmsTree, kxoCmsTree);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {
@@ -260,7 +259,6 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
 
             var mapped = _aclMapper.Map(kx13CmsAcl, kxoCmsAcl);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {
@@ -328,7 +326,6 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
 
             var mapped = _pageUrlPathMapper.Map(kx13CmsPageUrlPath, kxoCmsPageUrlPaths);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {

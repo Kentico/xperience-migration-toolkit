@@ -20,7 +20,7 @@ public class CmsConsentArchiveMapper : IEntityMapper<KX13.Models.CmsConsentArchi
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsentArchive>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsentArchive>().Log(_logger);
         }
 
         var newInstance = false;
@@ -34,7 +34,7 @@ public class CmsConsentArchiveMapper : IEntityMapper<KX13.Models.CmsConsentArchi
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentArchive>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentArchive>().Log(_logger);
         }
 
         var consentId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsConsent>(r => r.ConsentId, source.ConsentArchiveConsentId);
@@ -54,6 +54,6 @@ public class CmsConsentArchiveMapper : IEntityMapper<KX13.Models.CmsConsentArchi
         target.ConsentArchiveConsentId = consentId.Value;
 
 
-        return new ModelMappingSuccess<KXO.Models.CmsConsentArchive>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsConsentArchive>(target, newInstance).Log(_logger);
     }
 }

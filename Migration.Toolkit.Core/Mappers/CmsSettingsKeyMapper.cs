@@ -23,7 +23,7 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSettingsKey>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSettingsKey>().Log(_logger);
         }
 
         var newInstance = false;
@@ -37,7 +37,7 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsSettingsKey>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsSettingsKey>().Log(_logger);
         }
 
         // map entity
@@ -74,13 +74,13 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
                 case { Success: false } result:
                 {
                     aggregatedResult.AddResult(result);
-                    return aggregatedResult;
+                    return aggregatedResult.Log(_logger);
                 }
             }
         }
 
         // return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsSettingsKey>(target, newInstance);
-        return aggregatedResult;
+        return aggregatedResult.Log(_logger);
     }
 }
 

@@ -27,7 +27,7 @@ public class CmsMediaFileMapper: IEntityMapper<KX13.Models.MediaFile, KXO.Models
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<KXO.Models.MediaFile>();
+            return new ModelMappingFailedSourceNotDefined<KXO.Models.MediaFile>().Log(_logger);
         }
 
         var newInstance = false;
@@ -41,7 +41,7 @@ public class CmsMediaFileMapper: IEntityMapper<KX13.Models.MediaFile, KXO.Models
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<KXO.Models.MediaFile>();
+            return new ModelMappingFailedKeyMismatch<KXO.Models.MediaFile>().Log(_logger);
         }
 
         // target.FileId = source.FileId;
@@ -104,6 +104,6 @@ public class CmsMediaFileMapper: IEntityMapper<KX13.Models.MediaFile, KXO.Models
         // // [InverseProperty("Library")]
         // // public virtual ICollection<MediaLibraryRolePermission> MediaLibraryRolePermissions { get; set; }
 
-        return new ModelMappingSuccess<KXO.Models.MediaFile>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.MediaFile>(target, newInstance).Log(_logger);
     }
 }

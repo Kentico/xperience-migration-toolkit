@@ -65,7 +65,6 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
             _migrationProtocol.FetchedTarget(kxoCmsResource);
 
             var mapped = _cmsResourceMapper.Map(kx13CmsResource, kxoCmsResource);
-            mapped.LogResult(_logger);
             _migrationProtocol.MappedTarget(mapped);
             
             switch (mapped)
@@ -213,7 +212,6 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
             }
 
             var mapped = _mapper.Map(kx13CmsSettingsKey, kxoCmsSettingsKey);
-            mapped.LogResult(_logger);
             _migrationProtocol.MappedTarget(mapped);
             
             switch (mapped)

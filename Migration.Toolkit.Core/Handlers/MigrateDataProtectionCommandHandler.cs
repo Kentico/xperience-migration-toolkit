@@ -78,7 +78,6 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
 
             var mapped = _consentMapper.Map(kx13Consent, kxoConsent);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {
@@ -147,7 +146,6 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
 
             var mapped = _consentArchiveMapper.Map(kx13ArchiveConsent, kxoConsentArchive);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {
@@ -221,7 +219,6 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
 
             var mapped = _consentAgreementMapper.Map(kx13ConsentAgreement, kxoConsentAgreement);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {

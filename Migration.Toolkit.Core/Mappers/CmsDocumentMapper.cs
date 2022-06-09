@@ -20,7 +20,7 @@ public class CmsDocumentMapper : IEntityMapper<KX13.Models.CmsDocument, KXO.Mode
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsDocument>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsDocument>().Log(_logger);
         }
 
         var newInstance = false;
@@ -34,7 +34,7 @@ public class CmsDocumentMapper : IEntityMapper<KX13.Models.CmsDocument, KXO.Mode
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsDocument>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsDocument>().Log(_logger);
         }
 
         // target.DocumentId = source.DocumentId;
@@ -94,6 +94,6 @@ public class CmsDocumentMapper : IEntityMapper<KX13.Models.CmsDocument, KXO.Mode
         // TODO tk: 2022-05-18 Check DEPS: Categories of type ICollection<CmsCategory>
         // TODO tk: 2022-05-18 Check DEPS: Tags of type ICollection<CmsTag>
 
-        return new ModelMappingSuccess<KXO.Models.CmsDocument>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsDocument>(target, newInstance).Log(_logger);
     }
 }

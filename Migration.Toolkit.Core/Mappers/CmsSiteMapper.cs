@@ -19,7 +19,7 @@ public class CmsSiteMapper: IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSit
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSite>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSite>().Log(_logger);
         }
 
         var newInstance = false;
@@ -205,6 +205,6 @@ public class CmsSiteMapper: IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSit
         // [InverseProperty("Sites")]
         // public virtual ICollection<CmsResource> Resources { get; set; }
         
-        return new ModelMappingSuccess<KXO.Models.CmsSite>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsSite>(target, newInstance).Log(_logger);
     }
 }

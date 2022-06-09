@@ -94,7 +94,6 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
             
             var mapped = _userMapper.Map(kx13User, kxoUser);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {
@@ -193,7 +192,6 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
 
             var mapped = _roleMapper.Map(kx13CmsRole, kxoCmsRole);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {

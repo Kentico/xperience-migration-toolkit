@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
+using Newtonsoft.Json;
 
 namespace Migration.Toolkit.Core;
 
 public static class LogExtensions
 {
-    public static void LogResult<T, TResult>(this IModelMappingResult<TResult> mappingResult, ILogger<T> logger)
+    public static IModelMappingResult<TResult> Log<T, TResult>(this IModelMappingResult<TResult> mappingResult, ILogger<T> logger)
     {
         switch (mappingResult)
         {
@@ -16,7 +17,7 @@ public static class LogExtensions
             }
             case { Success: true } result:
             {
-                logger.LogTrace($"Model mapped successfully");
+                logger.LogTrace("Model mapped successfully"); // TODO tk: 2022-06-09 item print
                 break;
             }
             // case ModelMappingFailed<TResult>(var message):
@@ -44,5 +45,7 @@ public static class LogExtensions
                 throw new ArgumentOutOfRangeException(nameof(mappingResult));
             }
         }
+
+        return mappingResult;
     }
 }

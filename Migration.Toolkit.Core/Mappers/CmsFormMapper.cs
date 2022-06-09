@@ -26,7 +26,7 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<KXO.Models.CmsForm>();
+            return new ModelMappingFailedSourceNotDefined<KXO.Models.CmsForm>().Log(_logger);
         }
 
         var newInstance = false;
@@ -40,7 +40,7 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<KXO.Models.CmsForm>();
+            return new ModelMappingFailedKeyMismatch<KXO.Models.CmsForm>().Log(_logger);
         }
 
         // target.FormId = source.FormId;
@@ -83,7 +83,7 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         // [InverseProperty("Forms")]
         // public virtual ICollection<CmsRole> Roles { get; set; }
 
-        return new ModelMappingSuccess<KXO.Models.CmsForm>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsForm>(target, newInstance).Log(_logger);
     }
 
     public IModelMappingResult<BizFormInfo> Map(KX13.Models.CmsForm? source, BizFormInfo? target)
@@ -91,7 +91,7 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<BizFormInfo>();
+            return new ModelMappingFailedSourceNotDefined<BizFormInfo>().Log(_logger);
         }
 
         var newInstance = false;
@@ -106,7 +106,7 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<BizFormInfo>();
+            return new ModelMappingFailedKeyMismatch<BizFormInfo>().Log(_logger);
         }
 
         // target.FormId = source.FormId;
@@ -148,6 +148,6 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         // [InverseProperty("Forms")]
         // public virtual ICollection<CmsRole> Roles { get; set; }
 
-        return new ModelMappingSuccess<BizFormInfo>(target, newInstance);
+        return new ModelMappingSuccess<BizFormInfo>(target, newInstance).Log(_logger);
     }
 }

@@ -23,7 +23,7 @@ public class CmsAclMapper : IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsAcl>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsAcl>().Log(_logger);
         }
 
         var newInstance = false;
@@ -37,7 +37,7 @@ public class CmsAclMapper : IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsAcl>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsAcl>().Log(_logger);
         }
 
         // target.Aclid = source.Aclid;
@@ -50,6 +50,6 @@ public class CmsAclMapper : IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
         // TODO tk: 2022-05-18 Check DEPS: CmsAclitems of type ICollection<CmsAclitem>
         // TODO tk: 2022-05-18 Check DEPS: CmsTrees of type ICollection<CmsTree>
 
-        return new ModelMappingSuccess<KXO.Models.CmsAcl>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsAcl>(target, newInstance).Log(_logger);
     }
 }

@@ -23,7 +23,7 @@ public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUse
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<KXO.Models.CmsUser>();
+            return new ModelMappingFailedSourceNotDefined<KXO.Models.CmsUser>().Log(_logger);
         }
 
         var newInstance = false;
@@ -37,7 +37,7 @@ public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUse
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<KXO.Models.CmsUser>();
+            return new ModelMappingFailedKeyMismatch<KXO.Models.CmsUser>().Log(_logger);
         }
 
         // do not try to insert pk
@@ -77,7 +77,7 @@ public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUse
             }
         }
 
-        return new ModelMappingSuccess<KXO.Models.CmsUser>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsUser>(target, newInstance).Log(_logger);
 
         // removed in kxo
         // target.MiddleName = source.MiddleName;

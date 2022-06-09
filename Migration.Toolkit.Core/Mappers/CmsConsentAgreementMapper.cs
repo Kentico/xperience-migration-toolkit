@@ -20,7 +20,7 @@ public class CmsConsentAgreementMapper : IEntityMapper<KX13.Models.CmsConsentAgr
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsentAgreement>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsentAgreement>().Log(_logger);
         }
 
         var newInstance = false;
@@ -34,7 +34,7 @@ public class CmsConsentAgreementMapper : IEntityMapper<KX13.Models.CmsConsentAgr
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentAgreement>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentAgreement>().Log(_logger);
         }
 
         // TODO ff: 2022-05-23: Expected OM Contacts sync first
@@ -65,6 +65,6 @@ public class CmsConsentAgreementMapper : IEntityMapper<KX13.Models.CmsConsentAgr
         target.ConsentAgreementContactId = 1;
         target.ConsentAgreementConsentId = consentId.Value;
 
-        return new ModelMappingSuccess<KXO.Models.CmsConsentAgreement>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsConsentAgreement>(target, newInstance).Log(_logger);
     }
 }

@@ -23,7 +23,7 @@ public class CmsRoleMapper : IEntityMapper<KX13.Models.CmsRole, KXO.Models.CmsRo
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsRole>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsRole>().Log(_logger);
         }
 
         var newInstance = false;
@@ -37,7 +37,7 @@ public class CmsRoleMapper : IEntityMapper<KX13.Models.CmsRole, KXO.Models.CmsRo
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsRole>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsRole>().Log(_logger);
         }
         
         // target.RoleId = source.RoleId;
@@ -73,6 +73,6 @@ public class CmsRoleMapper : IEntityMapper<KX13.Models.CmsRole, KXO.Models.CmsRo
         // [InverseProperty("Roles")]
         // public virtual ICollection<CmsPermission> Permissions { get; set; }
         
-        return new ModelMappingSuccess<KXO.Models.CmsRole>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsRole>(target, newInstance).Log(_logger);
     }
 }

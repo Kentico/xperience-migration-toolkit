@@ -30,7 +30,7 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsTree>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsTree>().Log(_logger);
         }
 
         var newInstance = false;
@@ -44,7 +44,7 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsTree>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsTree>().Log(_logger);
         }
         
         // target.NodeId = source.NodeId;
@@ -64,7 +64,7 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         {
             var targetCmsDocument = target.CmsDocuments.FirstOrDefault(x => x.DocumentGuid == sourceCmsDocument.DocumentGuid);
             var mapped = _documentMapper.Map(sourceCmsDocument, targetCmsDocument);
-            mapped.LogResult(_logger);
+            mapped.Log(_logger);
 
             if (mapped is { Success: true, NewInstance: true })
             {
@@ -87,7 +87,7 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
                 case { Success: false } result:
                 {
                     aggregatedResult.AddResult(result);
-                    return aggregatedResult;
+                    return aggregatedResult.Log(_logger);
                 }
             }
         }
@@ -128,6 +128,6 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         // TODO tk: 2022-05-18 Check DEPS: CmsRelationshipRightNodes of type ICollection<CmsRelationship>
         // TODO tk: 2022-05-18 Check DEPS: ComMultiBuyDiscountTrees of type ICollection<ComMultiBuyDiscountTree>
 
-        return new ModelMappingSuccess<KXO.Models.CmsTree>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsTree>(target, newInstance).Log(_logger);
     }
 }

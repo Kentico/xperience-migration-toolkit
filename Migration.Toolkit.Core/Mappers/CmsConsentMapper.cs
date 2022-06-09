@@ -17,7 +17,7 @@ public class CmsConsentMapper : IEntityMapper<KX13.Models.CmsConsent, KXO.Models
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsent>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsent>().Log(_logger);
         }
 
         var newInstance = false;
@@ -31,7 +31,7 @@ public class CmsConsentMapper : IEntityMapper<KX13.Models.CmsConsent, KXO.Models
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsent>();
+            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsent>().Log(_logger);
         }
 
         // do not try to insert pk
@@ -44,6 +44,6 @@ public class CmsConsentMapper : IEntityMapper<KX13.Models.CmsConsent, KXO.Models
         target.ConsentHash = source.ConsentHash;
         
        
-        return new ModelMappingSuccess<KXO.Models.CmsConsent>(target, newInstance);
+        return new ModelMappingSuccess<KXO.Models.CmsConsent>(target, newInstance).Log(_logger);
     }
 }

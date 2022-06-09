@@ -18,7 +18,7 @@ public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.Cms
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsResource>();
+            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsResource>().Log(_logger);
         }
 
         var newInstance = false;
@@ -52,6 +52,6 @@ public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.Cms
         target.ResourceInstallationState = source.ResourceInstallationState;
         target.ResourceInstalledVersion = source.ResourceInstalledVersion;
 
-        return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsResource>(target, newInstance);
+        return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsResource>(target, newInstance).Log(_logger);
     }
 }

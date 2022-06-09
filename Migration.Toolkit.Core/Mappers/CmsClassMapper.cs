@@ -26,7 +26,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<CmsClass>();
+            return new ModelMappingFailedSourceNotDefined<CmsClass>().Log(_logger);
         }
 
         var newInstance = false;
@@ -40,7 +40,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity Guid mismatch.");
-            return new ModelMappingFailedKeyMismatch<CmsClass>();
+            return new ModelMappingFailedKeyMismatch<CmsClass>().Log(_logger);
         }
         
         // target.ClassId = source.ClassId;
@@ -102,7 +102,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassInheritsFromClassId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.ClassInheritsFromClassId);
         target.ClassResourceId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsResource>(c => c.ResourceId, source.ClassResourceId);
 
-        return new ModelMappingSuccess<CmsClass>(target, newInstance);
+        return new ModelMappingSuccess<CmsClass>(target, newInstance).Log(_logger);
     }
 
     public IModelMappingResult<DataClassInfo> Map(KX13.Models.CmsClass? source, DataClassInfo? target)
@@ -110,7 +110,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         if (source is null)
         {
             _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<DataClassInfo>();
+            return new ModelMappingFailedSourceNotDefined<DataClassInfo>().Log(_logger);
         }
 
         var newInstance = false;
@@ -124,7 +124,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity Guid mismatch.");
-            return new ModelMappingFailedKeyMismatch<DataClassInfo>();
+            return new ModelMappingFailedKeyMismatch<DataClassInfo>().Log(_logger);
         }
         
         // target.ClassId = source.ClassId;
@@ -188,6 +188,6 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         // target.ClassSearchCreationDateColumn = source.ClassSearchCreationDateColumn;
         // target.ClassSearchSettings = source.ClassSearchSettings;
 
-        return new ModelMappingSuccess<DataClassInfo>(target, newInstance);
+        return new ModelMappingSuccess<DataClassInfo>(target, newInstance).Log(_logger);
     }
 }

@@ -96,7 +96,6 @@ public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCom
     {
         var mapped = _dataClassMapper.Map(kx13Class, kxoDataClass);
         _migrationProtocol.MappedTarget(mapped);
-        mapped.LogResult(_logger);
 
         switch (mapped)
         {
@@ -127,7 +126,6 @@ public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCom
     {
         var mapped = _mapper.Map(kx13CmsClassesDocumentType, kxoCmsClass);
         _migrationProtocol.MappedTarget(mapped);
-        mapped.LogResult(_logger);
 
         switch (mapped)
         {

@@ -106,7 +106,6 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
 
                 var mapped = _cmsFormMapper.Map(kx13CmsForm, kxoCmsForm);
                 _migrationProtocol.MappedTarget(mapped);
-                mapped.LogResult(_logger);
 
                 switch (mapped)
                 {
@@ -180,7 +179,6 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
     {
         var mapped = _dataClassMapper.Map(kx13Class, kxoDataClass);
         _migrationProtocol.MappedTarget(mapped);
-        mapped.LogResult(_logger);
 
         switch (mapped)
         {

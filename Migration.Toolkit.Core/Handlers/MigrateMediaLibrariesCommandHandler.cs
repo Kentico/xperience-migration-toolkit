@@ -73,7 +73,6 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
             
             var mapped = _mediaLibraryMapper.Map(kx13MediaLibrary, kxoCmsTree);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {
@@ -138,7 +137,6 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
 
             var mapped = _mediaFileMapper.Map(kx13MediaFile, kxoCmsAcl);
             _migrationProtocol.MappedTarget(mapped);
-            mapped.LogResult(_logger);
 
             switch (mapped)
             {

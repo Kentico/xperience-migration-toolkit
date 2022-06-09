@@ -12,7 +12,12 @@ public class DebugMigrationProtocol: IMigrationProtocol
     {
         _logger = logger;
     }
-    
+
+    public void NeedsManualAction<TData>(HandbookReference handbookRef, TData data)
+    {
+        _logger.LogDebug("NeedsManualAction<{dataType}>: {handBookRef} - {data}", typeof(TData).FullName, handbookRef, data);
+    }
+
     public void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target, IModelMappingResult<TTarget> mapped)
     {
         _logger.LogDebug("NeedsManualAction<{sourceType}, {targetType}>: {handBookRef} - Mapped:{mapped}", typeof(TSource).FullName, typeof(TTarget), handbookRef, mapped);

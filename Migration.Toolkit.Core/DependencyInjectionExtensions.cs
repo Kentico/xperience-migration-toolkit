@@ -9,6 +9,7 @@ using Migration.Toolkit.Core.Behaviors;
 using Migration.Toolkit.Core.CmsResource;
 using Migration.Toolkit.Core.CmsSettingsKey;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.Convertors;
 using Migration.Toolkit.Core.Handlers;
 using Migration.Toolkit.Core.Mappers;
 using Migration.Toolkit.Core.MigrationProtocol;
@@ -25,6 +26,7 @@ public static class DependencyInjectionExtensions
         // services.AddSingleton<IMigrationProtocol, NullMigrationProtocol>();
         services.AddScoped<IPrimaryKeyLocatorService, PrimaryKeyLocatorService>();
         services.AddTransient<BulkDataCopyService>();
+        services.AddTransient<FormInfoDefinitionConvertor>();
 
         services.AddSingleton(s => new TableReflectionService(s.GetRequiredService<ILogger<TableReflectionService>>()));
         

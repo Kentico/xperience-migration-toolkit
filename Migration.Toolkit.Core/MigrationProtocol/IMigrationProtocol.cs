@@ -5,6 +5,7 @@ namespace Migration.Toolkit.Core.MigrationProtocol;
 
 public interface IMigrationProtocol
 {
+    void NeedsManualAction<TData>(HandbookReference handbookRef, TData data);
     // TODO tk: 2022-05-20 whatNeedsToBeDoneOrWhatHappened will not be needed
     void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target, IModelMappingResult<TTarget> mapped);
     // TODO tk: 2022-05-20 whatNeedsToBeDoneOrWhatHappened will not be needed

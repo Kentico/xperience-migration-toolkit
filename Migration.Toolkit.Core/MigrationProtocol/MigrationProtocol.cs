@@ -6,7 +6,12 @@ namespace Migration.Toolkit.Core.MigrationProtocol;
 public class NullMigrationProtocol: IMigrationProtocol
 {
     // TODO tk: 2022-05-18 get configuration, protocol detail: All, Required
-    
+
+    public void NeedsManualAction<TData>(HandbookReference handbookRef, TData data)
+    {
+        
+    }
+
     public void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target, IModelMappingResult<TTarget> mapped)
     {
         // TODO tk: 2022-05-18 write to protocol that manual action needs to be done - HandbookReference is used to point into user handbook for further instructions

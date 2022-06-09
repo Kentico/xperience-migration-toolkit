@@ -14,6 +14,8 @@ public static class HandbookReferences
     public static HandbookReference CmsConsentAgreementSkip => new("CmsConsentAgreement_SkipPublicConsentAgreement");
     public static HandbookReference CmsTreeTreeRootSkip => new("CmsTree_TreeRootSkipped");
     public static HandbookReference CmsSettingsKeyExclusionListSkip => new("CmsSettingsKey_SkipExclusionList");
+
+    public static HandbookReference CreatePossiblyCustomControlNeedToBeMigrated(string controlName) => new("ClassFormDefinition_PossiblyCustomControlNeedsToBeCreated", controlName);
     
     #endregion
 

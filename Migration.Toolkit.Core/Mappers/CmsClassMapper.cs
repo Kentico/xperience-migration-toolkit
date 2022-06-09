@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.Convertors;
 using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
@@ -11,11 +12,13 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
 {
     private readonly ILogger<CmsClass> _logger;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
+    private readonly FormInfoDefinitionConvertor _formInfoDefinitionConvertor;
 
-    public CmsClassMapper(ILogger<CmsClass> logger, PrimaryKeyMappingContext primaryKeyMappingContext)
+    public CmsClassMapper(ILogger<CmsClass> logger, PrimaryKeyMappingContext primaryKeyMappingContext, FormInfoDefinitionConvertor formInfoDefinitionConvertor)
     {
         _logger = logger;
         _primaryKeyMappingContext = primaryKeyMappingContext;
+        _formInfoDefinitionConvertor = formInfoDefinitionConvertor;
     }
     
     public IModelMappingResult<CmsClass> Map(KX13.Models.CmsClass? source, CmsClass? target)
@@ -48,8 +51,8 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassUsesVersioning = source.ClassUsesVersioning;
         target.ClassIsDocumentType = source.ClassIsDocumentType;
         target.ClassIsCoupledClass = source.ClassIsCoupledClass;
-        target.ClassXmlSchema = source.ClassXmlSchema;
-        target.ClassFormDefinition = source.ClassFormDefinition;
+        target.ClassXmlSchema = _formInfoDefinitionConvertor.ConvertToKxo(source.ClassXmlSchema);
+        target.ClassFormDefinition = _formInfoDefinitionConvertor.ConvertToKxo(source.ClassFormDefinition);
         target.ClassNodeNameSource = source.ClassNodeNameSource;
         target.ClassTableName = source.ClassTableName;
         // target.ClassFormLayout = source.ClassFormLayout;
@@ -132,8 +135,8 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassUsesVersioning = source.ClassUsesVersioning;
         target.ClassIsDocumentType = source.ClassIsDocumentType;
         target.ClassIsCoupledClass = source.ClassIsCoupledClass;
-        target.ClassXmlSchema = source.ClassXmlSchema;
-        target.ClassFormDefinition = source.ClassFormDefinition;
+        target.ClassXmlSchema = _formInfoDefinitionConvertor.ConvertToKxo(source.ClassXmlSchema);
+        target.ClassFormDefinition = _formInfoDefinitionConvertor.ConvertToKxo(source.ClassFormDefinition);
         target.ClassNodeNameSource = source.ClassNodeNameSource;
         target.ClassTableName = source.ClassTableName;
         // TODO tk: 2022-06-07 check if convertible

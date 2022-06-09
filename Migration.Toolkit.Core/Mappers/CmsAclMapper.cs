@@ -4,7 +4,7 @@ using Migration.Toolkit.Core.Contexts;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsAclMapper: IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
+public class CmsAclMapper : IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
 {
     private readonly ILogger<CmsAclMapper> _logger;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
@@ -12,12 +12,12 @@ public class CmsAclMapper: IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
     public CmsAclMapper(
         ILogger<CmsAclMapper> logger,
         PrimaryKeyMappingContext primaryKeyMappingContext
-        )
+    )
     {
         _logger = logger;
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
-    
+
     public IModelMappingResult<KXO.Models.CmsAcl> Map(KX13.Models.CmsAcl? source, KXO.Models.CmsAcl? target)
     {
         if (source is null)
@@ -39,7 +39,7 @@ public class CmsAclMapper: IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>
             _logger.LogTrace("Assertion failed, entity key mismatch.");
             return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsAcl>();
         }
-        
+
         // target.Aclid = source.Aclid;
         target.AclinheritedAcls = source.AclinheritedAcls;
         target.Aclguid = source.Aclguid;

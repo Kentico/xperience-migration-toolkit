@@ -76,7 +76,8 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
         {
             _migrationProtocol.FetchedSource(kx13Class);
 
-            if (kx13Class.ClassConnectionString != _toolkitConfiguration.SourceConnectionString &&
+            if (kx13Class.ClassConnectionString?.ToLowerInvariant() != "cmsconnectionstring" &&
+                kx13Class.ClassConnectionString != _toolkitConfiguration.SourceConnectionString &&
                 string.IsNullOrWhiteSpace(kx13Class.ClassConnectionString))
             {
                 _migrationProtocol.Warning(HandbookReferences.CmsClassClassConnectionStringIsDifferent, kx13Class);

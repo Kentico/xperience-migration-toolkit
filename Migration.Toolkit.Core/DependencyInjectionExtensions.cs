@@ -88,6 +88,10 @@ public static class DependencyInjectionExtensions
         services.AddTransient<IEntityMapper<KX13.Models.CmsConsentAgreement, KXO.Models.CmsConsentAgreement>, CmsConsentAgreementMapper>();
         services.AddTransient<MigrateDataProtectionCommandHandler>();
 
+        // contact groups
+        services.AddTransient<IEntityMapper<KX13.Models.OmContactGroup, KXO.Models.OmContactGroup>, OmContactGroupMapper>();
+        services.AddTransient<MigrateContactGroupsCommand>();
+        
         // IPipelineBehavior 
         return services;
     }

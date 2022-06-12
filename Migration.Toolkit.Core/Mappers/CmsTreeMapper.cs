@@ -73,13 +73,27 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         }
         
         var aggregatedResult = new AggregatedResult<Migration.Toolkit.KXO.Models.CmsTree>(target, newInstance);
-        // _cmsPageUrlPathMapper
         foreach (var sourceCmsPageUrlPath in source.CmsPageUrlPaths)
         {
+            // x.PageUrlPathUrlPathHash == kx13CmsPageUrlPath.PageUrlPathUrlPathHash &&
+            // x.PageUrlPathCulture == kx13CmsPageUrlPath.PageUrlPathCulture &&
+            // x.PageUrlPathSiteId == sourceSiteId,
+            // var explicitIdMapping = _primaryKeyMappingContext.MapFromSource<K13M.CmsPageUrlPath>(p => p.PageUrlPathId, sourceCmsPageUrlPath.PageUrlPathId);
+            // if (explicitIdMapping is int pageUrlPathMapping)
+            // {
+            //     pageUrlPathMapping    
+            // }
+            
             var targetCmsUrlPath = target.CmsPageUrlPaths.FirstOrDefault(x => x.PageUrlPathGuid == sourceCmsPageUrlPath.PageUrlPathGuid);
             switch (_cmsPageUrlPathMapper.Map(sourceCmsPageUrlPath, targetCmsUrlPath))
             {
-                case { Success: true } result:
+                case { Success: true, NewInstance: true } result:
+                {
+                    // ok
+                    target.CmsPageUrlPaths.Add(result.Item);
+                    break;
+                }
+                case { Success: true, NewInstance: false }:
                 {
                     // ok
                     break;

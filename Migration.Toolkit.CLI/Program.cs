@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Configuration;
+using System.Globalization;
 using System.Reflection;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,8 @@ using Migration.Toolkit.Core.Services;
 using Migration.Toolkit.KX13;
 using Migration.Toolkit.KXO;
 using Migration.Toolkit.KXO.Api;
+using Serilog;
+using Serilog.Events;
 
 // https://docs.microsoft.com/en-us/dotnet/core/extensions/configuration
 
@@ -25,16 +28,19 @@ var config = new ConfigurationBuilder()
 var settings = config.GetRequiredSection("Settings").Get<ToolkitConfiguration>();
 
 var services = new ServiceCollection();
+
 services
     .AddLogging(builder =>
     {
         builder.AddConfiguration(config.GetSection("Logging"));
+        // builder.AddSerilog(dispose: true);
         builder.AddSimpleConsole(options =>
         {
             options.IncludeScopes = true;
             options.SingleLine = true;
             options.TimestampFormat = "hh:mm:ss.fff ";
         });
+        builder.AddFile(config.GetSection("Logging"));
     });
 
 services.UseKx13DbContext(settings);

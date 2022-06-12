@@ -199,9 +199,15 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
                 // TODO tk: 2022-06-01 protocol needs attention?
                 continue;
             }
+            else if(kxoCmsSettingsKey == null)
+            {
+                _logger.LogWarning("Setting with key '{key}' not exists in target database (creating new keys with tool is not currently supported).", kx13CmsSettingsKey.KeyName);
+                // TODO tk: 2022-06-01 protocol needs attention?
+                continue;
+            }
             else
             {
-                _migrationProtocol.FetchedTarget(kxoCmsSettingsKey);    
+                _migrationProtocol.FetchedTarget(kxoCmsSettingsKey);
             }
 
             if (entityConfiguration.ExcludeCodeNames.Contains(kx13CmsSettingsKey.KeyName))

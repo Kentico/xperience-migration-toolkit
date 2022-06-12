@@ -42,25 +42,31 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
 
         // map entity
         // source.KeyId = target.KeyId;
-        target.KeyName = source.KeyName;
-        target.KeyDisplayName = source.KeyDisplayName;
-        target.KeyDescription = source.KeyDescription;
+        
+        if (newInstance)
+        {
+            target.KeyName = source.KeyName;
+            target.KeyDisplayName = source.KeyDisplayName;
+            target.KeyDescription = source.KeyDescription;
+            target.KeyType = source.KeyType;
+            target.KeyGuid = source.KeyGuid;
+            target.KeyOrder = source.KeyOrder;
+            target.KeyDefaultValue = source.KeyDefaultValue;
+            target.KeyValidation = source.KeyValidation;
+            target.KeyEditingControlPath = source.KeyEditingControlPath;
+            target.KeyIsGlobal = source.KeyIsGlobal;
+            target.KeyIsCustom = source.KeyIsCustom;
+            target.KeyFormControlSettings = source.KeyFormControlSettings;
+            target.KeyExplanationText = source.KeyExplanationText;
+        }
+        
         target.KeyValue = source.KeyValue;
-        target.KeyType = source.KeyType;
+        
         // target.KeyCategoryId = source.KeyCategoryId; - mapped using EF
         target.SiteId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsSite>(s => s.SiteId, source.SiteId);
-        target.KeyGuid = source.KeyGuid;
         target.KeyLastModified = source.KeyLastModified;
-        target.KeyOrder = source.KeyOrder;
-        target.KeyDefaultValue = source.KeyDefaultValue;
-        target.KeyValidation = source.KeyValidation;
-        target.KeyEditingControlPath = source.KeyEditingControlPath;
-        target.KeyIsGlobal = source.KeyIsGlobal;
-        target.KeyIsCustom = source.KeyIsCustom;
         // target.KeyIsHidden = source.KeyIsHidden; - not mapped / internal
-        target.KeyFormControlSettings = source.KeyFormControlSettings;
-        target.KeyExplanationText = source.KeyExplanationText;
-
+        
         var aggregatedResult = new AggregatedResult<Migration.Toolkit.KXO.Models.CmsSettingsKey>(target, newInstance);
         if (source.KeyCategory != null)
         {

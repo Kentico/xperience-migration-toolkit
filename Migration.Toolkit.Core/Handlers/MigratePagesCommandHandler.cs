@@ -3,6 +3,7 @@ using System.Data;
 using System.Security.Cryptography.Xml;
 using System.Xml.Linq;
 using MediatR;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
@@ -79,6 +80,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
             .Select(x => new {x.ClassXmlSchema, x.ClassTableName, x.ClassId, x.ClassGuid})
             ;
 
+        // TODO tk: 2022-06-12 user FormInfo
         XNamespace nsSchema = "http://www.w3.org/2001/XMLSchema";
         XNamespace msSchema = "urn:schemas-microsoft-com:xml-msdata";
         var coupledDataToMigrate = classesToMigrate.AsEnumerable().Select(x =>
@@ -109,7 +111,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         {
             // TODO tk: 2022-06-01 command fatal
             _logger.LogWarning("Some coupled data synchronization was skipped.");
-            return new CommandFailureResult();
+            // return new CommandFailureResult();
         }
 
         foreach (var (tableName, classGuid, autoIncrementColumns) in coupledDataToMigrate)
@@ -141,6 +143,10 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
             // TODO tk: 2022-05-18  .Where(x=>x.IsPublished)
             ;
 
+        var pageUrlPathsByHash =
+            _kxoContext.CmsPageUrlPaths.Include(x => x.PageUrlPathNode)
+                .ToDictionary(x => new { x.PageUrlPathSiteId, x.PageUrlPathUrlPathHash, x.PageUrlPathCulture });
+        
         foreach (var kx13CmsTree in kx13CmsTrees)
         {
             _migrationProtocol.FetchedSource(kx13CmsTree);
@@ -178,6 +184,26 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                 case ModelMappingSuccess<KXO.Models.CmsTree>(var cmsTree, var newInstance):
                     ArgumentNullException.ThrowIfNull(cmsTree, nameof(cmsTree));
                     
+                    //check PageUrlPath constraint
+                    foreach (var newPageUrlPath in cmsTree.CmsPageUrlPaths)
+                    {
+                        if (pageUrlPathsByHash.TryGetValue(
+                                new
+                                {
+                                    newPageUrlPath.PageUrlPathSiteId, newPageUrlPath.PageUrlPathUrlPathHash,
+                                    newPageUrlPath.PageUrlPathCulture
+                                }, out var targetPath))
+                        {
+                            _logger.LogError("Target PageUrlPath already exists {targetUrlPathHash} for Site {site} and culture {culture}.", newPageUrlPath.PageUrlPathUrlPathHash, newPageUrlPath.PageUrlPathSiteId, newPageUrlPath.PageUrlPathCulture);
+                            continue;
+                            // if (targetPath.PageUrlPathNode.NodeGuid == newPageUrlPath.PageUrlPathNode.NodeGuid && targetPath.PageUrlPathUrlPath == newPageUrlPath.PageUrlPathUrlPath)
+                            // {
+                            //     _logger.LogInformation("PageUrlPath was matched by NodeGuid '{NodeGuid}' and PageUrlPathUrlPath '{PageUrlPathUrlPath}'",  newPageUrlPath.PageUrlPathNode.NodeGuid, newPageUrlPath.PageUrlPathUrlPath);
+                            // }
+                        }
+                    }
+                    
+                    
                     if (newInstance)
                     {
                         _kxoContext.CmsTrees.Add(cmsTree);
@@ -202,6 +228,28 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                         _logger.LogInformation(newInstance
                             ? $"CmsTree: {cmsTree.NodeName} with NodeGuid '{cmsTree.NodeGuid}' was inserted."
                             : $"CmsTree: {cmsTree.NodeName} with NodeGuid '{cmsTree.NodeGuid}' was updated.");
+                    }
+                    catch (DbUpdateException dbUpdateException) when (
+                        dbUpdateException.InnerException is SqlException sqlException &&
+                        sqlException.Message.Contains("Cannot insert duplicate key row in object") &&
+                        sqlException.Message.Contains("IX_CMS_PageUrlPath_PageUrlPathUrlPathHash_PageUrlPathCulture_PageUrlPathSiteID") &&
+                        sqlException.Message.Contains("CMS_PageUrlPath")
+                    )
+                    {
+                        //PageUrlPathUrlPathHash, PageUrlPathCulture, PageUrlPathSiteID
+                        await _kxoContext.DisposeAsync();
+                        // TODO tk: 2022-05-18 protocol - request manual migration
+                        _logger.LogError(sqlException, "Failed to migrate page url path, possibly due to duplicated PageUrlPathHash.");
+                        _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
+                    
+                        _migrationProtocol.NeedsManualAction(
+                            HandbookReferences.CmsUserUserNameConstraintBroken,
+                            $"Failed to migrate page. PageNodeGuid: {kx13CmsTree.NodeGuid}. Needs manual migration.",
+                            kx13CmsTree,
+                            cmsTree,
+                            mapped
+                        );
+                        continue;
                     }
                     catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
                     {

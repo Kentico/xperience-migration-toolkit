@@ -48,7 +48,7 @@ public class CmsPageUrlPathMapper : IEntityMapper<KX13.Models.CmsPageUrlPath, KX
         target.PageUrlPathUrlPathHash = source.PageUrlPathUrlPathHash;
         target.PageUrlPathLastModified = source.PageUrlPathLastModified;
 
-        target.PageUrlPathNodeId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsTree>(c => c.NodeId, source.PageUrlPathNodeId);
+        // target.PageUrlPathNodeId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsTree>(c => c.NodeId, source.PageUrlPathNodeId);
         target.PageUrlPathSiteId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.PageUrlPathSiteId);
 
         return new ModelMappingSuccess<KXO.Models.CmsPageUrlPath>(target, newInstance).Log(_logger);

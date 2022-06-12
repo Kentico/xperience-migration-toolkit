@@ -121,27 +121,27 @@ public class FormInfoDefinitionConvertor
             }
         }
 
-        foreach (var dataDefinitionItem in formInfo.ItemsList)
-        {
-            switch (dataDefinitionItem)
-            {
-                case IField field:
-                {
-                    
-                    break;
-                }
-                // case CMS.DataEngine.FieldInfo fieldInfo:
-                // {
-                //     fieldInfo.
-                //     break;
-                // }
-                default:
-                {
-                    // ConvertToKxo()
-                    break;
-                }
-            }
-        }
+        // foreach (var dataDefinitionItem in formInfo.ItemsList)
+        // {
+        //     switch (dataDefinitionItem)
+        //     {
+        //         case IField field:
+        //         {
+        //             
+        //             break;
+        //         }
+        //         // case CMS.DataEngine.FieldInfo fieldInfo:
+        //         // {
+        //         //     fieldInfo.
+        //         //     break;
+        //         // }
+        //         default:
+        //         {
+        //             // ConvertToKxo()
+        //             break;
+        //         }
+        //     }
+        // }
 
         return formInfo.GetXmlDefinition();
     }

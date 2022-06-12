@@ -36,6 +36,9 @@ public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.Cms
             // return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsResource>();
         }
 
+        // avoid updating resource
+        if(!newInstance) return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsResource>(target, newInstance).Log(_logger);
+        
         // map entity
         // target.ResourceId = source.ResourceId;
         target.ResourceDisplayName = source.ResourceDisplayName;

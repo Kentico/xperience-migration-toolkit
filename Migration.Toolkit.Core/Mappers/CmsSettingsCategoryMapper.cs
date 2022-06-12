@@ -43,25 +43,44 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
 
         // map entity
         // target.CategoryId = source.CategoryId;
-        target.CategoryDisplayName = source.CategoryDisplayName;
-        target.CategoryOrder = source.CategoryOrder;
-        target.CategoryName = source.CategoryName;
+
+        if (newInstance)
+        {
+            target.CategoryOrder = source.CategoryOrder;
+            target.CategoryName = source.CategoryName;
+            target.CategoryDisplayName = source.CategoryDisplayName;
+            target.CategoryIdpath = source.CategoryIdpath;
+            target.CategoryLevel = source.CategoryLevel;
+            target.CategoryChildCount = source.CategoryChildCount;
+            target.CategoryIconPath = source.CategoryIconPath;
+            target.CategoryIsGroup = source.CategoryIsGroup;
+            target.CategoryIsCustom = source.CategoryIsCustom;
+        }
         
         var aggregatedResult = new AggregatedResult<Migration.Toolkit.KXO.Models.CmsSettingsCategory>(target, newInstance);
 
         if (source.CategoryResource != null)
         {
-            switch (_cmsResourceMapper.Map(source.CategoryResource, target.CategoryResource))
+            if (target.CategoryResource != null)
             {
-                case { Success: true } result:
+                // skip if target is present
+                _logger.LogInformation("Skipping category resource '{resourceGuid}', already present in target instance.", target.CategoryResource.ResourceGuid);
+                _primaryKeyMappingContext.SetMapping<KX13.Models.CmsResource>(r => r.ResourceId, source.CategoryResourceId.Value, target.CategoryResourceId.Value);
+            }
+            else
+            {
+                switch (_cmsResourceMapper.Map(source.CategoryResource, target.CategoryResource))
                 {
-                    target.CategoryResource = result.Item;
-                    break;
-                }
-                case { Success: false } result:
-                {
-                    aggregatedResult.AddResult(result);
-                    return aggregatedResult.Log(_logger);
+                    case { Success: true } result:
+                    {
+                        target.CategoryResource = result.Item;
+                        break;
+                    }
+                    case { Success: false } result:
+                    {
+                        aggregatedResult.AddResult(result);
+                        return aggregatedResult.Log(_logger);
+                    }
                 }
             }
         }
@@ -90,13 +109,6 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
         {
             target.CategoryParentId = _primaryKeyMappingContext.MapFromSource<CmsCategory>(c => c.CategoryId, source.CategoryParentId);
         }
-        
-        target.CategoryIdpath = source.CategoryIdpath;
-        target.CategoryLevel = source.CategoryLevel;
-        target.CategoryChildCount = source.CategoryChildCount;
-        target.CategoryIconPath = source.CategoryIconPath;
-        target.CategoryIsGroup = source.CategoryIsGroup;
-        target.CategoryIsCustom = source.CategoryIsCustom;
 
         return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsSettingsCategory>(target, newInstance).Log(_logger);
     }

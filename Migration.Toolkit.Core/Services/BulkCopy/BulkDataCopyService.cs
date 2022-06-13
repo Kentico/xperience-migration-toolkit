@@ -54,13 +54,15 @@ public class BulkDataCopyService
 
     public void CopyTableToTable(BulkCopyRequest request)
     {
-        var (tableName, columnFilter, dataFilter, batchSize) = request;
+        var (tableName, columnFilter, dataFilter, batchSize, columns, valueInterceptor) = request;
         
         _logger.LogInformation("Copy of {tableName} started", tableName);
-        
-        var sourceColumns = GetSqlTableColumns(tableName, _configuration.SourceConnectionString)
-            .OrderBy(x => x.ordinalPosition)
-            .ToArray();
+
+        var sourceColumns = columns == null
+            ? GetSqlTableColumns(tableName, _configuration.SourceConnectionString)
+                .OrderBy(x => x.ordinalPosition)
+                .ToArray()
+            : columns.Select((c, idx) => (c, idx)).ToArray();
         
         using var sourceConnection = new SqlConnection(_configuration.SourceConnectionString);
         using var command = sourceConnection.CreateCommand();
@@ -70,10 +72,12 @@ public class BulkDataCopyService
         // TODO tk: 2022-05-31  sqlBulkCopy.EnableStreaming
         // TODO tk: 2022-05-31  sqlBulkCopy.BulkCopyTimeout
         
+        sqlBulkCopy.NotifyAfter = 5000;
         sqlBulkCopy.SqlRowsCopied += (sender, args) =>
         {
             _logger.LogTrace("Copy '{tableName}': Rows copied={rows}", tableName, args.RowsCopied);
         };
+        
         
         var selectQuery = BuildSelectQuery(tableName, sourceColumns).ToString();
         
@@ -90,8 +94,13 @@ public class BulkDataCopyService
         command.CommandType = CommandType.Text;
         sourceConnection.Open();
         using var reader = command.ExecuteReader();
-        var filteredReader = new FilteredDbDataReader(reader, dataFilter);
-        sqlBulkCopy.WriteToServer(filteredReader);
+        var filteredReader = new FilteredDbDataReader<SqlDataReader>(reader, dataFilter);
+        IDataReader readerPipeline = filteredReader;
+        if (valueInterceptor != null)
+        {
+            readerPipeline = new ValueInterceptingReader(readerPipeline, valueInterceptor, sourceColumns);
+        }
+        sqlBulkCopy.WriteToServer(readerPipeline);
         
         _logger.LogInformation("Copy of {tableName} finished! Total={total}, TotalCopied={totalCopied}", tableName, filteredReader.TotalItems, filteredReader.TotalNonFiltered);
     }

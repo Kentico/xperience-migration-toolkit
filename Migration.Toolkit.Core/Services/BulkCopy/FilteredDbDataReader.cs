@@ -1,14 +1,15 @@
+using System.Data;
 using System.Data.Common;
 
 namespace Migration.Toolkit.Core.Services.BulkCopy;
 
-public class FilteredDbDataReader: DataReaderProxyBase
+public class FilteredDbDataReader<TReader> : DataReaderProxyBase where TReader: IDataReader
 {
-    private readonly Func<DbDataReader, bool> _includePredicate;
+    private readonly Func<IDataReader, bool> _includePredicate;
     public int TotalItems { get; private set; } = 0;
     public int TotalNonFiltered { get; private set; } = 0;
 
-    public FilteredDbDataReader(DbDataReader innerReader, Func<DbDataReader, bool> includePredicate) : base(innerReader)
+    public FilteredDbDataReader(IDataReader innerReader, Func<IDataReader, bool> includePredicate) : base(innerReader)
     {
         _includePredicate = includePredicate;
     }

@@ -5,9 +5,9 @@ namespace Migration.Toolkit.Core.Services.BulkCopy;
 
 public class DataReaderProxyBase: IDataReader
 {
-    protected readonly DbDataReader _innerReader;
+    protected readonly IDataReader _innerReader;
 
-    public DataReaderProxyBase(DbDataReader innerReader)
+    public DataReaderProxyBase(IDataReader innerReader)
     {
         _innerReader = innerReader;
     }

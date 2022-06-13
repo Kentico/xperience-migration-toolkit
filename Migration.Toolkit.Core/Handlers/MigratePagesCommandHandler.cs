@@ -118,7 +118,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         {
             var lookup = alreadyExistingDocuments[classGuid];
             var bulkCopyRequest = new BulkCopyRequest(tableName, s => !autoIncrementColumns.Contains(s),
-                reader => !lookup.Contains(reader.GetInt32(autoIncrementColumns.Single())), 1500);
+                reader => !lookup.Contains(reader.GetInt32(reader.GetOrdinal(autoIncrementColumns.Single()))), 1500);
             if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(tableName))
             {
                 _logger.LogError("Data exists in target coupled data table '{tableName}' - cannot migrate.", tableName);

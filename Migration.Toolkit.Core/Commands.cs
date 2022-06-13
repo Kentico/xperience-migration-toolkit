@@ -13,15 +13,15 @@ public record MigrateContactGroupsCommand(): IRequest<GenericCommandResult>, ICo
     public static string Moniker => "contact-groups";
     public static string MonikerFriendly => "Contact groups";
     
-    public Type[] Dependencies => new[] { typeof(MigrateUsersCommand), typeof(MigrateSitesCommand) };
-}
+    public Type[] Dependencies => Type.EmptyTypes;
+ }
 
 public record MigrateContactManagementCommand(): IRequest<GenericCommandResult>, ICommand
 {
     public static string Moniker => "contact-management";
     public static string MonikerFriendly => "Contact management";
     
-    public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
+    public Type[] Dependencies => new[] {  typeof(MigrateUsersCommand), typeof(MigrateSitesCommand) };
 }
 
 public record MigrateDataProtectionCommand(int? BatchSize) : IRequest<GenericCommandResult>, ICommand
@@ -29,7 +29,7 @@ public record MigrateDataProtectionCommand(int? BatchSize) : IRequest<GenericCom
     public static string Moniker => "data-protection";
     public static string MonikerFriendly => "Data protection";
     
-    public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
+    public Type[] Dependencies => new[] { typeof(MigrateSitesCommand), typeof(MigrateContactManagementCommand) };
 }
 
 public record MigrateFormsCommand() : IRequest<GenericCommandResult>, ICommand

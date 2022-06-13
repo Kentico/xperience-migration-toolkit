@@ -60,9 +60,7 @@ public class CmsConsentAgreementMapper : IEntityMapper<KX13.Models.CmsConsentAgr
         target.ConsentAgreementRevoked = source.ConsentAgreementRevoked;
         target.ConsentAgreementConsentHash = source.ConsentAgreementConsentHash;
         target.ConsentAgreementTime = source.ConsentAgreementTime;
-        // TODO ff: 2022-05-23: Expected OM Contacts sync first
-        //target.ConsentAgreementContactId = contactId.Value;
-        target.ConsentAgreementContactId = 1;
+        target.ConsentAgreementContactId = _primaryKeyMappingContext.RequireMapFromSource<K13M.OmContact>(c => c.ContactId, source.ConsentAgreementContactId);
         target.ConsentAgreementConsentId = consentId.Value;
 
         return new ModelMappingSuccess<KXO.Models.CmsConsentAgreement>(target, newInstance).Log(_logger);

@@ -54,6 +54,39 @@ public class PrimaryKeyLocatorService : IPrimaryKeyLocatorService
                 targetId = kxoContext.CmsSites.Where(x => x.SiteGuid == kx13Guid).Select(x => x.SiteId).Single();
                 return true;
             }
+            
+            // target.ContactStateId = _primaryKeyMappingContext.MapFromSource<K13M.CmsState>(u => u.StateId, source.ContactStateId);
+            if (sourceType == typeof(KX13.Models.CmsState))
+            {
+                var kx13Guid = kx13Context.CmsStates.Where(c => c.StateId == sourceId).Select(x => x.StateGuid).Single();
+                targetId = kxoContext.CmsStates.Where(x => x.StateGuid == kx13Guid).Select(x => x.StateId).Single();
+                return true;
+            }
+            
+            // target.ContactCountryId = _primaryKeyMappingContext.MapFromSource<K13M.CmsCountry>(u => u.CountryId, source.ContactCountryId);
+            if (sourceType == typeof(KX13.Models.CmsCountry))
+            {
+                var kx13Guid = kx13Context.CmsCountries.Where(c => c.CountryId == sourceId).Select(x => x.CountryGuid).Single();
+                targetId = kxoContext.CmsCountries.Where(x => x.CountryGuid == kx13Guid).Select(x => x.CountryId).Single();
+                return true;
+            }
+            
+            // target.ContactStatusId = _primaryKeyMappingContext.MapFromSource<K13M.OmContactStatus>(u => u.ContactStatusId, source.ContactStatusId);
+            if (sourceType == typeof(KX13.Models.OmContactStatus))
+            {
+                var kx13Guid = kx13Context.OmContactStatuses.Where(c => c.ContactStatusId == sourceId).Select(x => x.ContactStatusName).Single();
+                targetId = kxoContext.OmContactStatuses.Where(x => x.ContactStatusName == kx13Guid).Select(x => x.ContactStatusId).Single();
+                return true;
+            }
+            
+            //target.ConsentAgreementContactId = _primaryKeyMappingContext.RequireMapFromSource<K13M.OmContact>(c => c.ContactId, source.ConsentAgreementContactId);
+            if (sourceType == typeof(KX13.Models.OmContact))
+            {
+                // TODO tk: 2022-06-13 might be good to optimize
+                var kx13Guid = kx13Context.OmContacts.Where(c => c.ContactStatusId == sourceId).Select(x => x.ContactGuid).Single();
+                targetId = kxoContext.OmContacts.Where(x => x.ContactGuid == kx13Guid).Select(x => x.ContactId).Single();
+                return true;
+            }
         }
         catch (InvalidOperationException ioex)
             // when(ioex.Message.Contains("SequenceContainsN"))

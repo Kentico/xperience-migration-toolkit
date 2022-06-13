@@ -12,7 +12,6 @@ using Migration.Toolkit.KXO.Context;
 
 namespace Migration.Toolkit.Core.Handlers;
 
-// MigrateContactGroupsCommand
 public class MigrateContactGroupsCommandHandler : IRequestHandler<MigrateContactGroupsCommand, GenericCommandResult>, IDisposable
 {
     private readonly ILogger<MigrateContactGroupsCommandHandler> _logger;

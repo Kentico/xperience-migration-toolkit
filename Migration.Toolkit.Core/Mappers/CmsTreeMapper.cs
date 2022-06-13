@@ -64,7 +64,6 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         {
             var targetCmsDocument = target.CmsDocuments.FirstOrDefault(x => x.DocumentGuid == sourceCmsDocument.DocumentGuid);
             var mapped = _documentMapper.Map(sourceCmsDocument, targetCmsDocument);
-            mapped.Log(_logger);
 
             if (mapped is { Success: true, NewInstance: true })
             {

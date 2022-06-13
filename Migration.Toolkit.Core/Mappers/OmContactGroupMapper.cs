@@ -4,8 +4,6 @@ using Migration.Toolkit.Core.Contexts;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-//IEntityMapper<KX13.Models.OmContactGroup, KXO.Models.OmContactGroup>
-
 public class OmContactGroupMapper: IEntityMapper<KX13.Models.OmContactGroup, KXO.Models.OmContactGroup>
 {
     private readonly ILogger<OmContactGroupMapper> _logger;

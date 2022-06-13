@@ -8,6 +8,22 @@ public interface ICommand
     Type[] Dependencies { get; }
 }
 
+public record MigrateSitesCommand(): IRequest<GenericCommandResult>, ICommand
+{
+    public static string Moniker => "sites";
+    public static string MonikerFriendly => "Sites";
+    
+    public Type[] Dependencies => new Type[] { };
+}
+
+public record MigrateUsersCommand(): IRequest<GenericCommandResult>, ICommand
+{
+    public static string Moniker => "users";
+    public static string MonikerFriendly => "Users";
+    
+    public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
+}
+
 public record MigrateContactGroupsCommand(): IRequest<GenericCommandResult>, ICommand
 {
     public static string Moniker => "contact-groups";
@@ -21,7 +37,7 @@ public record MigrateContactManagementCommand(): IRequest<GenericCommandResult>,
     public static string Moniker => "contact-management";
     public static string MonikerFriendly => "Contact management";
     
-    public Type[] Dependencies => new[] {  typeof(MigrateUsersCommand), typeof(MigrateSitesCommand) };
+    public Type[] Dependencies => new[] {  typeof(MigrateUsersCommand) };
 }
 
 public record MigrateDataProtectionCommand(int? BatchSize) : IRequest<GenericCommandResult>, ICommand
@@ -72,22 +88,6 @@ public record MigrateSettingKeysCommand() : IRequest<MigrateSettingsKeysResult>,
 {
     public static string Moniker => "settings-keys";
     public static string MonikerFriendly => "Settings keys";
-    
-    public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
-}
-
-public record MigrateSitesCommand(): IRequest<GenericCommandResult>, ICommand
-{
-    public static string Moniker => "sites";
-    public static string MonikerFriendly => "Sites";
-    
-    public Type[] Dependencies => new Type[] { };
-}
-
-public record MigrateUsersCommand(): IRequest<GenericCommandResult>, ICommand
-{
-    public static string Moniker => "users";
-    public static string MonikerFriendly => "Users";
     
     public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
 }

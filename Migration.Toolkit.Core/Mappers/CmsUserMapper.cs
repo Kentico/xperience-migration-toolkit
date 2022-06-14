@@ -59,7 +59,7 @@ public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUse
         // TODO tk: 2022-05-18 deduce info
         target.UserIsPendingRegistration = false;
         // TODO tk: 2022-05-18 deduce info
-        target.UserPasswordLastChanged = DateTime.Now;
+        target.UserPasswordLastChanged = null;
         // TODO tk: 2022-05-18 deduce info
         target.UserRegistrationLinkExpiration = DateTime.Now.AddDays(365);
         

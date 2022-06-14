@@ -18,7 +18,7 @@ public static class LogExtensions
             }
             case { Success: true } result:
             {
-                logger.LogTrace("Success - {model}", LogHelper.PrintKxoModelInfo(result.Item)); // TODO tk: 2022-06-09 item print
+                logger.LogTrace("Success - {model}", LogHelper.PrintKxoModelInfo(result.Item));
                 break;
             }
             // case ModelMappingFailed<TResult>(var message):

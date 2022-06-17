@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Reflection;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -12,8 +11,6 @@ using Migration.Toolkit.Core.Services;
 using Migration.Toolkit.KX13;
 using Migration.Toolkit.KXO;
 using Migration.Toolkit.KXO.Api;
-using Serilog;
-using Serilog.Events;
 
 // https://docs.microsoft.com/en-us/dotnet/core/extensions/configuration
 

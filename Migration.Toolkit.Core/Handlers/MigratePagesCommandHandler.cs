@@ -109,7 +109,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
 
         if (anyDataPresent)
         {
-            // TODO tk: 2022-06-01 command fatal
+            // TODO tk: 2022-06-01 command non-fatal
             _logger.LogWarning("Some coupled data synchronization was skipped.");
             // return new CommandFailureResult();
         }
@@ -194,7 +194,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                                     newPageUrlPath.PageUrlPathCulture
                                 }, out var targetPath))
                         {
-                            _logger.LogError("Target PageUrlPath already exists {targetUrlPathHash} for Site {site} and culture {culture}.", newPageUrlPath.PageUrlPathUrlPathHash, newPageUrlPath.PageUrlPathSiteId, newPageUrlPath.PageUrlPathCulture);
+                            _logger.LogError("Target PageUrlPath already exists {TargetUrlPathHash} for Site {Site} and culture {Culture}", newPageUrlPath.PageUrlPathUrlPathHash, newPageUrlPath.PageUrlPathSiteId, newPageUrlPath.PageUrlPathCulture);
                             continue;
                             // if (targetPath.PageUrlPathNode.NodeGuid == newPageUrlPath.PageUrlPathNode.NodeGuid && targetPath.PageUrlPathUrlPath == newPageUrlPath.PageUrlPathUrlPath)
                             // {
@@ -226,8 +226,8 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                         
                         _migrationProtocol.Success(kx13CmsTree, cmsTree, mapped);
                         _logger.LogInformation(newInstance
-                            ? $"CmsTree: {cmsTree.NodeName} with NodeGuid '{cmsTree.NodeGuid}' was inserted."
-                            : $"CmsTree: {cmsTree.NodeName} with NodeGuid '{cmsTree.NodeGuid}' was updated.");
+                            ? $"CmsTree: {cmsTree.NodeName} with NodeGuid '{cmsTree.NodeGuid}' was inserted"
+                            : $"CmsTree: {cmsTree.NodeName} with NodeGuid '{cmsTree.NodeGuid}' was updated");
                     }
                     catch (DbUpdateException dbUpdateException) when (
                         dbUpdateException.InnerException is SqlException sqlException &&
@@ -340,73 +340,6 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                         r => r.Aclid,
                         kx13CmsAcl.Aclid,
                         cmsAcl.Aclid
-                    );
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mapped));
-            }
-        }
-    }
-
-    // TODO tk: 2022-05-19 might be better to migrate after each cmsTree in case migration get interrupted
-    private async Task RequireMigratedCmsPageUrlPaths(CancellationToken cancellationToken, KX13Context kx13Context, List<int?> explicitSiteIdMapping)
-    {
-        var kx13CmsPageUrlPaths = kx13Context.CmsPageUrlPaths
-            .Where(x => explicitSiteIdMapping.Contains(x.PageUrlPathSiteId));
-
-        foreach (var kx13CmsPageUrlPath in kx13CmsPageUrlPaths)
-        {
-            _migrationProtocol.FetchedSource(kx13CmsPageUrlPath);
-
-            var sourceSiteId = _primaryKeyMappingContext.RequireMapFromSource<K13M.CmsSite>(s => s.SiteId, kx13CmsPageUrlPath.PageUrlPathSiteId);
-            
-            // PageUrlPathUrlPathHash, PageUrlPathCulture, PageUrlPathSiteID
-            var kxoCmsPageUrlPaths = await _kxoContext.CmsPageUrlPaths
-                .FirstOrDefaultAsync(x =>
-                        x.PageUrlPathGuid == kx13CmsPageUrlPath.PageUrlPathGuid,
-                        // x.PageUrlPathUrlPathHash == kx13CmsPageUrlPath.PageUrlPathUrlPathHash &&
-                        // x.PageUrlPathCulture == kx13CmsPageUrlPath.PageUrlPathCulture &&
-                        // x.PageUrlPathSiteId == sourceSiteId,
-                    cancellationToken: cancellationToken);
-
-            _migrationProtocol.FetchedTarget(kxoCmsPageUrlPaths);
-
-            var mapped = _pageUrlPathMapper.Map(kx13CmsPageUrlPath, kxoCmsPageUrlPaths);
-            _migrationProtocol.MappedTarget(mapped);
-
-            switch (mapped)
-            {
-                case ModelMappingSuccess<KXO.Models.CmsPageUrlPath>(var cmsPageUrlPath, var newInstance):
-                    ArgumentNullException.ThrowIfNull(cmsPageUrlPath, nameof(cmsPageUrlPath));
-
-                    if (newInstance)
-                    {
-                        _kxoContext.CmsPageUrlPaths.Add(cmsPageUrlPath);
-                    }
-                    else
-                    {
-                        _kxoContext.CmsPageUrlPaths.Update(cmsPageUrlPath);
-                    }
-
-                    try
-                    {
-                        await _kxoContext.SaveChangesAsync(cancellationToken);
-
-                        _migrationProtocol.Success(kx13CmsPageUrlPath, cmsPageUrlPath, mapped);
-                        _logger.LogInformation(newInstance
-                            ? $"CmsPageUrlPath: {cmsPageUrlPath.PageUrlPathUrlPath} with Guid {cmsPageUrlPath.PageUrlPathGuid} was inserted."
-                            : $"CmsPageUrlPath: {cmsPageUrlPath.PageUrlPathUrlPath} with Guid {cmsPageUrlPath.PageUrlPathGuid} was updated.");
-                    }
-                    catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
-                    {
-                        throw;
-                    }
-
-                    _primaryKeyMappingContext.SetMapping<KX13.Models.CmsPageUrlPath>(
-                        r => r.PageUrlPathId,
-                        kx13CmsPageUrlPath.PageUrlPathId,
-                        cmsPageUrlPath.PageUrlPathId
                     );
 
                     break;

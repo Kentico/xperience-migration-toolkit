@@ -42,6 +42,7 @@ public class CmsSiteMapper: IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSit
         target.SiteDisplayName = source.SiteDisplayName;
         target.SiteDescription = source.SiteDescription;
         target.SiteStatus = source.SiteStatus;
+        target.SiteDomainName = source.SitePresentationUrl;
         // target.SiteDomainName = source.SiteDomainName; // TODO tk: 2022-06-01 check
         target.SiteDefaultVisitorCulture = source.SiteDefaultVisitorCulture;
         // target.SiteGuid = source.SiteGuid; // TODO tk: 2022-05-26 do not rewrite, instead add siteguid to mapping

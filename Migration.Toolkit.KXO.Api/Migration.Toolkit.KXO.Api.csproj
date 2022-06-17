@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Kentico.Xperience.Libraries" Version="14.0.0-build-b128207" />
+      <ProjectReference Include="..\Migration.Toolkit.Common\Migration.Toolkit.Common.csproj" />      
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Migration.Toolkit.Common\Migration.Toolkit.Common.csproj" />      
+      <PackageReference Include="Kentico.Xperience.Core" Version="22.0.0-b130941" />
     </ItemGroup>
 
 </Project>

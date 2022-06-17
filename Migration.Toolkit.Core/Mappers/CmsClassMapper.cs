@@ -151,6 +151,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassIsProduct = source.ClassIsProduct.UseKenticoDefault();
         target.ClassIsCustomTable = source.ClassIsCustomTable;
         target.ClassShowColumns = source.ClassShowColumns;
+        // TODO tk: 2022-06-17 konvertovat - zahodit mappings na neexistující Custom fieldy v OM_Contact
         target.ClassContactMapping = source.ClassContactMapping;
         target.ClassContactOverwriteEnabled = source.ClassContactOverwriteEnabled.UseKenticoDefault();
         target.ClassConnectionString = source.ClassConnectionString;

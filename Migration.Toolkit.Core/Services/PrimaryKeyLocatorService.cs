@@ -83,7 +83,7 @@ public class PrimaryKeyLocatorService : IPrimaryKeyLocatorService
             if (sourceType == typeof(KX13.Models.OmContact))
             {
                 // TODO tk: 2022-06-13 might be good to optimize
-                var kx13Guid = kx13Context.OmContacts.Where(c => c.ContactStatusId == sourceId).Select(x => x.ContactGuid).Single();
+                var kx13Guid = kx13Context.OmContacts.Where(c => c.ContactId == sourceId).Select(x => x.ContactGuid).Single();
                 targetId = kxoContext.OmContacts.Where(x => x.ContactGuid == kx13Guid).Select(x => x.ContactId).Single();
                 return true;
             }

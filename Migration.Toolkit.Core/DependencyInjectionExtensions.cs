@@ -31,12 +31,8 @@ public static class DependencyInjectionExtensions
 
         services.AddScoped<PrimaryKeyMappingContext>();
 
-        services
-            .AddTransient<IDataEqualityComparer<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>,
-                CmsSettingsKeyComparer>();
-        services
-            .AddTransient<IEntityMapper<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>,
-                CmsSettingsKeyMapper>();
+        services.AddTransient<IDataEqualityComparer<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>, CmsSettingsKeyComparer>();
+        services.AddTransient<IEntityMapper<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>, CmsSettingsKeyMapper>();
 
         // forms
         services.AddTransient<IRequestHandler<MigrateFormsCommand, GenericCommandResult>, MigrateFormsCommandHandler>();

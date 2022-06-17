@@ -87,7 +87,7 @@ public class MigrateContactGroupsCommandHandler : IRequestHandler<MigrateContact
 
                         _migrationProtocol.Success(kx13omContactGroup, omContactGroup, mapped);
                         _logger.LogInformation(
-                            "OmContactGroup: {contactGroupName} with ContactGroupGuid '{contactGroupGuid}' was {operation}.",
+                            "OmContactGroup: {ContactGroupName} with ContactGroupGuid '{ContactGroupGuid}' was {Operation}",
                             omContactGroup.ContactGroupName, omContactGroup.ContactGroupGuid, newInstance ? "inserted" : "updated");
                     }
                     catch (Exception ex) // TODO tk: 2022-06-13 handle exceptions

@@ -14,7 +14,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Kentico.Xperience.Libraries" Version="14.0.0-build-b128207" />
       <PackageReference Include="MediatR" Version="10.0.1" />
       <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

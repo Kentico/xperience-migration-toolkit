@@ -30,7 +30,6 @@ services
     .AddLogging(builder =>
     {
         builder.AddConfiguration(config.GetSection("Logging"));
-        // builder.AddSerilog(dispose: true);
         builder.AddSimpleConsole(options =>
         {
             options.IncludeScopes = true;
@@ -45,21 +44,6 @@ services.UseKxoDbContext(settings);
 services.UseKxoApi(config.GetRequiredSection("Settings").GetRequiredSection("TargetKxoApiSettings"));
 services.AddSingleton(settings);
 services.UseToolkitCore();
-
-//
-// services.AddSingleton(new EntityConfigurations
-// {
-//     {"CMS_Site", new EntityConfiguration(Array.Empty<string>()) },
-//     {"CMS_SettingsKey", new EntityConfiguration(Array.Empty<string>())}
-// });
-
-// services.AddSingleton(new GlobalConfiguration
-// {
-//     SiteIdMapping = new()
-//     {
-//         { 1, 1 } // TODO tk: 2022-05-19 check by site GUID if site exists in target
-//     }
-// });
 
 await using var serviceProvider = services.BuildServiceProvider();
 using var scope = serviceProvider.CreateScope();

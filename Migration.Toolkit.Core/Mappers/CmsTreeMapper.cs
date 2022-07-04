@@ -58,7 +58,7 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
         target.NodeCustomData = source.NodeCustomData;
         target.NodeHasChildren = source.NodeHasChildren;
         target.NodeHasLinks = source.NodeHasLinks;
-        target.NodeIsAclowner = source.NodeIsAclowner;
+        // target.NodeIsAclowner = source.NodeIsAclowner;
         
         foreach (var sourceCmsDocument in source.CmsDocuments)
         {
@@ -107,7 +107,7 @@ public class CmsTreeMapper: IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTre
 
         // TODO tk: 2022-05-18 map foreign keys
         // target.NodeSkuid = source.NodeSkuid;
-        target.NodeAclid = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsAcl>(c => c.Aclid, source.NodeAclid);
+        // target.NodeAclid = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsAcl>(c => c.Aclid, source.NodeAclid);
         target.NodeOwner = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsUser>(c => c.UserId, source.NodeOwner);
         target.NodeClassId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.NodeClassId);
         target.NodeParentId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsTree>(tree => tree.NodeId, source.NodeParentId);

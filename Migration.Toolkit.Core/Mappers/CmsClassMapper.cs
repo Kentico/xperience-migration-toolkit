@@ -63,7 +63,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassNodeAliasSource = source.ClassNodeAliasSource;
         target.ClassLastModified = source.ClassLastModified;
         target.ClassGuid = source.ClassGuid;
-        target.ClassIsProduct = source.ClassIsProduct;
+        // target.ClassIsProduct = source.ClassIsProduct;
         target.ClassIsCustomTable = source.ClassIsCustomTable;
         target.ClassShowColumns = source.ClassShowColumns;
         // TODO tk: 2022-05-30  Cannot set info object, domain validation failed (Field name: ClassSearchIndexDataSource)
@@ -85,7 +85,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassContactMapping = source.ClassContactMapping;
         target.ClassContactOverwriteEnabled = source.ClassContactOverwriteEnabled;
         target.ClassConnectionString = source.ClassConnectionString;
-        target.ClassIsProductSection = source.ClassIsProductSection;
+        // target.ClassIsProductSection = source.ClassIsProductSection;
         // target.ClassFormLayoutType = source.ClassFormLayoutType;
         // target.ClassVersionGuid = source.ClassVersionGuid;
         target.ClassDefaultObjectType = source.ClassDefaultObjectType;
@@ -144,18 +144,18 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassShowAsSystemTable = source.ClassShowAsSystemTable.UseKenticoDefault();
         target.ClassUsePublishFromTo = source.ClassUsePublishFromTo.UseKenticoDefault();
         target.ClassShowTemplateSelection = source.ClassShowTemplateSelection.UseKenticoDefault();
-        target.ClassIsMenuItemType = source.ClassIsMenuItemType.UseKenticoDefault();
+        // target.ClassIsMenuItemType = source.ClassIsMenuItemType.UseKenticoDefault();
         target.ClassNodeAliasSource = source.ClassNodeAliasSource;
         target.ClassLastModified = source.ClassLastModified;
         target.ClassGUID = source.ClassGuid;
-        target.ClassIsProduct = source.ClassIsProduct.UseKenticoDefault();
+        // target.ClassIsProduct = source.ClassIsProduct.UseKenticoDefault();
         target.ClassIsCustomTable = source.ClassIsCustomTable;
         target.ClassShowColumns = source.ClassShowColumns;
         // TODO tk: 2022-06-17 konvertovat - zahodit mappings na neexistující Custom fieldy v OM_Contact
         target.ClassContactMapping = source.ClassContactMapping;
         target.ClassContactOverwriteEnabled = source.ClassContactOverwriteEnabled.UseKenticoDefault();
         target.ClassConnectionString = source.ClassConnectionString;
-        target.ClassIsProductSection = source.ClassIsProductSection.UseKenticoDefault();
+        // target.ClassIsProductSection = source.ClassIsProductSection.UseKenticoDefault();
         // TODO tk: 2022-06-07 check if convertible
         // target.ClassFormLayoutType = source.ClassFormLayoutType.AsEnum<LayoutTypeEnum>();
         // TODO tk: 2022-06-07 check if convertible
@@ -167,7 +167,7 @@ public class CmsClassMapper : IEntityMapper<KX13.Models.CmsClass, KXO.Models.Cms
         target.ClassIconClass = source.ClassIconClass;
         target.ClassURLPattern = source.ClassUrlpattern;
         target.ClassUsesPageBuilder = source.ClassUsesPageBuilder;
-        target.ClassIsNavigationItem = source.ClassIsNavigationItem;
+        // target.ClassIsNavigationItem = source.ClassIsNavigationItem;
         target.ClassHasURL = source.ClassHasUrl;
         target.ClassHasMetadata = source.ClassHasMetadata;
         

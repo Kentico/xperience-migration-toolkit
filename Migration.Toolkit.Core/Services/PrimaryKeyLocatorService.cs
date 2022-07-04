@@ -43,8 +43,8 @@ public class PrimaryKeyLocatorService : IPrimaryKeyLocatorService
 
             if (sourceType == typeof(KX13.Models.CmsUser))
             {
-                var kx13Guid = kx13Context.CmsUsers.Where(c => c.UserId == sourceId).Select(x => x.UserGuid).Single();
-                targetId = kxoContext.CmsUsers.Where(x => x.UserGuid == kx13Guid).Select(x => x.UserId).Single();
+                var kx13User = kx13Context.CmsUsers.Where(c => c.UserId == sourceId).Select(x => new {x.UserGuid, x.UserName}).Single();
+                targetId = kxoContext.CmsUsers.Where(x => x.UserGuid == kx13User.UserGuid || x.UserName == kx13User.UserName).Select(x => x.UserId).Single();
                 return true;
             }
 
@@ -85,6 +85,14 @@ public class PrimaryKeyLocatorService : IPrimaryKeyLocatorService
                 // TODO tk: 2022-06-13 might be good to optimize
                 var kx13Guid = kx13Context.OmContacts.Where(c => c.ContactId == sourceId).Select(x => x.ContactGuid).Single();
                 targetId = kxoContext.OmContacts.Where(x => x.ContactGuid == kx13Guid).Select(x => x.ContactId).Single();
+                return true;
+            }
+
+            if (sourceType == typeof(KX13.Models.CmsTree))
+            { 
+                // carefull - cms.root will have different guid
+                var kx13Guid = kx13Context.CmsTrees.Where(c => c.NodeId == sourceId).Select(x => x.NodeGuid).Single();
+                targetId = kxoContext.CmsTrees.Where(x => x.NodeGuid == kx13Guid).Select(x => x.NodeId).Single();
                 return true;
             }
         }

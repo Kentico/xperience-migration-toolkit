@@ -142,6 +142,9 @@ while (argsQ.TryDequeue(out var arg))
 {
     var cultureCode = "";
 
+    // TODO tk: 2022-06-23 siteId konfigurovatelné přes cmd argument
+    // TODO tk: 2022-06-23 ! konfigurovat site přes SiteName (ponechat aktuální přístup)
+    
     if (arg.IsIn("help", "h"))
     {
         PrintCommandDescriptions();

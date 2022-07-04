@@ -22,9 +22,6 @@ namespace Migration.Toolkit.KXO.Models
             CmsTrees = new HashSet<CmsTree>();
             CmsVersionHistories = new HashSet<CmsVersionHistory>();
             CmsWorkflowScopes = new HashSet<CmsWorkflowScope>();
-            ChildClasses = new HashSet<CmsClass>();
-            ParentClasses = new HashSet<CmsClass>();
-            Scopes = new HashSet<CmsDocumentTypeScope>();
             Sites = new HashSet<CmsSite>();
         }
 
@@ -47,17 +44,12 @@ namespace Migration.Toolkit.KXO.Models
         public bool? ClassShowAsSystemTable { get; set; }
         public bool? ClassUsePublishFromTo { get; set; }
         public bool? ClassShowTemplateSelection { get; set; }
-        [Column("ClassSKUMappings")]
-        public string? ClassSkumappings { get; set; }
         public bool? ClassIsMenuItemType { get; set; }
         [StringLength(100)]
         public string? ClassNodeAliasSource { get; set; }
         public DateTime ClassLastModified { get; set; }
         [Column("ClassGUID")]
         public Guid ClassGuid { get; set; }
-        [Column("ClassCreateSKU")]
-        public bool? ClassCreateSku { get; set; }
-        public bool? ClassIsProduct { get; set; }
         public bool ClassIsCustomTable { get; set; }
         [StringLength(1000)]
         public string? ClassShowColumns { get; set; }
@@ -73,19 +65,10 @@ namespace Migration.Toolkit.KXO.Models
         [Column("ClassInheritsFromClassID")]
         public int? ClassInheritsFromClassId { get; set; }
         public bool? ClassSearchEnabled { get; set; }
-        [Column("ClassSKUDefaultDepartmentName")]
-        [StringLength(200)]
-        public string? ClassSkudefaultDepartmentName { get; set; }
-        [Column("ClassSKUDefaultDepartmentID")]
-        public int? ClassSkudefaultDepartmentId { get; set; }
         public string? ClassContactMapping { get; set; }
         public bool? ClassContactOverwriteEnabled { get; set; }
-        [Column("ClassSKUDefaultProductType")]
-        [StringLength(50)]
-        public string? ClassSkudefaultProductType { get; set; }
         [StringLength(100)]
         public string? ClassConnectionString { get; set; }
-        public bool? ClassIsProductSection { get; set; }
         [StringLength(100)]
         public string? ClassDefaultObjectType { get; set; }
         public bool? ClassIsForm { get; set; }
@@ -128,15 +111,6 @@ namespace Migration.Toolkit.KXO.Models
         [InverseProperty("ScopeClass")]
         public virtual ICollection<CmsWorkflowScope> CmsWorkflowScopes { get; set; }
 
-        [ForeignKey("ParentClassId")]
-        [InverseProperty("ParentClasses")]
-        public virtual ICollection<CmsClass> ChildClasses { get; set; }
-        [ForeignKey("ChildClassId")]
-        [InverseProperty("ChildClasses")]
-        public virtual ICollection<CmsClass> ParentClasses { get; set; }
-        [ForeignKey("ClassId")]
-        [InverseProperty("Classes")]
-        public virtual ICollection<CmsDocumentTypeScope> Scopes { get; set; }
         [ForeignKey("ClassId")]
         [InverseProperty("Classes")]
         public virtual ICollection<CmsSite> Sites { get; set; }

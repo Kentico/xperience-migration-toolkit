@@ -14,7 +14,7 @@ using Migration.Toolkit.KXO.Context;
 
 namespace Migration.Toolkit.Core.Handlers;
 
-public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCommand, MigratePageTypesResult>
+public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCommand, MigratePageTypesResult>
 {
     private readonly ILogger<MigratePageTypesCommandHandler> _logger;
     private readonly IEntityMapper<CmsClass, KXO.Models.CmsClass> _mapper;
@@ -36,7 +36,7 @@ public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCom
         KxoClassFacade kxoClassFacade,
         IMigrationProtocol migrationProtocol,
         ToolkitConfiguration toolkitConfiguration
-        )
+    )
     {
         _logger = logger;
         _mapper = mapper;
@@ -54,16 +54,25 @@ public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCom
         var sw = Stopwatch.StartNew();
 
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
-
+        
+        var entityConfiguration = _toolkitConfiguration.EntityConfigurations.GetEntityConfiguration<KX13.Models.CmsClass>();
+        
         _logger.LogInformation("Selecting source CMS_Classes");
         var cmsClassesDocumentTypes = kx13Context.CmsClasses.Where(x => x.ClassIsDocumentType).OrderBy(x => x.ClassId).AsEnumerable();
         _logger.LogInformation("Selected source CMS_Classes, took: {took}", sw.Elapsed);
-        
+
         // TODO tk: 2022-06-01 kx13Class.Sites condition
-        
+
         foreach (var kx13Class in cmsClassesDocumentTypes)
         {
             _migrationProtocol.FetchedSource(kx13Class);
+
+            if (entityConfiguration.ExcludeCodeNames.Contains(kx13Class.ClassName, StringComparer.InvariantCultureIgnoreCase))
+            {
+                _migrationProtocol.Warning(HandbookReferences.EntityExplicitlyExcludedByCodeName(kx13Class.ClassName, "PageType"), kx13Class);
+                _logger.LogWarning("CmsClass: {kx13Class.ClassName} was skipped => it is explicitly excluded in configuration.", kx13Class.ClassName);
+                continue;    
+            }
             
             if (kx13Class.ClassName == "CMS.Root")
             {
@@ -72,21 +81,23 @@ public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCom
                 continue;
             }
 
-            if (kx13Class.ClassConnectionString?.ToLowerInvariant() != "cmsconnectionstring" &&
-                kx13Class.ClassConnectionString != _toolkitConfiguration.SourceConnectionString && 
-                string.IsNullOrWhiteSpace(kx13Class.ClassConnectionString))
-            {
-                _migrationProtocol.Warning(HandbookReferences.CmsClassClassConnectionStringIsDifferent, kx13Class);
-                _logger.LogWarning($"CmsClass: {kx13Class.ClassName} => ClassConnectionString is different from source connection string needs attention!");
-            }
-            
+            // nekontrolujeme
+            // if (kx13Class.ClassConnectionString?.ToLowerInvariant() != "cmsconnectionstring" &&
+            //     kx13Class.ClassConnectionString != _toolkitConfiguration.SourceConnectionString &&
+            //     string.IsNullOrWhiteSpace(kx13Class.ClassConnectionString))
+            // {
+            //     _migrationProtocol.Warning(HandbookReferences.CmsClassClassConnectionStringIsDifferent, kx13Class);
+            //     _logger.LogWarning(
+            //         $"CmsClass: {kx13Class.ClassName} => ClassConnectionString is different from source connection string needs attention!");
+            // }
+
             var kxoDataClass = _kxoClassFacade.GetClass(kx13Class.ClassGuid);
             _migrationProtocol.FetchedTarget(kxoDataClass);
-            
+
             SaveUsingKxoApi(kx13Class, kxoDataClass);
             // await SaveUsingEntityFramework(cancellationToken, kx13CmsClassesDocumentType, kxoCmsClass, kxoContext);
         }
-        
+
         _logger.LogInformation("Finished: {took}", sw.Elapsed);
 
         return new MigratePageTypesResult();
@@ -97,32 +108,40 @@ public class MigratePageTypesCommandHandler: IRequestHandler<MigratePageTypesCom
         var mapped = _dataClassMapper.Map(kx13Class, kxoDataClass);
         _migrationProtocol.MappedTarget(mapped);
 
-        switch (mapped)
+        try
         {
-            case ModelMappingSuccess<DataClassInfo>(var dataClassInfo, var newInstance):
-                ArgumentNullException.ThrowIfNull(dataClassInfo, nameof(dataClassInfo));
+            switch (mapped)
+            {
+                case ModelMappingSuccess<DataClassInfo>(var dataClassInfo, var newInstance):
+                    ArgumentNullException.ThrowIfNull(dataClassInfo, nameof(dataClassInfo));
 
-                _kxoClassFacade.SetClass(dataClassInfo);
+                    _kxoClassFacade.SetClass(dataClassInfo);
 
-                _migrationProtocol.Success(kx13Class, dataClassInfo, mapped);
+                    _migrationProtocol.Success(kx13Class, dataClassInfo, mapped);
 
-                _logger.LogInformation(newInstance
-                    ? $"CmsClass: {dataClassInfo.ClassName} was inserted."
-                    : $"CmsClass: {dataClassInfo.ClassName} was updated.");
+                    _logger.LogInformation(newInstance
+                        ? $"CmsClass: {dataClassInfo.ClassName} was inserted."
+                        : $"CmsClass: {dataClassInfo.ClassName} was updated.");
 
-                _primaryKeyMappingContext.SetMapping<KX13.Models.CmsClass>(
-                    r => r.ClassId,
-                    kx13Class.ClassId,
-                    dataClassInfo.ClassID
-                );
+                    _primaryKeyMappingContext.SetMapping<KX13.Models.CmsClass>(
+                        r => r.ClassId,
+                        kx13Class.ClassId,
+                        dataClassInfo.ClassID
+                    );
 
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(mapped));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mapped));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while saving page type {className}", kx13Class.ClassName);
         }
     }
 
-    private async Task SaveUsingEntityFramework(CancellationToken cancellationToken, CmsClass kx13CmsClassesDocumentType, KXO.Models.CmsClass? kxoCmsClass, KxoContext kxoContext)
+    private async Task SaveUsingEntityFramework(CancellationToken cancellationToken, CmsClass kx13CmsClassesDocumentType,
+        KXO.Models.CmsClass? kxoCmsClass, KxoContext kxoContext)
     {
         var mapped = _mapper.Map(kx13CmsClassesDocumentType, kxoCmsClass);
         _migrationProtocol.MappedTarget(mapped);

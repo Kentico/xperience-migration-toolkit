@@ -5,11 +5,9 @@ namespace Migration.Toolkit.Common.Helpers;
 
 public static class EnumerableHelper
 {
-    public static Aligner<TA, TB, TKey> CreateAligner<TA, TB, TKey>(IEnumerator<TA> eA, IEnumerator<TB> eB, IEnumerator<TKey> eK,
+    public static SimpleAligner<TA, TB, TKey> CreateAligner<TA, TB, TKey>(IEnumerable<TA> eA, IEnumerable<TB> eB, IEnumerable<TKey> eK,
         SimpleAligner<TA, TB, TKey>.SelectKey<TA> selectKeyA, SimpleAligner<TA, TB, TKey>.SelectKey<TB> selectKeyB, bool disposeEnumerators)
-        where TA : class where TB : class => new(eA, eB, eK, selectKeyA, selectKeyB, disposeEnumerators);
-
-
+        where TA : class where TB : class => SimpleAligner<TA, TB, TKey>.Create(eA.GetEnumerator(), eB.GetEnumerator(), eK.GetEnumerator(), selectKeyA, selectKeyB, disposeEnumerators);
 }
 
 public class Aligner<TA, TB, TKey>: IEnumerable<SimpleAlignResult<TA, TB, TKey>> where TA : class where TB : class {
@@ -75,7 +73,7 @@ public class SimpleAligner<TA, TB, TKey> : IEnumerator<SimpleAlignResult<TA, TB,
             _eK = eK;
             
             
-            this._streamWriter = new StreamWriter("/home/admin77/RiderProjects/Kensync/Output/pairing.txt");
+            // this._streamWriter = new StreamWriter("/home/admin77/RiderProjects/Kensync/Output/pairing.txt");
         }
 
         public static SimpleAligner<TA, TB, TKey> Create(
@@ -121,7 +119,7 @@ public class SimpleAligner<TA, TB, TKey> : IEnumerator<SimpleAlignResult<TA, TB,
                     Trace.WriteLine($"AB.Match: K={_eK.Current} => yield result");
                     Current = new SimpleAlignResultMatch<TA?, TB?, TKey>(_eA.Current, _eB.Current, _eK.Current);
                     
-                    _streamWriter.WriteLine($"MATCH      {_eK.Current}{keyA}{keyB}");
+                    _streamWriter?.WriteLine($"MATCH      {_eK.Current}{keyA}{keyB}");
                     
                     _hasA = _hasA && _eA.MoveNext();
                     _hasB = _hasB && _eB.MoveNext();
@@ -134,7 +132,7 @@ public class SimpleAligner<TA, TB, TKey> : IEnumerator<SimpleAlignResult<TA, TB,
                     Trace.WriteLine($"A .Match: K={_eK.Current} => yield result");
                     Current = new SimpleAlignResultOnlyA<TA?, TB?, TKey>(_eA.Current, _eK.Current);
                     
-                    _streamWriter.WriteLine($"MATCH-A    {_eK.Current}{keyA}{keyB}");
+                    _streamWriter?.WriteLine($"MATCH-A    {_eK.Current}{keyA}{keyB}");
                     
                     _hasA = _hasA && _eA.MoveNext();
                     Ordinal++;
@@ -146,7 +144,7 @@ public class SimpleAligner<TA, TB, TKey> : IEnumerator<SimpleAlignResult<TA, TB,
                     Trace.WriteLine($"B .Match: K={_eK.Current} => yield result");
                     Current = new SimpleAlignResultOnlyB<TA?, TB?, TKey>(_eB.Current, _eK.Current);
                     
-                    _streamWriter.WriteLine($"MATCH-B    {_eK.Current}{keyA}{keyB}");
+                    _streamWriter?.WriteLine($"MATCH-B    {_eK.Current}{keyA}{keyB}");
                     
                     _hasB = _hasB && _eB.MoveNext();
                     Ordinal++;
@@ -158,7 +156,7 @@ public class SimpleAligner<TA, TB, TKey> : IEnumerator<SimpleAlignResult<TA, TB,
                     Trace.WriteLine($"AB.MatchNot: K={_eK.Current} AK={keyA} BK={keyB}");
                     Current = new SimpleAlignFatalNoMatch<TA?, TB?, TKey>(_eA.Current, _eB.Current, _eK.Current, "AB.NOMATCH: possibly error / wrongly sorted, selected source enumerators.");
                     
-                    _streamWriter.WriteLine($"MATCH-NOPE {_eK.Current}{keyA}{keyB}");
+                    _streamWriter?.WriteLine($"MATCH-NOPE {_eK.Current}{keyA}{keyB}");
                     
                     Ordinal++;
                     return _hasK;

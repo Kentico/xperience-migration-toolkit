@@ -92,6 +92,14 @@ public record MigrateSettingKeysCommand() : IRequest<MigrateSettingsKeysResult>,
     public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
 }
 
+public record MigrateAttachmentsCommand() : IRequest<MigrateSettingsKeysResult>, ICommand
+{
+    public static string Moniker => "attachments";
+    public static string MonikerFriendly => "Attachments";
+    
+    public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
+}
+
 // public record MigrateWebFarmsCommand(): IRequest<GenericCommandResult>, ICommand
 // {
 //     public static string Moniker => "web-farms";

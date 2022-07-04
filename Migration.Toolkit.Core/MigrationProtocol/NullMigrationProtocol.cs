@@ -37,6 +37,11 @@ public class NullMigrationProtocol: IMigrationProtocol
         // TODO tk: 2022-05-19 cannot continue
     }
 
+    public void Error<T>(HandbookReference handbookRef, T? entity)
+    {
+        
+    }
+
     public void CommandRequest<TRequest, TResponse>(TRequest request) where TRequest : IRequest<TResponse>
     {
         

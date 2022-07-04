@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Migration.Toolkit.Core.MigrationProtocol;
 
 namespace Migration.Toolkit.Core.Abstractions;
 
@@ -30,6 +31,8 @@ public record AggregatedResult<TResult>(TResult? Item, bool NewInstance) : IMode
     }
 }
 
+public record MapperResult<TResult>(TResult? Item, bool NewInstance, bool Success, HandbookReference? HandbookReference);
+
 public abstract record ModelMappingResult<TResult>(TResult? Item, bool Success, string Message, bool NewInstance) : IModelMappingResult<TResult>;
 
 public record ModelMappingSuccess<TResult>(TResult? Result, bool NewInstance) : ModelMappingResult<TResult>(Result, true, null, NewInstance);
@@ -37,3 +40,4 @@ public record ModelMappingSuccess<TResult>(TResult? Result, bool NewInstance) : 
 public record ModelMappingFailed<TResult>(string Message) : ModelMappingResult<TResult>(default, false, Message, false);
 public record ModelMappingFailedKeyMismatch<TResult>() : ModelMappingResult<TResult>(default, false, $"Entity Guid mismatch, cannot map entity {typeof(TResult).FullName}", false);
 public record ModelMappingFailedSourceNotDefined<TResult>() : ModelMappingResult<TResult>(default, false, $"Source entity is not defined for target {typeof(TResult).FullName}", false);
+public record ModelMappingFailedMissingDependencyInTargetInstance<TResult>(string Name, object SourceId, HandbookReference Reference): ModelMappingResult<TResult>(default, false, $"Missing dependency in target instance for {typeof(TResult).FullName}", false);

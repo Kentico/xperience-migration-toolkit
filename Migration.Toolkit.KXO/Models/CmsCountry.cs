@@ -9,9 +9,6 @@ namespace Migration.Toolkit.KXO.Models
         public CmsCountry()
         {
             CmsStates = new HashSet<CmsState>();
-            ComAddresses = new HashSet<ComAddress>();
-            ComOrderAddresses = new HashSet<ComOrderAddress>();
-            ComTaxClassCountries = new HashSet<ComTaxClassCountry>();
             OmAccounts = new HashSet<OmAccount>();
             OmContacts = new HashSet<OmContact>();
         }
@@ -33,12 +30,6 @@ namespace Migration.Toolkit.KXO.Models
 
         [InverseProperty("Country")]
         public virtual ICollection<CmsState> CmsStates { get; set; }
-        [InverseProperty("AddressCountry")]
-        public virtual ICollection<ComAddress> ComAddresses { get; set; }
-        [InverseProperty("AddressCountry")]
-        public virtual ICollection<ComOrderAddress> ComOrderAddresses { get; set; }
-        [InverseProperty("Country")]
-        public virtual ICollection<ComTaxClassCountry> ComTaxClassCountries { get; set; }
         [InverseProperty("AccountCountry")]
         public virtual ICollection<OmAccount> OmAccounts { get; set; }
         [InverseProperty("ContactCountry")]

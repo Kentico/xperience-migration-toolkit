@@ -10,7 +10,6 @@ namespace Migration.Toolkit.KXO.Models
     {
         public CmsRole()
         {
-            CmsAclitems = new HashSet<CmsAclitem>();
             CmsUserRoles = new HashSet<CmsUserRole>();
             CmsWorkflowStepRoles = new HashSet<CmsWorkflowStepRole>();
             MediaLibraryRolePermissions = new HashSet<MediaLibraryRolePermission>();
@@ -37,8 +36,6 @@ namespace Migration.Toolkit.KXO.Models
         [ForeignKey("SiteId")]
         [InverseProperty("CmsRoles")]
         public virtual CmsSite? Site { get; set; }
-        [InverseProperty("Role")]
-        public virtual ICollection<CmsAclitem> CmsAclitems { get; set; }
         [InverseProperty("Role")]
         public virtual ICollection<CmsUserRole> CmsUserRoles { get; set; }
         [InverseProperty("Role")]

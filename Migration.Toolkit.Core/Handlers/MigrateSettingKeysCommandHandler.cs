@@ -108,6 +108,8 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
         // not needed right naw as category will be migrated when needed 
         // await RequireMigratedCmsSettingsCategories(kx13Context, cancellationToken);
 
+        // TODO tk: 2022-06-17 Přenášet jen ty které nesjsou IsHidden (cílová instnce)
+        
         _logger.LogInformation($"CmsSettingsKey synchronization starting");
         var cmsSettingsKeys = kx13Context.CmsSettingsKeys
                 .Include(sk => sk.KeyCategory.CategoryResource)

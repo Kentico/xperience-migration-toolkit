@@ -11,13 +11,6 @@ namespace Migration.Toolkit.KXO.Models
     [Index("TaskUserId", Name = "IX_CMS_ScheduledTask_TaskUserID")]
     public partial class CmsScheduledTask
     {
-        public CmsScheduledTask()
-        {
-            AnalyticsCampaigns = new HashSet<AnalyticsCampaign>();
-            NewsletterAbtests = new HashSet<NewsletterAbtest>();
-            NewsletterNewsletters = new HashSet<NewsletterNewsletter>();
-        }
-
         [Key]
         [Column("TaskID")]
         public int TaskId { get; set; }
@@ -72,11 +65,5 @@ namespace Migration.Toolkit.KXO.Models
         [ForeignKey("TaskUserId")]
         [InverseProperty("CmsScheduledTasks")]
         public virtual CmsUser? TaskUser { get; set; }
-        [InverseProperty("CampaignScheduledTask")]
-        public virtual ICollection<AnalyticsCampaign> AnalyticsCampaigns { get; set; }
-        [InverseProperty("TestWinnerScheduledTask")]
-        public virtual ICollection<NewsletterAbtest> NewsletterAbtests { get; set; }
-        [InverseProperty("NewsletterDynamicScheduledTask")]
-        public virtual ICollection<NewsletterNewsletter> NewsletterNewsletters { get; set; }
     }
 }

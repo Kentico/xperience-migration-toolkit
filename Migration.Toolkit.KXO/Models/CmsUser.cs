@@ -12,11 +12,8 @@ namespace Migration.Toolkit.KXO.Models
     {
         public CmsUser()
         {
-            CmsAclitemLastModifiedByUsers = new HashSet<CmsAclitem>();
-            CmsAclitemUsers = new HashSet<CmsAclitem>();
             CmsAutomationHistories = new HashSet<CmsAutomationHistory>();
             CmsAutomationStates = new HashSet<CmsAutomationState>();
-            CmsCategories = new HashSet<CmsCategory>();
             CmsDocumentDocumentCheckedOutByUsers = new HashSet<CmsDocument>();
             CmsDocumentDocumentCreatedByUsers = new HashSet<CmsDocument>();
             CmsDocumentDocumentModifiedByUsers = new HashSet<CmsDocument>();
@@ -28,7 +25,6 @@ namespace Migration.Toolkit.KXO.Models
             CmsObjectVersionHistoryVersionModifiedByUsers = new HashSet<CmsObjectVersionHistory>();
             CmsPersonalizations = new HashSet<CmsPersonalization>();
             CmsScheduledTasks = new HashSet<CmsScheduledTask>();
-            CmsTranslationSubmissions = new HashSet<CmsTranslationSubmission>();
             CmsTrees = new HashSet<CmsTree>();
             CmsUserCultures = new HashSet<CmsUserCulture>();
             CmsUserRoles = new HashSet<CmsUserRole>();
@@ -37,11 +33,6 @@ namespace Migration.Toolkit.KXO.Models
             CmsVersionHistoryVersionDeletedByUsers = new HashSet<CmsVersionHistory>();
             CmsWorkflowHistories = new HashSet<CmsWorkflowHistory>();
             CmsWorkflowStepUsers = new HashSet<CmsWorkflowStepUser>();
-            ComCustomers = new HashSet<ComCustomer>();
-            ComOrderStatusUsers = new HashSet<ComOrderStatusUser>();
-            ComOrders = new HashSet<ComOrder>();
-            ComShoppingCarts = new HashSet<ComShoppingCart>();
-            ComWishlists = new HashSet<ComWishlist>();
             ExportHistories = new HashSet<ExportHistory>();
             MediaFileFileCreatedByUsers = new HashSet<MediaFile>();
             MediaFileFileModifiedByUsers = new HashSet<MediaFile>();
@@ -81,16 +72,10 @@ namespace Migration.Toolkit.KXO.Models
         public virtual CmsUserMacroIdentity CmsUserMacroIdentity { get; set; } = null!;
         [InverseProperty("User")]
         public virtual StagingTaskGroupUser StagingTaskGroupUser { get; set; } = null!;
-        [InverseProperty("LastModifiedByUser")]
-        public virtual ICollection<CmsAclitem> CmsAclitemLastModifiedByUsers { get; set; }
-        [InverseProperty("User")]
-        public virtual ICollection<CmsAclitem> CmsAclitemUsers { get; set; }
         [InverseProperty("HistoryApprovedByUser")]
         public virtual ICollection<CmsAutomationHistory> CmsAutomationHistories { get; set; }
         [InverseProperty("StateUser")]
         public virtual ICollection<CmsAutomationState> CmsAutomationStates { get; set; }
-        [InverseProperty("CategoryUser")]
-        public virtual ICollection<CmsCategory> CmsCategories { get; set; }
         [InverseProperty("DocumentCheckedOutByUser")]
         public virtual ICollection<CmsDocument> CmsDocumentDocumentCheckedOutByUsers { get; set; }
         [InverseProperty("DocumentCreatedByUser")]
@@ -113,8 +98,6 @@ namespace Migration.Toolkit.KXO.Models
         public virtual ICollection<CmsPersonalization> CmsPersonalizations { get; set; }
         [InverseProperty("TaskUser")]
         public virtual ICollection<CmsScheduledTask> CmsScheduledTasks { get; set; }
-        [InverseProperty("SubmissionSubmittedByUser")]
-        public virtual ICollection<CmsTranslationSubmission> CmsTranslationSubmissions { get; set; }
         [InverseProperty("NodeOwnerNavigation")]
         public virtual ICollection<CmsTree> CmsTrees { get; set; }
         [InverseProperty("User")]
@@ -131,16 +114,6 @@ namespace Migration.Toolkit.KXO.Models
         public virtual ICollection<CmsWorkflowHistory> CmsWorkflowHistories { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<CmsWorkflowStepUser> CmsWorkflowStepUsers { get; set; }
-        [InverseProperty("CustomerUser")]
-        public virtual ICollection<ComCustomer> ComCustomers { get; set; }
-        [InverseProperty("ChangedByUser")]
-        public virtual ICollection<ComOrderStatusUser> ComOrderStatusUsers { get; set; }
-        [InverseProperty("OrderCreatedByUser")]
-        public virtual ICollection<ComOrder> ComOrders { get; set; }
-        [InverseProperty("ShoppingCartUser")]
-        public virtual ICollection<ComShoppingCart> ComShoppingCarts { get; set; }
-        [InverseProperty("User")]
-        public virtual ICollection<ComWishlist> ComWishlists { get; set; }
         [InverseProperty("ExportUser")]
         public virtual ICollection<ExportHistory> ExportHistories { get; set; }
         [InverseProperty("FileCreatedByUser")]

@@ -128,7 +128,7 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
                         await _kxoContext.DisposeAsync();
                         // TODO tk: 2022-05-18 protocol - request manual migration
                         _logger.LogError(
-                            "Failed to migrate user, possibly due to duplicated userName - user guid: {userGuid}. Use needs manual migration. Email: {email}",
+                            "Failed to migrate user, possibly due to duplicated userName - user guid: {userGuid}. Use needs manual migration. Email: {email} - it is recommended to fix source data before proceeding",
                             kx13User.UserGuid, kx13User.Email);
                         _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
 

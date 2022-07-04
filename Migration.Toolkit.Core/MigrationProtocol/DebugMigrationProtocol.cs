@@ -73,6 +73,11 @@ public class DebugMigrationProtocol: IMigrationProtocol
         
     }
 
+    public void Error<T>(HandbookReference handbookRef, T? entity)
+    {
+        _logger.LogDebug("Error: {handbookref}, entity: {entity}", handbookRef, entity);
+    }
+
     public void CommandRequest<TRequest, TResponse>(TRequest request) where TRequest : IRequest<TResponse>
     {
         _logger.LogDebug("CommandRequest {request}", request);

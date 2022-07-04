@@ -54,7 +54,13 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
 
         // TODO tk: 2022-06-13 check field length
         // _bulkDataCopyService.CheckIfDataExistsInTargetTable("OM_Contact");
-        
+
+        if (_bulkDataCopyService.CheckForTableColumnsDifferences("OM_Contact", out var differences))
+        {
+            // TODO tk: 2022-06-30 protocol & skip
+        }
+
+        // TODO tk: 2022-06-30 use some way to ensure hardcoded columns fail when DB changes (use nameof etc..)
         var bulkCopyRequest = new BulkCopyRequest("OM_Contact",
             s => s != "ContactID",
             reader => true, 150000,
@@ -71,6 +77,7 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
             {
                 if (columnName == "ContactCompanyName")
                 {
+                    // TODO tk: 2022-06-30 protocol truncation
                     return SqlDataTypeHelper.TruncateString(value, 100); // TODO tk: 2022-06-13 log truncation
                 }
 
@@ -78,6 +85,7 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
             }  
         );
         // TODO tk: 2022-06-13 also migrate status with contact
+        // TODO tk: 2022-06-30 migrate contact activities
         _logger.LogTrace("Bulk data copy request: {request}", bulkCopyRequest);
         _bulkDataCopyService.CopyTableToTable(bulkCopyRequest);
         return new GenericCommandResult();

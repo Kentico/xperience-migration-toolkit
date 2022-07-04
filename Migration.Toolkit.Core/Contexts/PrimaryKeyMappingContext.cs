@@ -50,7 +50,7 @@ public class PrimaryKeyMappingContext
         var fullKeyName = $"{typeof(T).FullName}.{keyNameSelector.GetMemberName()}.{sourceId}";
         if (sourceId == 0)
         {
-            throw new ArgumentException($"Cannot satisfy required mapping {fullKeyName} - source Id cannot be 0.");
+            throw new MappingFailureException(fullKeyName, $"Cannot satisfy required mapping {fullKeyName} - source Id cannot be 0.");
         }
 
         if (_mappings.TryGetValue(fullKeyName, out var resultId))
@@ -67,7 +67,35 @@ public class PrimaryKeyMappingContext
             return targetId;
         }
         
-        throw new KeyNotFoundException(fullKeyName);
+        throw new MappingFailureException(fullKeyName, "Target entity is missing");
+    }
+    
+    public bool TryRequireMapFromSource<T>(Expression<Func<T, object>> keyNameSelector, int sourceId, out int targetIdResult)
+    {
+        targetIdResult = -1;
+        var fullKeyName = $"{typeof(T).FullName}.{keyNameSelector.GetMemberName()}.{sourceId}";
+        if (sourceId == 0)
+        {
+            throw new MappingFailureException(fullKeyName, $"Cannot satisfy required mapping {fullKeyName} - source Id cannot be 0.");
+        }
+
+        if (_mappings.TryGetValue(fullKeyName, out var resultId))
+        {
+            _logger.LogTrace("{key} resolved as {value}", fullKeyName, resultId);
+            targetIdResult = resultId;
+            return true;
+        }
+        
+        _logger.LogTrace("TryLocate {key}", fullKeyName);
+        if(_primaryKeyLocatorService.TryLocate(keyNameSelector, sourceId, out var targetId))
+        {
+            SetMapping(keyNameSelector, sourceId, targetId); // cache id
+            _logger.LogTrace("{key} located as {value}", fullKeyName, resultId);
+            targetIdResult = resultId;
+            return true;
+        }
+
+        return false;
     }
     
     public int? MapFromSource<T>(Expression<Func<T, object>> keyNameSelector, int? sourceId)
@@ -100,9 +128,9 @@ public class PrimaryKeyMappingContext
             return targetId;
         }
 
-        throw new InvalidOperationException($"Mapping with key {fullKeyName} is not present!");
+        throw new MappingFailureException(fullKeyName, $"Target entity is missing");
     }
-    
+
     public int? MapFromSourceOrNull<T>(Expression<Func<T, object>> keyNameSelector, int? sourceId)
     {
         if (sourceId == null) return null;

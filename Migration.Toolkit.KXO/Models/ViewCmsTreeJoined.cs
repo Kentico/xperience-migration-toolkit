@@ -24,16 +24,12 @@ namespace Migration.Toolkit.KXO.Models
         [Column("NodeParentID")]
         public int? NodeParentId { get; set; }
         public int NodeLevel { get; set; }
-        [Column("NodeACLID")]
-        public int? NodeAclid { get; set; }
         [Column("NodeSiteID")]
         public int NodeSiteId { get; set; }
         [Column("NodeGUID")]
         public Guid NodeGuid { get; set; }
         public int? NodeOrder { get; set; }
         public bool? IsSecuredNode { get; set; }
-        [Column("NodeSKUID")]
-        public int? NodeSkuid { get; set; }
         [Column("NodeLinkedNodeID")]
         public int? NodeLinkedNodeId { get; set; }
         public int? NodeOwner { get; set; }
@@ -44,8 +40,6 @@ namespace Migration.Toolkit.KXO.Models
         public bool? NodeHasLinks { get; set; }
         [Column("NodeOriginalNodeID")]
         public int? NodeOriginalNodeId { get; set; }
-        [Column("NodeIsACLOwner")]
-        public bool NodeIsAclowner { get; set; }
         [Column("DocumentID")]
         public int DocumentId { get; set; }
         [StringLength(100)]
@@ -72,14 +66,8 @@ namespace Migration.Toolkit.KXO.Models
         public string DocumentCulture { get; set; } = null!;
         [Column("DocumentNodeID")]
         public int DocumentNodeId { get; set; }
-        public string? DocumentPageTitle { get; set; }
-        public string? DocumentPageKeyWords { get; set; }
-        public string? DocumentPageDescription { get; set; }
         public string? DocumentContent { get; set; }
         public string? DocumentCustomData { get; set; }
-        public string? DocumentTags { get; set; }
-        [Column("DocumentTagGroupID")]
-        public int? DocumentTagGroupId { get; set; }
         public DateTime? DocumentLastPublished { get; set; }
         public bool? DocumentSearchExcluded { get; set; }
         [StringLength(50)]
@@ -89,14 +77,6 @@ namespace Migration.Toolkit.KXO.Models
         public Guid? DocumentGuid { get; set; }
         [Column("DocumentWorkflowCycleGUID")]
         public Guid? DocumentWorkflowCycleGuid { get; set; }
-        public bool? DocumentIsWaitingForTranslation { get; set; }
-        [Column("DocumentSKUName")]
-        [StringLength(440)]
-        public string? DocumentSkuname { get; set; }
-        [Column("DocumentSKUDescription")]
-        public string? DocumentSkudescription { get; set; }
-        [Column("DocumentSKUShortDescription")]
-        public string? DocumentSkushortDescription { get; set; }
         [StringLength(450)]
         public string? DocumentWorkflowActionStatus { get; set; }
         public bool DocumentCanBePublished { get; set; }

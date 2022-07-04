@@ -19,7 +19,6 @@ namespace Migration.Toolkit.KXO.Models
             CmsDocumentDocumentCheckedOutVersionHistories = new HashSet<CmsDocument>();
             CmsDocumentDocumentPublishedVersionHistories = new HashSet<CmsDocument>();
             CmsWorkflowHistories = new HashSet<CmsWorkflowHistory>();
-            AttachmentHistories = new HashSet<CmsAttachmentHistory>();
         }
 
         [Key]
@@ -80,9 +79,5 @@ namespace Migration.Toolkit.KXO.Models
         public virtual ICollection<CmsDocument> CmsDocumentDocumentPublishedVersionHistories { get; set; }
         [InverseProperty("VersionHistory")]
         public virtual ICollection<CmsWorkflowHistory> CmsWorkflowHistories { get; set; }
-
-        [ForeignKey("VersionHistoryId")]
-        [InverseProperty("VersionHistories")]
-        public virtual ICollection<CmsAttachmentHistory> AttachmentHistories { get; set; }
     }
 }

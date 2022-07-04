@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Migration.Toolkit.KXO.Models
 {
     [Table("CMS_Tree")]
-    [Index("NodeAclid", Name = "IX_CMS_Tree_NodeACLID")]
     [Index("NodeAliasPath", Name = "IX_CMS_Tree_NodeAliasPath")]
     [Index("NodeClassId", Name = "IX_CMS_Tree_NodeClassID")]
     [Index("NodeLevel", Name = "IX_CMS_Tree_NodeLevel")]
@@ -14,7 +13,6 @@ namespace Migration.Toolkit.KXO.Models
     [Index("NodeOriginalNodeId", Name = "IX_CMS_Tree_NodeOriginalNodeID")]
     [Index("NodeOwner", Name = "IX_CMS_Tree_NodeOwner")]
     [Index("NodeParentId", "NodeAlias", "NodeName", Name = "IX_CMS_Tree_NodeParentID_NodeAlias_NodeName")]
-    [Index("NodeSkuid", Name = "IX_CMS_Tree_NodeSKUID")]
     [Index("NodeSiteId", "NodeGuid", Name = "IX_CMS_Tree_NodeSiteID_NodeGUID", IsUnique = true)]
     public partial class CmsTree
     {
@@ -23,7 +21,6 @@ namespace Migration.Toolkit.KXO.Models
             CmsDocuments = new HashSet<CmsDocument>();
             CmsPageFormerUrlPaths = new HashSet<CmsPageFormerUrlPath>();
             CmsPageUrlPaths = new HashSet<CmsPageUrlPath>();
-            ComMultiBuyDiscountTrees = new HashSet<ComMultiBuyDiscountTree>();
             InverseNodeLinkedNode = new HashSet<CmsTree>();
             InverseNodeOriginalNode = new HashSet<CmsTree>();
             InverseNodeParent = new HashSet<CmsTree>();
@@ -42,16 +39,12 @@ namespace Migration.Toolkit.KXO.Models
         [Column("NodeParentID")]
         public int? NodeParentId { get; set; }
         public int NodeLevel { get; set; }
-        [Column("NodeACLID")]
-        public int? NodeAclid { get; set; }
         [Column("NodeSiteID")]
         public int NodeSiteId { get; set; }
         [Column("NodeGUID")]
         public Guid NodeGuid { get; set; }
         public int? NodeOrder { get; set; }
         public bool? IsSecuredNode { get; set; }
-        [Column("NodeSKUID")]
-        public int? NodeSkuid { get; set; }
         [Column("NodeLinkedNodeID")]
         public int? NodeLinkedNodeId { get; set; }
         public int? NodeOwner { get; set; }
@@ -62,12 +55,7 @@ namespace Migration.Toolkit.KXO.Models
         public bool? NodeHasLinks { get; set; }
         [Column("NodeOriginalNodeID")]
         public int? NodeOriginalNodeId { get; set; }
-        [Column("NodeIsACLOwner")]
-        public bool NodeIsAclowner { get; set; }
 
-        [ForeignKey("NodeAclid")]
-        [InverseProperty("CmsTrees")]
-        public virtual CmsAcl? NodeAcl { get; set; }
         [ForeignKey("NodeClassId")]
         [InverseProperty("CmsTrees")]
         public virtual CmsClass NodeClass { get; set; } = null!;
@@ -89,17 +77,12 @@ namespace Migration.Toolkit.KXO.Models
         [ForeignKey("NodeSiteId")]
         [InverseProperty("CmsTreeNodeSites")]
         public virtual CmsSite NodeSite { get; set; } = null!;
-        [ForeignKey("NodeSkuid")]
-        [InverseProperty("CmsTrees")]
-        public virtual ComSku? NodeSku { get; set; }
         [InverseProperty("DocumentNode")]
         public virtual ICollection<CmsDocument> CmsDocuments { get; set; }
         [InverseProperty("PageFormerUrlPathNode")]
         public virtual ICollection<CmsPageFormerUrlPath> CmsPageFormerUrlPaths { get; set; }
         [InverseProperty("PageUrlPathNode")]
         public virtual ICollection<CmsPageUrlPath> CmsPageUrlPaths { get; set; }
-        [InverseProperty("Node")]
-        public virtual ICollection<ComMultiBuyDiscountTree> ComMultiBuyDiscountTrees { get; set; }
         [InverseProperty("NodeLinkedNode")]
         public virtual ICollection<CmsTree> InverseNodeLinkedNode { get; set; }
         [InverseProperty("NodeOriginalNode")]

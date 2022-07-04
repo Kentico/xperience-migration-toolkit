@@ -108,7 +108,7 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
                     )
                     {
                         await _kxoContext.DisposeAsync();
-                        _logger.LogError("Failed to migrate consent - consent guid: {consentGuid}. Use needs manual migration. Consent name: {consentName}", kx13Consent.ConsentGuid, kx13Consent.ConsentName);
+                        _logger.LogError("Failed to migrate consent - consent guid: {consentGuid}. Consent needs manual migration. Consent name: {consentName}", kx13Consent.ConsentGuid, kx13Consent.ConsentName);
                         _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
 
                         _migrationProtocol.NeedsManualAction(

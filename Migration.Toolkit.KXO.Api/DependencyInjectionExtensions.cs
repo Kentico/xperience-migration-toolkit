@@ -18,6 +18,7 @@ public static class DependencyInjectionExtensions
 
         services.AddSingleton<KxoClassFacade>();
         services.AddSingleton<KxoFormFacade>();
+        services.AddSingleton<KxoPageFacade>();
 
         return services;
     }

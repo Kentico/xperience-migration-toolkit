@@ -8,7 +8,6 @@ namespace Migration.Toolkit.KXO.Models
     {
         public OmContactGroup()
         {
-            NewsletterIssueContactGroups = new HashSet<NewsletterIssueContactGroup>();
             OmContactGroupMembers = new HashSet<OmContactGroupMember>();
         }
 
@@ -27,8 +26,6 @@ namespace Migration.Toolkit.KXO.Models
         public Guid? ContactGroupGuid { get; set; }
         public int? ContactGroupStatus { get; set; }
 
-        [InverseProperty("ContactGroup")]
-        public virtual ICollection<NewsletterIssueContactGroup> NewsletterIssueContactGroups { get; set; }
         [InverseProperty("ContactGroupMemberContactGroup")]
         public virtual ICollection<OmContactGroupMember> OmContactGroupMembers { get; set; }
     }

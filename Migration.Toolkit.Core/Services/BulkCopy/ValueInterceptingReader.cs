@@ -9,10 +9,10 @@ public class ValueInterceptingReader : DataReaderProxyBase
     private readonly Dictionary<int, string> _columnOrdinals;
 
     public ValueInterceptingReader(IDataReader innerReader, Func<int, string, object, object> valueInterceptor,
-        (string columnName, int columnOrdinal)[] columnOrdinals) : base(innerReader)
+        SqlColumn[] columnOrdinals) : base(innerReader)
     {
         _valueInterceptor = valueInterceptor;
-        _columnOrdinals = columnOrdinals.ToDictionary(x => x.columnOrdinal, x => x.columnName);
+        _columnOrdinals = columnOrdinals.ToDictionary(x => x.OrdinalPosition, x => x.ColumnName);
     }
 
     public override object GetValue(int i) => _valueInterceptor.Invoke(i, _columnOrdinals[i], base.GetValue(i));

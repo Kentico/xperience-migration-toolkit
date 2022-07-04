@@ -7,6 +7,8 @@ public class ToolkitConfiguration
     public string SourceConnectionString { get; set; }
     public string TargetConnectionString { get; set; }
     public EntityConfigurations EntityConfigurations { get; set; }
+    
+    public string TargetAttachmentMediaLibraryName { get; set; }
 
     public Dictionary<int?, int?> RequireSiteIdExplicitMapping<TEntityType>(Expression<Func<TEntityType, object>> keyNameSelector)
     {

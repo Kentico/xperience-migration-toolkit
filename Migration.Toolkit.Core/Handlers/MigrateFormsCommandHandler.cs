@@ -76,13 +76,14 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
         {
             _migrationProtocol.FetchedSource(kx13Class);
 
-            if (kx13Class.ClassConnectionString?.ToLowerInvariant() != "cmsconnectionstring" &&
-                kx13Class.ClassConnectionString != _toolkitConfiguration.SourceConnectionString &&
-                string.IsNullOrWhiteSpace(kx13Class.ClassConnectionString))
-            {
-                _migrationProtocol.Warning(HandbookReferences.CmsClassClassConnectionStringIsDifferent, kx13Class);
-                _logger.LogWarning($"CmsClass: {kx13Class.ClassName} => ClassConnectionString is different from source connection string needs attention!");
-            }
+            // nekontrolujeme
+            // if (kx13Class.ClassConnectionString?.ToLowerInvariant() != "cmsconnectionstring" &&
+            //     kx13Class.ClassConnectionString != _toolkitConfiguration.SourceConnectionString &&
+            //     string.IsNullOrWhiteSpace(kx13Class.ClassConnectionString))
+            // {
+            //     _migrationProtocol.Warning(HandbookReferences.CmsClassClassConnectionStringIsDifferent, kx13Class);
+            //     _logger.LogWarning($"CmsClass: {kx13Class.ClassName} => ClassConnectionString is different from source connection string needs attention!");
+            // }
 
             if (!kx13Class.CmsForms.Any(f => explicitSiteIdMapping.Contains(f.FormSiteId)))
             {

@@ -1,4 +1,5 @@
 using CMS.DataEngine;
+using CMS.DocumentEngine;
 using CMS.OnlineForms;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,15 +22,17 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection UseToolkitCore(this IServiceCollection services)
     {
-        services.AddSingleton<IMigrationProtocol, DebugMigrationProtocol>();
+        services.AddSingleton<IMigrationProtocol, MigrationProtocolInHtml>();
         // services.AddSingleton<IMigrationProtocol, NullMigrationProtocol>();
         services.AddScoped<IPrimaryKeyLocatorService, PrimaryKeyLocatorService>();
         services.AddTransient<BulkDataCopyService>();
+        services.AddTransient<CoupledDataService>();
         services.AddTransient<FormInfoDefinitionConvertor>();
 
         services.AddSingleton(s => new TableReflectionService(s.GetRequiredService<ILogger<TableReflectionService>>()));
 
         services.AddScoped<PrimaryKeyMappingContext>();
+        services.AddSingleton<PageMigrationContext>();
 
         services.AddTransient<IDataEqualityComparer<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>, CmsSettingsKeyComparer>();
         services.AddTransient<IEntityMapper<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>, CmsSettingsKeyMapper>();
@@ -63,6 +66,7 @@ public static class DependencyInjectionExtensions
 
         // pages
         services.AddTransient<MigratePagesCommand>();
+        services.AddTransient<IEntityMapper<KX13.Models.CmsTree, TreeNode>, TreeNodeMapper>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTree>, CmsTreeMapper>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsDocument, KXO.Models.CmsDocument>, CmsDocumentMapper>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>, CmsAclMapper>();

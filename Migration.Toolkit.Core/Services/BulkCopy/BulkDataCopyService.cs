@@ -1,11 +1,13 @@
 using System.Data;
-using System.Data.SqlClient;
 using System.Text;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
+using Migration.Toolkit.Common.Helpers;
 
 namespace Migration.Toolkit.Core.Services.BulkCopy;
+
+public record SqlColumn(string ColumnName, int OrdinalPosition);
 
 public class BulkDataCopyService
 {
@@ -14,10 +16,12 @@ public class BulkDataCopyService
 
     public BulkDataCopyService(ToolkitConfiguration configuration, ILogger<BulkDataCopyService> logger)
     {
-        _configuration = configuration;
+        this._configuration = configuration;
         this._logger = logger;
     }
 
+    
+    
     // use in case fast object to table insertion is needed
     // // TODO tk: 2022-05-31 remove or use and fully implement
     // public void Copy<TSource>(IEnumerable<TSource> sourceData, string destinationTableName, Func<string, bool> columnNameFilter) where TSource: class
@@ -52,6 +56,42 @@ public class BulkDataCopyService
         return ((int)command.ExecuteScalar()) > 0;
     }
 
+    public bool CheckForTableColumnsDifferences(string tableName, out List<(string sourceColumn, string targetColumn)> columnsWithFailedCheck)
+    {
+        var anyFailedColumnCheck = false;
+        var sourceTableColumns = GetSqlTableColumns(tableName, _configuration.SourceConnectionString)
+            .Select(x => x.ColumnName).OrderBy(x => x);
+        var targetTableColumns = GetSqlTableColumns(tableName, _configuration.TargetConnectionString)
+            .Select(x => x.ColumnName).OrderBy(x => x);
+
+        var aligner = EnumerableHelper.CreateAligner(
+            sourceTableColumns,
+            targetTableColumns,
+            sourceTableColumns.Union(targetTableColumns).OrderBy(x => x),
+            a => a,
+            b => b,
+            false
+        );
+
+        columnsWithFailedCheck = new List<(string sourceColumn, string targetColumn)>();
+        while (aligner.MoveNext())
+        {
+            switch (aligner.Current)
+            {
+                case SimpleAlignResultMatch<string, string, string> result:
+                    _logger.LogDebug("Table {table} pairing source({sourceColumnName}) <> target({targetColumnName}) success", tableName, result?.A, result?.B);
+                    break;
+                case { } result:
+                    columnsWithFailedCheck.Add((result.A, result.B));
+                    _logger.LogError("Table {table} pairing source({sourceColumnName}) <> target({targetColumnName}) has failed", tableName, result?.A, result?.B);
+                    anyFailedColumnCheck = true;
+                    break;
+            }
+        }
+
+        return anyFailedColumnCheck;
+    }
+    
     public void CopyTableToTable(BulkCopyRequest request)
     {
         var (tableName, columnFilter, dataFilter, batchSize, columns, valueInterceptor) = request;
@@ -60,9 +100,9 @@ public class BulkDataCopyService
 
         var sourceColumns = columns == null
             ? GetSqlTableColumns(tableName, _configuration.SourceConnectionString)
-                .OrderBy(x => x.ordinalPosition)
+                .OrderBy(x => x.OrdinalPosition)
                 .ToArray()
-            : columns.Select((c, idx) => (c, idx)).ToArray();
+            : columns.Select((c, idx) => new SqlColumn(c, idx)).ToArray();
         
         using var sourceConnection = new SqlConnection(_configuration.SourceConnectionString);
         using var command = sourceConnection.CreateCommand();
@@ -105,7 +145,7 @@ public class BulkDataCopyService
         _logger.LogInformation("Copy of {tableName} finished! Total={total}, TotalCopied={totalCopied}", tableName, filteredReader.TotalItems, filteredReader.TotalNonFiltered);
     }
 
-    private static StringBuilder BuildSelectQuery(string tableName, (string columnName, int ordinalPosition)[] sourceColumns)
+    private static StringBuilder BuildSelectQuery(string tableName, SqlColumn[] sourceColumns)
     {
         StringBuilder selectBuilder = new StringBuilder();
         selectBuilder.Append("SELECT ");
@@ -123,7 +163,8 @@ public class BulkDataCopyService
         return selectBuilder;
     }
 
-    public IEnumerable<(string columnName, int ordinalPosition)> GetSqlTableColumns(string tableName, string connectionString)
+    // TODO tk: 2022-06-30 assert column type is compatible
+    public IEnumerable<SqlColumn> GetSqlTableColumns(string tableName, string connectionString)
     {
         using var sourceConnection = new SqlConnection(connectionString);
         using var cmd = sourceConnection.CreateCommand();
@@ -138,7 +179,7 @@ public class BulkDataCopyService
         while (reader.Read())
         {
             // TODO tk: 2022-05-31 IS_NULLABLE, DATA_TYPE, ... check column compatibility
-            yield return (reader.GetString("COLUMN_NAME"), reader.GetInt32("ORDINAL_POSITION"));
+            yield return new(reader.GetString("COLUMN_NAME"), reader.GetInt32("ORDINAL_POSITION"));
         }
     }
 }

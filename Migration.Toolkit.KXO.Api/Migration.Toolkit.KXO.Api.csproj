@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Kentico.Xperience.Core" Version="22.0.0-b130941" />
+      <PackageReference Include="Kentico.Xperience.Core" Version="22.0.0-b135454" />
     </ItemGroup>
 
 </Project>

@@ -1,68 +1,48 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsConsentAgreementMapper : IEntityMapper<KX13.Models.CmsConsentAgreement, KXO.Models.CmsConsentAgreement>
+public class CmsConsentAgreementMapper : EntityMapperBase<KX13.Models.CmsConsentAgreement, KXO.Models.CmsConsentAgreement>
 {
-    private readonly ILogger<CmsConsentAgreementMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
-
-    public CmsConsentAgreementMapper(ILogger<CmsConsentAgreementMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext)
+    public CmsConsentAgreementMapper(ILogger<CmsConsentAgreementMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext, IMigrationProtocol protocol): base(logger, primaryKeyMappingContext, protocol)
     {
-        _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
     }
 
-    public IModelMappingResult<KXO.Models.CmsConsentAgreement> Map(KX13.Models.CmsConsentAgreement? source, KXO.Models.CmsConsentAgreement? target)
+    protected override CmsConsentAgreement? CreateNewInstance(KX13.Models.CmsConsentAgreement source, MappingHelper mappingHelper,
+        AddFailure addFailure) => new();
+
+    protected override CmsConsentAgreement MapInternal(KX13.Models.CmsConsentAgreement source, CmsConsentAgreement target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
     {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsentAgreement>().Log(_logger);
-        }
-
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new Migration.Toolkit.KXO.Models.CmsConsentAgreement();
-            newInstance = true;
-        }
-        else if (source.ConsentAgreementGuid != target.ConsentAgreementGuid)
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentAgreement>().Log(_logger);
-        }
-
-        // TODO ff: 2022-05-23: Expected OM Contacts sync first
-        //var contactId = _primaryKeyMappingContext.MapFromSourceNonRequired<KX13.Models.OmContact>(r => r.ContactId, source.ConsentAgreementContactId);
-
-        //if (!contactId.HasValue)
-        //{
-        //    _logger.LogTrace("Assertion failed, Contact not found.");
-        //    return new ModelMappingFailed<Migration.Toolkit.KXO.Models.CmsConsentAgreement>($"Contact: {source.ConsentAgreementContactId} for entity not found");
-        //}
-
-        var consentId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsConsent>(r => r.ConsentId, source.ConsentAgreementConsentId);
-
-        if (!consentId.HasValue)
-        {
-            _logger.LogTrace("Assertion failed, Consent not found.");
-            return new ModelMappingFailed<Migration.Toolkit.KXO.Models.CmsConsentAgreement>($"Consent: {source.ConsentAgreementConsentId} for entity not found");
-        }
-
+        // if (source.ConsentAgreementGuid != target.ConsentAgreementGuid)
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentAgreement>().Log(_logger);
+        // }
+        
         // do not try to insert pk
         // target.ConsentAgreementId = source.ConsentAgreementId;
         target.ConsentAgreementGuid = source.ConsentAgreementGuid;
         target.ConsentAgreementRevoked = source.ConsentAgreementRevoked;
         target.ConsentAgreementConsentHash = source.ConsentAgreementConsentHash;
         target.ConsentAgreementTime = source.ConsentAgreementTime;
-        target.ConsentAgreementContactId = _primaryKeyMappingContext.RequireMapFromSource<K13M.OmContact>(c => c.ContactId, source.ConsentAgreementContactId);
-        target.ConsentAgreementConsentId = consentId.Value;
+        
+        // target.ConsentAgreementContactId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.OmContact>(c => c.ContactId, source.ConsentAgreementContactId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.OmContact>(c => c.ContactId, source.ConsentAgreementContactId, out var contactId))
+        {
+            target.ConsentAgreementContactId = contactId;
+        }
 
-        return new ModelMappingSuccess<KXO.Models.CmsConsentAgreement>(target, newInstance).Log(_logger);
+        // var consentId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsConsent>(r => r.ConsentId, source.ConsentAgreementConsentId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.CmsConsent>(r => r.ConsentId, source.ConsentAgreementConsentId, out var consentId))
+        {
+            target.ConsentAgreementConsentId = consentId;    
+        }
+
+        return target;
     }
 }

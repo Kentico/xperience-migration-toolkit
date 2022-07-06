@@ -1,43 +1,58 @@
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Migration.Toolkit.Core.MigrationProtocol;
 
 namespace Migration.Toolkit.Core.Abstractions;
 
 public interface IModelMappingResult
 {
-    string Message { get; }
     bool Success { get; }
 }
 
-public interface IModelMappingResult<out TResult>: IModelMappingResult
+public interface IModelMappingResult<TResult>: IModelMappingResult
 {
     TResult? Item { get; }
     bool NewInstance { get; }
-}
-
-public record AggregatedResult<TResult>(TResult? Item, bool NewInstance) : IModelMappingResult<TResult>
-{
-    public IReadOnlyCollection<IModelMappingResult> Results { get; private set; } = new Collection<IModelMappingResult>();
-
-    public string Message => string.Join(", ", this.Results);
-
-    public bool Success => this.Results.All(x => x.Success);
-
-    public void AddResult(IModelMappingResult result)
+    HandbookReference? HandbookReference { get; }
+    
+    void Deconstruct(out TResult? item, out bool newInstance)
     {
-        this.Results = this.Results.Concat(new[] { result }).ToImmutableList();
+        item = this.Item;
+        newInstance = this.NewInstance;
+    }
+    void Deconstruct(out HandbookReference? handbookReference)
+    {
+        handbookReference = this.HandbookReference;
     }
 }
 
-public record MapperResult<TResult>(TResult? Item, bool NewInstance, bool Success, HandbookReference? HandbookReference);
+public record AggregatedResult<TResult>(IEnumerable<IModelMappingResult<TResult>> Results) : IModelMappingResult<TResult>
+{
+    public TResult? Item => throw new NotImplementedException();
 
-public abstract record ModelMappingResult<TResult>(TResult? Item, bool Success, string Message, bool NewInstance) : IModelMappingResult<TResult>;
+    public bool NewInstance => throw new NotImplementedException();
 
-public record ModelMappingSuccess<TResult>(TResult? Result, bool NewInstance) : ModelMappingResult<TResult>(Result, true, null, NewInstance);
+    public HandbookReference? HandbookReference => throw new NotImplementedException();
 
-public record ModelMappingFailed<TResult>(string Message) : ModelMappingResult<TResult>(default, false, Message, false);
-public record ModelMappingFailedKeyMismatch<TResult>() : ModelMappingResult<TResult>(default, false, $"Entity Guid mismatch, cannot map entity {typeof(TResult).FullName}", false);
-public record ModelMappingFailedSourceNotDefined<TResult>() : ModelMappingResult<TResult>(default, false, $"Source entity is not defined for target {typeof(TResult).FullName}", false);
-public record ModelMappingFailedMissingDependencyInTargetInstance<TResult>(string Name, object SourceId, HandbookReference Reference): ModelMappingResult<TResult>(default, false, $"Missing dependency in target instance for {typeof(TResult).FullName}", false);
+    public bool Success => this.Results.All(x => x.Success);
+}
+
+public record MapperResult<TResult>(TResult? Item, bool NewInstance, bool Success, HandbookReference? HandbookReference): IModelMappingResult<TResult>;
+public record MapperResultSuccess<TResult>(TResult? Item, bool NewInstance) : MapperResult<TResult>(Item, NewInstance, true, null);
+public record MapperResultFailure<TResult>(HandbookReference HandbookReference) : MapperResult<TResult>(default, false, false, HandbookReference);
+
+public static class Extensions
+{
+    public static IModelMappingResult<TResult> AsFailure<TResult>(this HandbookReference reference) => new MapperResultFailure<TResult>(reference);
+}
+
+//
+// public abstract record ModelMappingResult<TResult>(TResult? Item, bool Success, string Message, bool NewInstance) : IModelMappingResult<TResult>
+// {
+//     public HandbookReference? HandbookReference { get; }
+// }
+//
+// public record ModelMappingSuccess<TResult>(TResult? Result, bool NewInstance) : ModelMappingResult<TResult>(Result, true, null, NewInstance);
+//
+// public record ModelMappingFailed<TResult>(string Message) : ModelMappingResult<TResult>(default, false, Message, false);
+// public record ModelMappingFailedKeyMismatch<TResult>() : ModelMappingResult<TResult>(default, false, $"Entity Guid mismatch, cannot map entity {typeof(TResult).FullName}", false);
+// public record ModelMappingFailedSourceNotDefined<TResult>() : ModelMappingResult<TResult>(default, false, $"Source entity is not defined for target {typeof(TResult).FullName}", false);
+// public record ModelMappingFailedMissingDependencyInTargetInstance<TResult>(string Name, object SourceId, HandbookReference Reference): ModelMappingResult<TResult>(default, false, $"Missing dependency in target instance for {typeof(TResult).FullName}", false);

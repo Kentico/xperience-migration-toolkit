@@ -164,7 +164,7 @@ public class BulkDataCopyService
     }
 
     // TODO tk: 2022-06-30 assert column type is compatible
-    public IEnumerable<SqlColumn> GetSqlTableColumns(string tableName, string connectionString)
+    public IEnumerable<SqlColumn> GetSqlTableColumns(string tableName, string? connectionString)
     {
         using var sourceConnection = new SqlConnection(connectionString);
         using var cmd = sourceConnection.CreateCommand();

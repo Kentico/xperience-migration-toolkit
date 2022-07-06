@@ -1,38 +1,34 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
 using Migration.Toolkit.KX13.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Models.CmsSettingsCategory, Migration.Toolkit.KXO.Models.CmsSettingsCategory>
+public class CmsSettingsCategoryMapper : EntityMapperBase<Migration.Toolkit.KX13.Models.CmsSettingsCategory,
+    Migration.Toolkit.KXO.Models.CmsSettingsCategory>
 {
     private readonly ILogger<CmsSettingsCategoryMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
+    private readonly PrimaryKeyMappingContext _pkContext;
     private readonly IEntityMapper<KX13.Models.CmsResource, KXO.Models.CmsResource> _cmsResourceMapper;
 
-    public CmsSettingsCategoryMapper(ILogger<CmsSettingsCategoryMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext, IEntityMapper<Migration.Toolkit.KX13.Models.CmsResource, Migration.Toolkit.KXO.Models.CmsResource> cmsResourceMapper)
+    public CmsSettingsCategoryMapper(ILogger<CmsSettingsCategoryMapper> logger, PrimaryKeyMappingContext pkContext, IMigrationProtocol protocol,
+        IEntityMapper<KX13M.CmsResource, KXO.Models.CmsResource> cmsResourceMapper) : base(logger, pkContext, protocol)
     {
         _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
+        _pkContext = pkContext;
         _cmsResourceMapper = cmsResourceMapper;
     }
 
-    public IModelMappingResult<Migration.Toolkit.KXO.Models.CmsSettingsCategory> Map(Migration.Toolkit.KX13.Models.CmsSettingsCategory? source, Migration.Toolkit.KXO.Models.CmsSettingsCategory? target)
+    protected override KXO.Models.CmsSettingsCategory? CreateNewInstance(CmsSettingsCategory source, MappingHelper mappingHelper,
+        AddFailure addFailure)
     {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSettingsCategory>().Log(_logger);
-        }
+        throw new NotImplementedException();
+    }
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new Migration.Toolkit.KXO.Models.CmsSettingsCategory();
-            newInstance = true;
-        }
+    protected override KXOM.CmsSettingsCategory MapInternal(KX13.Models.CmsSettingsCategory source, KXOM.CmsSettingsCategory target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    {
         // no category guid to match on...
         // else if (source.CategoryName != target.CategoryName)
         // {
@@ -56,16 +52,14 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
             target.CategoryIsGroup = source.CategoryIsGroup;
             target.CategoryIsCustom = source.CategoryIsCustom;
         }
-        
-        var aggregatedResult = new AggregatedResult<Migration.Toolkit.KXO.Models.CmsSettingsCategory>(target, newInstance);
 
         if (source.CategoryResource != null)
         {
             if (target.CategoryResource != null)
             {
                 // skip if target is present
-                _logger.LogInformation("Skipping category resource '{resourceGuid}', already present in target instance.", target.CategoryResource.ResourceGuid);
-                _primaryKeyMappingContext.SetMapping<KX13.Models.CmsResource>(r => r.ResourceId, source.CategoryResourceId.Value, target.CategoryResourceId.Value);
+                _logger.LogTrace("Skipping category resource '{resourceGuid}', already present in target instance.", target.CategoryResource.ResourceGuid);
+                _pkContext.SetMapping<KX13.Models.CmsResource>(r => r.ResourceId, source.CategoryResourceId.Value, target.CategoryResourceId.Value);
             }
             else
             {
@@ -78,17 +72,17 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
                     }
                     case { Success: false } result:
                     {
-                        aggregatedResult.AddResult(result);
-                        return aggregatedResult.Log(_logger);
+                        addFailure(new MapperResultFailure<KXOM.CmsSettingsCategory>(result.HandbookReference));
+                        break;
                     }
                 }
             }
         }
-        else
+        else if(mappingHelper.TranslateId<KX13.Models.CmsResource>(r => r.ResourceId, source.CategoryResourceId, out var categoryResourceId))
         {
-            target.CategoryResourceId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsResource>(r => r.ResourceId, source.CategoryResourceId);
+            target.CategoryResourceId = categoryResourceId;
         }
-        
+
         if (source.CategoryParent != null)
         {
             switch (Map(source.CategoryParent, target.CategoryParent))
@@ -100,16 +94,16 @@ public class CmsSettingsCategoryMapper : IEntityMapper<Migration.Toolkit.KX13.Mo
                 }
                 case { Success: false } result:
                 {
-                    aggregatedResult.AddResult(result);
-                    return aggregatedResult.Log(_logger);
+                    addFailure(new MapperResultFailure<KXOM.CmsSettingsCategory>(result.HandbookReference));
+                    break;
                 }
             }
         }
-        else
+        else if(mappingHelper.TranslateId<KX13M.CmsCategory>(c => c.CategoryId, source.CategoryParentId, out var categoryParentId))
         {
-            target.CategoryParentId = _primaryKeyMappingContext.MapFromSource<CmsCategory>(c => c.CategoryId, source.CategoryParentId);
+            target.CategoryParentId = categoryParentId;
         }
 
-        return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsSettingsCategory>(target, newInstance).Log(_logger);
+        return target;
     }
 }

@@ -17,7 +17,6 @@ namespace Migration.Toolkit.Core.Handlers;
 public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCommand, MigratePageTypesResult>
 {
     private readonly ILogger<MigratePageTypesCommandHandler> _logger;
-    private readonly IEntityMapper<CmsClass, KXO.Models.CmsClass> _mapper;
     private readonly IEntityMapper<CmsClass, DataClassInfo> _dataClassMapper;
     private readonly IDbContextFactory<KxoContext> _kxoContextFactory;
     private readonly IDbContextFactory<KX13Context> _kx13ContextFactory;
@@ -28,7 +27,6 @@ public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCo
 
     public MigratePageTypesCommandHandler(
         ILogger<MigratePageTypesCommandHandler> logger,
-        IEntityMapper<KX13.Models.CmsClass, KXO.Models.CmsClass> mapper,
         IEntityMapper<KX13.Models.CmsClass, DataClassInfo> dataClassMapper,
         IDbContextFactory<KXO.Context.KxoContext> kxoContextFactory,
         IDbContextFactory<KX13.Context.KX13Context> kx13ContextFactory,
@@ -39,7 +37,6 @@ public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCo
     )
     {
         _logger = logger;
-        _mapper = mapper;
         _dataClassMapper = dataClassMapper;
         _kxoContextFactory = kxoContextFactory;
         _kx13ContextFactory = kx13ContextFactory;
@@ -112,7 +109,9 @@ public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCo
         {
             switch (mapped)
             {
-                case ModelMappingSuccess<DataClassInfo>(var dataClassInfo, var newInstance):
+                case { Success : true } result:
+                {
+                    var (dataClassInfo, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(dataClassInfo, nameof(dataClassInfo));
 
                     _kxoClassFacade.SetClass(dataClassInfo);
@@ -130,6 +129,7 @@ public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCo
                     );
 
                     break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mapped));
             }
@@ -140,38 +140,41 @@ public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCo
         }
     }
 
-    private async Task SaveUsingEntityFramework(CancellationToken cancellationToken, CmsClass kx13CmsClassesDocumentType,
-        KXO.Models.CmsClass? kxoCmsClass, KxoContext kxoContext)
-    {
-        var mapped = _mapper.Map(kx13CmsClassesDocumentType, kxoCmsClass);
-        _migrationProtocol.MappedTarget(mapped);
-
-        switch (mapped)
-        {
-            case ModelMappingSuccess<KXO.Models.CmsClass>(var cmsClass, var newInstance):
-                ArgumentNullException.ThrowIfNull(cmsClass, nameof(cmsClass));
-
-                if (newInstance)
-                {
-                    kxoContext.CmsClasses.Add(cmsClass);
-                }
-                else
-                {
-                    kxoContext.CmsClasses.Update(cmsClass);
-                }
-
-                await kxoContext.SaveChangesAsync(cancellationToken); // TODO tk: 2022-05-18 context needs to be disposed/recreated after error
-
-                _migrationProtocol.Success(kx13CmsClassesDocumentType, kxoCmsClass, mapped);
-
-                _logger.LogInformation(newInstance
-                    ? $"CmsClass: {cmsClass.ClassName} was inserted."
-                    : $"CmsClass: {cmsClass.ClassName} was updated.");
-
-                // kxoContext.SaveChangesWithIdentityInsert<KXO.Models.CmsClass>();
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(mapped));
-        }
-    }
+    // private async Task SaveUsingEntityFramework(CancellationToken cancellationToken, CmsClass kx13CmsClassesDocumentType,
+    //     KXO.Models.CmsClass? kxoCmsClass, KxoContext kxoContext)
+    // {
+    //     var mapped = _mapper.Map(kx13CmsClassesDocumentType, kxoCmsClass);
+    //     _migrationProtocol.MappedTarget(mapped);
+    //
+    //     switch (mapped)
+    //     {
+    //         case { Success : true } result:
+    //         {
+    //             var (cmsClass, newInstance) = result;
+    //             ArgumentNullException.ThrowIfNull(cmsClass, nameof(cmsClass));
+    //
+    //             if (newInstance)
+    //             {
+    //                 kxoContext.CmsClasses.Add(cmsClass);
+    //             }
+    //             else
+    //             {
+    //                 kxoContext.CmsClasses.Update(cmsClass);
+    //             }
+    //
+    //             await kxoContext.SaveChangesAsync(cancellationToken); // TODO tk: 2022-05-18 context needs to be disposed/recreated after error
+    //
+    //             _migrationProtocol.Success(kx13CmsClassesDocumentType, kxoCmsClass, mapped);
+    //
+    //             _logger.LogInformation(newInstance
+    //                 ? $"CmsClass: {cmsClass.ClassName} was inserted."
+    //                 : $"CmsClass: {cmsClass.ClassName} was updated.");
+    //
+    //             // kxoContext.SaveChangesWithIdentityInsert<KXO.Models.CmsClass>();
+    //             break;
+    //         }
+    //         default:
+    //             throw new ArgumentOutOfRangeException(nameof(mapped));
+    //     }
+    // }
 }

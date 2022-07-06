@@ -62,7 +62,7 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
 
     public async Task<GenericCommandResult> Handle(MigrateFormsCommand request, CancellationToken cancellationToken)
     {
-        var explicitSiteIdMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
 
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -85,7 +85,7 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
             //     _logger.LogWarning($"CmsClass: {kx13Class.ClassName} => ClassConnectionString is different from source connection string needs attention!");
             // }
 
-            if (!kx13Class.CmsForms.Any(f => explicitSiteIdMapping.Contains(f.FormSiteId)))
+            if (!kx13Class.CmsForms.Any(f => migratedSiteIds.Contains(f.FormSiteId)))
             {
                 _logger.LogWarning($"CmsClass: {kx13Class.ClassName} => Class site is not migrated => skipping.");
                 continue;
@@ -109,11 +109,13 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
 
                 switch (mapped)
                 {
-                    case ModelMappingSuccess<KXO.Models.CmsForm>(var cmsForm, var newInstance):
+                    case { Success : true } result:
+                    {
+                        var (cmsForm, newInstance) = result;
                         ArgumentNullException.ThrowIfNull(cmsForm, nameof(cmsForm));
 
                         _migrationProtocol.Success(kx13Class, cmsForm, mapped);
-                        
+
                         if (newInstance)
                         {
                             _kxoContext.CmsForms.Add(cmsForm);
@@ -124,7 +126,7 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                         }
 
                         await _kxoContext.SaveChangesAsync(cancellationToken);
-                        
+
                         _logger.LogInformation(newInstance
                             ? $"CmsForm: {cmsForm.FormName} was inserted."
                             : $"CmsForm: {cmsForm.FormName} was updated.");
@@ -136,8 +138,7 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                         );
 
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(mapped));
+                    }
                 }
 
 
@@ -149,14 +150,14 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                     .Select(x => x.Attribute("name").Value).ToImmutableHashSet();
 
 
-                var result = (kx13Class.ClassTableName, kx13Class.ClassGuid, autoIncrementColumns);
-                _logger.LogTrace("Class '{classGuild}' Resolved as: {result}", kx13Class.ClassGuid, result);
+                var r = (kx13Class.ClassTableName, kx13Class.ClassGuid, autoIncrementColumns);
+                _logger.LogTrace("Class '{classGuild}' Resolved as: {result}", kx13Class.ClassGuid, r);
 
 
                 // check if data is present in target tables
                 if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(kx13Class.ClassTableName))
                 {
-                    _logger.LogWarning("Data exists in target coupled data table '{tableName}' - cannot migrate, skipping form data migration.", result.ClassTableName);
+                    _logger.LogWarning("Data exists in target coupled data table '{tableName}' - cannot migrate, skipping form data migration.", r.ClassTableName);
                     // TODO tk: 2022-06-01 migrate data manually or delete all data
                     continue;
                 }
@@ -182,7 +183,9 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
 
         switch (mapped)
         {
-            case ModelMappingSuccess<DataClassInfo>(var dataClassInfo, var newInstance):
+            case { Success : true } result:
+            {
+                var (dataClassInfo, newInstance) = result;
                 ArgumentNullException.ThrowIfNull(dataClassInfo, nameof(dataClassInfo));
 
                 _kxoClassFacade.SetClass(dataClassInfo);
@@ -200,8 +203,7 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                 );
 
                 break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(mapped));
+            }
         }
     }
 

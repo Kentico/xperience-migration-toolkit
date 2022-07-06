@@ -1,44 +1,32 @@
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class OmContactGroupMapper: IEntityMapper<KX13.Models.OmContactGroup, KXO.Models.OmContactGroup>
+public class OmContactGroupMapper : EntityMapperBase<KX13.Models.OmContactGroup, KXO.Models.OmContactGroup>
 {
-    private readonly ILogger<OmContactGroupMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
-
     public OmContactGroupMapper(
         ILogger<OmContactGroupMapper> logger,
-        PrimaryKeyMappingContext primaryKeyMappingContext 
-    )
+        PrimaryKeyMappingContext primaryKeyMappingContext,
+        IMigrationProtocol protocol
+    ) : base(logger, primaryKeyMappingContext, protocol)
     {
-        _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
     }
-    
-    public IModelMappingResult<KXO.Models.OmContactGroup> Map(KX13.Models.OmContactGroup? source, KXO.Models.OmContactGroup? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<KXO.Models.OmContactGroup>().Log(_logger);
-        }
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new KXO.Models.OmContactGroup();
-            newInstance = true;
-        }
-        else if (source.ContactGroupGuid != target.ContactGroupGuid)
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<KXO.Models.OmContactGroup>().Log(_logger);
-        }
+    protected override OmContactGroup? CreateNewInstance(KX13.Models.OmContactGroup tSourceEntity, MappingHelper mappingHelper, AddFailure addFailure) => new();
+
+    protected override OmContactGroup MapInternal(KX13.Models.OmContactGroup source, OmContactGroup target, bool newInstance,
+        MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        // if (!newInstance && source.ContactGroupGuid != target.ContactGroupGuid)
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<KXO.Models.OmContactGroup>().Log(_logger);
+        // }
 
         // do not try to insert pk
         // target.ContactGroupId = source.ContactGroupId;
@@ -54,6 +42,6 @@ public class OmContactGroupMapper: IEntityMapper<KX13.Models.OmContactGroup, KXO
         // TODO tk: 2022-06-13  public virtual ICollection<NewsletterIssueContactGroup> NewsletterIssueContactGroups { get; set; }
         // TODO tk: 2022-06-13  public virtual ICollection<OmContactGroupMember> OmContactGroupMembers { get; set; }
 
-        return new ModelMappingSuccess<KXO.Models.OmContactGroup>(target, newInstance).Log(_logger);
+        return target;
     }
 }

@@ -4,110 +4,36 @@ using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm>, IEntityMapper<KX13.Models.CmsForm, BizFormInfo>
+public class CmsFormMapper : EntityMapperBase<KX13.Models.CmsForm, BizFormInfo>
 {
-    private readonly ILogger<CmsFormMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
-
     public CmsFormMapper(
         ILogger<CmsFormMapper> logger,
-        PrimaryKeyMappingContext primaryKeyMappingContext
-    )
+        PrimaryKeyMappingContext primaryKeyMappingContext,
+        IMigrationProtocol protocol
+    ) : base(logger, primaryKeyMappingContext, protocol)
     {
-        _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
     }
 
-    public IModelMappingResult<KXO.Models.CmsForm> Map(KX13.Models.CmsForm? source, KXO.Models.CmsForm? target)
+    protected override BizFormInfo? CreateNewInstance(KX13.Models.CmsForm source, MappingHelper mappingHelper, AddFailure addFailure)
     {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<KXO.Models.CmsForm>().Log(_logger);
-        }
-
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new KXO.Models.CmsForm();
-            newInstance = true;
-        }
-        else if (source.FormGuid != target.FormGuid)
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<KXO.Models.CmsForm>().Log(_logger);
-        }
-
-        // target.FormId = source.FormId;
-        target.FormDisplayName = source.FormDisplayName;
-        target.FormName = source.FormName;
-        // target.FormSendToEmail = source.FormSendToEmail;
-        // target.FormSendFromEmail = source.FormSendFromEmail;
-        // target.FormEmailSubject = source.FormEmailSubject;
-        // target.FormEmailTemplate = source.FormEmailTemplate;
-        // target.FormEmailAttachUploadedDocs = source.FormEmailAttachUploadedDocs;
-        target.FormItems = source.FormItems;
-        target.FormReportFields = source.FormReportFields;
-        target.FormSubmitButtonText = source.FormSubmitButtonText;
-        // target.FormConfirmationEmailField = source.FormConfirmationEmailField;
-        // target.FormConfirmationTemplate = source.FormConfirmationTemplate;
-        // target.FormConfirmationSendFromEmail = source.FormConfirmationSendFromEmail;
-        // target.FormConfirmationEmailSubject = source.FormConfirmationEmailSubject;
-        target.FormAccess = source.FormAccess;
-        target.FormSubmitButtonImage = source.FormSubmitButtonImage;
-        target.FormGuid = source.FormGuid;
-        target.FormLastModified = source.FormLastModified;
-        target.FormLogActivity = source.FormLogActivity;
-        target.FormBuilderLayout = source.FormBuilderLayout;
-
-        // TODO tk: 2022-05-20 new deduce: target.FormAfterSubmitMode = source.FormAfterSubmitMode;
-        // TODO tk: 2022-05-20 new deduce: target.FormAfterSubmitRelatedValue = source.FormAfterSubmitRelatedValue;
-
-        // TODO tk: 2022-05-20 form class migration required
-        target.FormClassId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId);
-        target.FormSiteId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.FormSiteId);
-
-        // [ForeignKey("FormClassId")]
-        // [InverseProperty("CmsForms")]
-        // public virtual CmsClass FormClass { get; set; } = null!;
-        // [ForeignKey("FormSiteId")]
-        // [InverseProperty("CmsForms")]
-        // public virtual CmsSite FormSite { get; set; } = null!;
-        //
-        // [ForeignKey("FormId")]
-        // [InverseProperty("Forms")]
-        // public virtual ICollection<CmsRole> Roles { get; set; }
-
-        return new ModelMappingSuccess<KXO.Models.CmsForm>(target, newInstance).Log(_logger);
+        var newBizFormInfo = BizFormInfo.New();
+        newBizFormInfo.FormGUID = source.FormGuid;
+        return newBizFormInfo;
     }
 
-    public IModelMappingResult<BizFormInfo> Map(KX13.Models.CmsForm? source, BizFormInfo? target)
+    protected override BizFormInfo MapInternal(KX13.Models.CmsForm source, BizFormInfo target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
     {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<BizFormInfo>().Log(_logger);
-        }
-
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = BizFormInfo.New();
-            target.FormGUID = source.FormGuid;
-            newInstance = true;
-        }
-        else if (source.FormGuid != target.FormGUID)
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<BizFormInfo>().Log(_logger);
-        }
+        // if (source.FormGuid != target.FormGUID)
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<BizFormInfo>().Log(_logger);
+        // }
 
         // target.FormId = source.FormId;
         target.FormDisplayName = source.FormDisplayName;
@@ -134,8 +60,74 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         // target.FormAfterSubmitRelatedValue = source.FormAfterSubmitRelatedValue;
 
         // TODO tk: 2022-05-20 form class migration required
-        target.FormClassID = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId);
-        target.FormSiteID = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.FormSiteId);
+        // target.FormClassID = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId, out var formClassId))
+        {
+            target.FormClassID = formClassId;
+        }
+        
+        // target.FormSiteID = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.FormSiteId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.CmsSite>(c => c.SiteId, source.FormSiteId, out var formSiteId))
+        {
+            target.FormSiteID = formSiteId;
+        }
+
+        return target;
+    }
+}
+
+public class CmsFormMapperEf : EntityMapperBase<KX13.Models.CmsForm, KXO.Models.CmsForm>
+{
+    public CmsFormMapperEf(ILogger<CmsFormMapperEf> logger, PrimaryKeyMappingContext pkContext, IMigrationProtocol protocol) : base(logger, pkContext, protocol)
+    {
+    }
+
+    protected override CmsForm? CreateNewInstance(KX13.Models.CmsForm source, MappingHelper mappingHelper, AddFailure addFailure) => new();
+
+    protected override CmsForm MapInternal(KX13.Models.CmsForm source, CmsForm target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        // if (source.FormGuid != target.FormGuid)
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<KXO.Models.CmsForm>().Log(_logger);
+        // }
+
+        // target.FormId = source.FormId;
+        target.FormDisplayName = source.FormDisplayName;
+        target.FormName = source.FormName;
+        // target.FormSendToEmail = source.FormSendToEmail;
+        // target.FormSendFromEmail = source.FormSendFromEmail;
+        // target.FormEmailSubject = source.FormEmailSubject;
+        // target.FormEmailTemplate = source.FormEmailTemplate;
+        // target.FormEmailAttachUploadedDocs = source.FormEmailAttachUploadedDocs;
+        target.FormItems = source.FormItems;
+        target.FormReportFields = source.FormReportFields;
+        target.FormSubmitButtonText = source.FormSubmitButtonText;
+        // target.FormConfirmationEmailField = source.FormConfirmationEmailField;
+        // target.FormConfirmationTemplate = source.FormConfirmationTemplate;
+        // target.FormConfirmationSendFromEmail = source.FormConfirmationSendFromEmail;
+        // target.FormConfirmationEmailSubject = source.FormConfirmationEmailSubject;
+        target.FormAccess = source.FormAccess;
+        target.FormSubmitButtonImage = source.FormSubmitButtonImage;
+        target.FormGuid = source.FormGuid;
+        target.FormLastModified = source.FormLastModified;
+        target.FormLogActivity = source.FormLogActivity;
+        target.FormBuilderLayout = source.FormBuilderLayout;
+
+        // TODO tk: 2022-05-20 new deduce: target.FormAfterSubmitMode = source.FormAfterSubmitMode;
+        // TODO tk: 2022-05-20 new deduce: target.FormAfterSubmitRelatedValue = source.FormAfterSubmitRelatedValue;
+
+        // target.FormClassId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId, out var classId))
+        {
+            target.FormClassId = classId;
+        }
+        // target.FormSiteId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.FormSiteId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.CmsSite>(c => c.SiteId, source.FormSiteId, out var siteId))
+        {
+            target.FormSiteId = siteId;
+        }
 
         // [ForeignKey("FormClassId")]
         // [InverseProperty("CmsForms")]
@@ -148,6 +140,6 @@ public class CmsFormMapper : IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsFo
         // [InverseProperty("Forms")]
         // public virtual ICollection<CmsRole> Roles { get; set; }
 
-        return new ModelMappingSuccess<BizFormInfo>(target, newInstance).Log(_logger);
+        return target;
     }
 }

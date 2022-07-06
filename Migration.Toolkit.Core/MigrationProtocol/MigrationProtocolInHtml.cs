@@ -36,6 +36,7 @@ public class MigrationProtocolInHtml: IMigrationProtocol, IDisposable
 </style>
 ";
         _streamWriter.WriteLine($"<html><head>{head}</head><body><h1>Migration protocol {nowStartDate}</h1>");
+        _streamWriter.AutoFlush = true;
     }
 
     public class ShouldSerializeContractResolver : DefaultContractResolver
@@ -84,7 +85,7 @@ public class MigrationProtocolInHtml: IMigrationProtocol, IDisposable
         _streamWriter.WriteLine($"<tr>{GetTimeStamp()}<td>Command error</td><td></td><td><pre>{WebUtility.HtmlEncode(exception.ToString())}</pre></td></tr>");
         _streamWriter.WriteLine($"</table>");
     }
-    
+
     public void NeedsManualAction<TData>(HandbookReference handbookRef, TData data)
     {
         _streamWriter.WriteLine($"<tr>{GetTimeStamp()}<td>Manual action needed</td><td>{handbookRef}</td><td>{ToJsonEscaped(data)}</td></tr>");
@@ -98,6 +99,13 @@ public class MigrationProtocolInHtml: IMigrationProtocol, IDisposable
     public void NeedsManualAction<TSource, TTarget>(HandbookReference handbookRef, string whatNeedsToBeDoneOrWhatHappened, TSource source, TTarget? target)
     {
         _streamWriter.WriteLine($"<tr>{GetTimeStamp()}<td>Manual action needed</td><td>{handbookRef}</td><td>{ToJsonEscaped(source)}</td><td>{ToJsonEscaped(target)}</td></tr>");
+    }
+    
+    public void Append(HandbookReference? handbookReference)
+    {
+        ArgumentNullException.ThrowIfNull(handbookReference);
+        
+        _streamWriter.WriteLine($"<tr>{GetTimeStamp()}<td>Manual action needed</td><td>{handbookReference.ReferenceName}</td><td>{ToJsonEscaped(handbookReference.Data)}</td><td></td></tr>");
     }
 
     public void MappedTarget<TTarget>(IModelMappingResult<TTarget> mapped)

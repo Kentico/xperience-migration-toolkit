@@ -1,19 +1,32 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Helpers;
-using Newtonsoft.Json;
+using Migration.Toolkit.Core.MigrationProtocol;
 
 namespace Migration.Toolkit.Core;
 
 public static class LogExtensions
 {
-    public static IModelMappingResult<TResult> Log<T, TResult>(this IModelMappingResult<TResult> mappingResult, ILogger<T> logger)
+    public static IModelMappingResult<TResult> Log<TResult>(this IModelMappingResult<TResult> mappingResult, ILogger logger, IMigrationProtocol protocol)
     {
         switch (mappingResult)
         {
             case { Success: false } result:
             {
-                logger.LogError(result.Message);
+                if (result is AggregatedResult<TResult> aggregatedResult)
+                {
+                    foreach (var r in aggregatedResult.Results)
+                    {
+                        protocol.Append(r.HandbookReference);
+                        logger.LogError(r.HandbookReference?.ToString());
+                    }
+                }
+                else
+                {
+                    protocol.Append(result.HandbookReference);   
+                    logger.LogError(result.HandbookReference?.ToString());
+                }
+                
                 break;
             }
             case { Success: true } result:
@@ -21,26 +34,6 @@ public static class LogExtensions
                 logger.LogTrace("Success - {model}", LogHelper.PrintKxoModelInfo(result.Item));
                 break;
             }
-            // case ModelMappingFailed<TResult>(var message):
-            // {
-            //     logger.LogError(message);
-            //     break;
-            // }
-            // case ModelMappingFailedKeyMismatch<TResult>(var tResult, var success, var message, var newInstance):
-            // {
-            //     logger.LogError(message);
-            //     break;
-            // }
-            // case ModelMappingFailedSourceNotDefined<TResult>(var tResult, var success, var message, var newInstance):
-            // {
-            //     logger.LogError(message);
-            //     break;
-            // }
-            // case ModelMappingSuccess<TResult>(var tResult, var newInstance):
-            // {
-            //     logger.LogTrace($"Model mapped successfully");
-            //     break;
-            // }
             default:
             {
                 throw new ArgumentOutOfRangeException(nameof(mappingResult));

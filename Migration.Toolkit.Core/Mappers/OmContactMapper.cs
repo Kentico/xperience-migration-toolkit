@@ -1,47 +1,37 @@
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
-using Migration.Toolkit.KX13.Models;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
+
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class OmContactMapper : IEntityMapper<KX13.Models.OmContact, KXO.Models.OmContact>
+public class OmContactMapper : EntityMapperBase<KX13.Models.OmContact, KXO.Models.OmContact>
 {
     private readonly ILogger<OmContactMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
-    private readonly IEntityMapper<OmContactStatus, KXO.Models.OmContactStatus> _contactStatusMapper;
+    private readonly IEntityMapper<KX13M.OmContactStatus, KXO.Models.OmContactStatus> _contactStatusMapper;
 
     public OmContactMapper(
         ILogger<OmContactMapper> logger,
         PrimaryKeyMappingContext primaryKeyMappingContext,
-        IEntityMapper<KX13.Models.OmContactStatus, KXO.Models.OmContactStatus> contactStatusMapper
-    )
+        IEntityMapper<KX13.Models.OmContactStatus, KXO.Models.OmContactStatus> contactStatusMapper,
+        IMigrationProtocol protocol
+    ): base(logger, primaryKeyMappingContext, protocol)
     {
         _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
         _contactStatusMapper = contactStatusMapper;
     }
 
-    public IModelMappingResult<KXO.Models.OmContact> Map(KX13.Models.OmContact? source, KXO.Models.OmContact? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined");
-            return new ModelMappingFailedSourceNotDefined<KXO.Models.OmContact>().Log(_logger);
-        }
+    protected override OmContact? CreateNewInstance(KX13.Models.OmContact tSourceEntity, MappingHelper mappingHelper, AddFailure addFailure) => new();
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance");
-            target = new KXO.Models.OmContact();
-            newInstance = true;
-        }
-        else if (source.ContactGuid != target.ContactGuid)
+    protected override KXOM.OmContact MapInternal(KX13.Models.OmContact source, KXOM.OmContact target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        if (!newInstance && source.ContactGuid != target.ContactGuid)
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch");
-            return new ModelMappingFailedKeyMismatch<KXO.Models.OmContact>().Log(_logger);
+            throw new InvalidOperationException("Assertion failed, entity key mismatch");
         }
 
         // do not try to insert pk
@@ -76,7 +66,6 @@ public class OmContactMapper : IEntityMapper<KX13.Models.OmContact, KXO.Models.O
 
 
         // target.ContactStatusId = _primaryKeyMappingContext.MapFromSource<K13M.OmContactStatus>(u => u.ContactStatusId, source.ContactStatusId);
-        var aggregatedResult = new AggregatedResult<Migration.Toolkit.KXO.Models.OmContact>(target, newInstance);
         if (source.ContactStatus != null)
         {
             switch (_contactStatusMapper.Map(source.ContactStatus, target.ContactStatus))
@@ -88,8 +77,8 @@ public class OmContactMapper : IEntityMapper<KX13.Models.OmContact, KXO.Models.O
                 }
                 case { Success: false } result:
                 {
-                    aggregatedResult.AddResult(result);
-                    return aggregatedResult.Log(_logger);
+                    addFailure(new MapperResultFailure<OmContact>(result?.HandbookReference));
+                    break;
                 }
             }
         }
@@ -99,33 +88,12 @@ public class OmContactMapper : IEntityMapper<KX13.Models.OmContact, KXO.Models.O
         }
 
         target.ContactSalesForceLeadId = source.ContactSalesForceLeadId;
-        target.ContactOwnerUserId = _primaryKeyMappingContext.MapFromSource<K13M.CmsUser>(u => u.UserId, source.ContactOwnerUserId);
+        // target.ContactOwnerUserId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsUser>(u => u.UserId, source.ContactOwnerUserId);
+        if (mappingHelper.TranslateId<KX13M.CmsUser>(u => u.UserId, source.ContactOwnerUserId, out var userId))
+        {
+            target.ContactOwnerUserId = userId;
+        }
 
-        // [ForeignKey("ContactCountryId")]
-        // [InverseProperty("OmContacts")]
-        // public virtual CmsCountry? ContactCountry { get; set; }
-        // [ForeignKey("ContactOwnerUserId")]
-        // [InverseProperty("OmContacts")]
-        // public virtual CmsUser? ContactOwnerUser { get; set; }
-        // [ForeignKey("ContactStateId")]
-        // [InverseProperty("OmContacts")]
-        // public virtual CmsState? ContactState { get; set; }
-        // [ForeignKey("ContactStatusId")]
-        // [InverseProperty("OmContacts")]
-        // public virtual OmContactStatus? ContactStatus { get; set; }
-        // [InverseProperty("ConsentAgreementContact")]
-        // public virtual ICollection<CmsConsentAgreement> CmsConsentAgreements { get; set; }
-        // [InverseProperty("AccountPrimaryContact")]
-        // public virtual ICollection<OmAccount> OmAccountAccountPrimaryContacts { get; set; }
-        // [InverseProperty("AccountSecondaryContact")]
-        // public virtual ICollection<OmAccount> OmAccountAccountSecondaryContacts { get; set; }
-        // [InverseProperty("Contact")]
-        // public virtual ICollection<OmAccountContact> OmAccountContacts { get; set; }
-        // [InverseProperty("Contact")]
-        // public virtual ICollection<OmMembership> OmMemberships { get; set; }
-        // [InverseProperty("VisitorToContactContact")]
-        // public virtual ICollection<OmVisitorToContact> OmVisitorToContacts { get; set; }
-
-        return new ModelMappingSuccess<KXO.Models.OmContact>(target, newInstance).Log(_logger);
+        return target;
     }
 }

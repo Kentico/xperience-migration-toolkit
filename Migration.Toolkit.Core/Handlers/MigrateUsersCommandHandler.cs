@@ -49,14 +49,14 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
     public async Task<GenericCommandResult> Handle(MigrateUsersCommand request, CancellationToken cancellationToken)
     {
         // using var protocolScope = _migrationProtocol.CreateScope<MigrateUsersCommandHandler>();  
-        var explicitSiteIdMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
         
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 
-        await RequireMigratedCmsRoles(kx13Context, cancellationToken, explicitSiteIdMapping);
+        await RequireMigratedCmsRoles(kx13Context, cancellationToken, migratedSiteIds);
 
         var kx13CmsUsers = kx13Context.CmsUsers
-                .Include(u => u.CmsUserRoles.Where(x => explicitSiteIdMapping.Contains(x.Role.SiteId) || x.Role.SiteId == null))
+                .Include(u => u.CmsUserRoles.Where(x => migratedSiteIds.Contains(x.Role.SiteId) || x.Role.SiteId == null))
                 .ThenInclude(ur => ur.Role)
             ;
 
@@ -97,8 +97,9 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.CmsUser>(var cmsUser, var newInstance):
-                    ArgumentNullException.ThrowIfNull(cmsUser, nameof(cmsUser));
+                case { Success : true } result:
+                {
+                    var (cmsUser, newInstance) = result;
 
                     if (newInstance)
                     {
@@ -168,6 +169,7 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
                     _primaryKeyMappingContext.SetMapping<KX13.Models.CmsUser>(r => r.UserId, kx13User.UserId, cmsUser.UserId);
 
                     break;
+                }
                 default:
                     break;
             }
@@ -176,10 +178,10 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
         return new GenericCommandResult();
     }
 
-    private async Task RequireMigratedCmsRoles(KX13Context kx13Context, CancellationToken cancellationToken, List<int?> explicitSiteIdMapping)
+    private async Task RequireMigratedCmsRoles(KX13Context kx13Context, CancellationToken cancellationToken, List<int?> migratedSiteIds)
     {
         var kx13CmsRoles = kx13Context.CmsRoles
-            .Where(x => explicitSiteIdMapping.Contains(x.SiteId) || x.SiteId == null);
+            .Where(x => migratedSiteIds.Contains(x.SiteId) || x.SiteId == null);
 
         foreach (var kx13CmsRole in kx13CmsRoles)
         {
@@ -195,7 +197,9 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.CmsRole>(var cmsRole, var newInstance):
+                case { Success : true } result:
+                {
+                    var (cmsRole, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(cmsRole, nameof(cmsRole));
 
                     if (newInstance)
@@ -228,6 +232,7 @@ public class MigrateUsersCommandHandler: IRequestHandler<MigrateUsersCommand, Ge
                     );
 
                     break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mapped));
             }

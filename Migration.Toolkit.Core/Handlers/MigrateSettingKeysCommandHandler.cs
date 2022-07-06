@@ -101,7 +101,7 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
     public async Task<MigrateSettingsKeysResult> Handle(MigrateSettingKeysCommand request, CancellationToken cancellationToken)
     {
         var entityConfiguration = _toolkitConfiguration.EntityConfigurations.GetEntityConfiguration<KX13.Models.CmsSettingsKey>();
-        var explicitSiteIdMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
         
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -115,7 +115,7 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
                 .Include(sk => sk.KeyCategory.CategoryResource)
                 .Include(sk => sk.KeyCategory.CategoryParent.CategoryResource)
                 .Include(sk => sk.KeyCategory.CategoryParent.CategoryParent.CategoryResource)
-                .Where(csk => explicitSiteIdMapping.Contains(csk.SiteId) || csk.SiteId == null)
+                .Where(csk => migratedSiteIds.Contains(csk.SiteId) || csk.SiteId == null)
             // .Where(k => k.KeyIsCustom == true)
             ;
 

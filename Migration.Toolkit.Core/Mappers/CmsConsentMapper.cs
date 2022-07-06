@@ -1,38 +1,27 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
+using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsConsentMapper : IEntityMapper<KX13.Models.CmsConsent, KXO.Models.CmsConsent>
+public class CmsConsentMapper : EntityMapperBase<KX13.Models.CmsConsent, KXO.Models.CmsConsent>
 {
-    private readonly ILogger<CmsConsentMapper> _logger;
-
-    public CmsConsentMapper(ILogger<CmsConsentMapper> logger)
+    public CmsConsentMapper(ILogger<CmsConsentMapper> logger, PrimaryKeyMappingContext pkContext, IMigrationProtocol protocol): base(logger, pkContext, protocol)
     {
-        _logger = logger;
     }
-    
-    public IModelMappingResult<KXO.Models.CmsConsent> Map(KX13.Models.CmsConsent? source, KXO.Models.CmsConsent? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsent>().Log(_logger);
-        }
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new Migration.Toolkit.KXO.Models.CmsConsent();
-            newInstance = true;
-        }
-        else if (source.ConsentGuid!= target.ConsentGuid)
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsent>().Log(_logger);
-        }
+    protected override CmsConsent? CreateNewInstance(KX13.Models.CmsConsent source, MappingHelper mappingHelper, AddFailure addFailure) => new();
+
+    protected override CmsConsent MapInternal(KX13.Models.CmsConsent source, CmsConsent target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        // if (source.ConsentGuid!= target.ConsentGuid)
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsent>().Log(_logger);
+        // }
 
         // do not try to insert pk
         // target.ConsentId = source.ConsentId;
@@ -42,8 +31,7 @@ public class CmsConsentMapper : IEntityMapper<KX13.Models.CmsConsent, KXO.Models
         target.ConsentGuid = source.ConsentGuid;
         target.ConsentLastModified = source.ConsentLastModified;
         target.ConsentHash = source.ConsentHash;
-        
        
-        return new ModelMappingSuccess<KXO.Models.CmsConsent>(target, newInstance).Log(_logger);
+        return target;
     }
 }

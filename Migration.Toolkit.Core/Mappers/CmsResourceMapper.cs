@@ -1,44 +1,37 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
+using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.CmsResource, Migration.Toolkit.KXO.Models.CmsResource>
+public class CmsResourceMapper : EntityMapperBase<Migration.Toolkit.KX13.Models.CmsResource, Migration.Toolkit.KXO.Models.CmsResource>
 {
     private readonly ILogger<CmsResourceMapper> _logger;
 
-    public CmsResourceMapper(ILogger<CmsResourceMapper> logger)
+    public CmsResourceMapper(ILogger<CmsResourceMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext, IMigrationProtocol protocol) :
+        base(logger, primaryKeyMappingContext, protocol)
     {
         _logger = logger;
     }
 
-    public IModelMappingResult<Migration.Toolkit.KXO.Models.CmsResource> Map(Migration.Toolkit.KX13.Models.CmsResource? source,
-        Migration.Toolkit.KXO.Models.CmsResource? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsResource>().Log(_logger);
-        }
+    protected override CmsResource? CreateNewInstance(KX13.Models.CmsResource source, MappingHelper mappingHelper, AddFailure addFailure) => new();
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new Migration.Toolkit.KXO.Models.CmsResource();
-            newInstance = true;
-        }
-        else if (source.ResourceGuid != target.ResourceGuid)
+    protected override CmsResource MapInternal(KX13.Models.CmsResource source, CmsResource target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        if (source.ResourceGuid != target.ResourceGuid)
         {
             // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch on resources S={sourceGuild}, T={targetGuid}", source.ResourceGuid, target.ResourceGuid);
+            _logger.LogTrace("Assertion failed, entity key mismatch on resources S={sourceGuild}, T={targetGuid}", source.ResourceGuid,
+                target.ResourceGuid);
             // allowing to run through, same resource is not required for target instance
             // return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsResource>();
         }
 
         // avoid updating resource
-        if(!newInstance) return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsResource>(target, newInstance).Log(_logger);
-        
+        if (!newInstance) return target;
+
         // map entity
         // target.ResourceId = source.ResourceId;
         target.ResourceDisplayName = source.ResourceDisplayName;
@@ -55,6 +48,6 @@ public class CmsResourceMapper : IEntityMapper<Migration.Toolkit.KX13.Models.Cms
         target.ResourceInstallationState = source.ResourceInstallationState;
         target.ResourceInstalledVersion = source.ResourceInstalledVersion;
 
-        return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsResource>(target, newInstance).Log(_logger);
+        return target;
     }
 }

@@ -10,39 +10,27 @@ using Migration.Toolkit.KX13.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class TreeNodeMapper: IEntityMapper<KX13.Models.CmsTree, TreeNode>
+public class TreeNodeMapper: EntityMapperBase<KX13.Models.CmsTree, TreeNode>
 {
     private readonly ILogger<TreeNodeMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
     private readonly CoupledDataService _coupledDataService;
 
-    public TreeNodeMapper(ILogger<TreeNodeMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext, CoupledDataService coupledDataService)
+    public TreeNodeMapper(ILogger<TreeNodeMapper> logger, PrimaryKeyMappingContext pkContext, CoupledDataService coupledDataService, IMigrationProtocol protocol) : base(logger, pkContext, protocol)
     {
         _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
         _coupledDataService = coupledDataService;
     }
-    
-    public IModelMappingResult<TreeNode> Map(CmsTree? source, TreeNode? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<TreeNode>().Log(_logger);
-        }
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = TreeNode.New(source.NodeClass.ClassName);
-            newInstance = true;
-        }
-        else if (source.NodeGuid != target.NodeGUID)
+    protected override TreeNode? CreateNewInstance(CmsTree source, MappingHelper mappingHelper, AddFailure addFailure) 
+        => TreeNode.New(source.NodeClass.ClassName);
+
+    protected override TreeNode MapInternal(CmsTree source, TreeNode target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        if (!newInstance && source.NodeGuid != target.NodeGUID)
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<TreeNode>().Log(_logger);
+            throw new InvalidOperationException("Assertion failed, entity key mismatch.");
         }
 
         target.NodeGUID = source.NodeGuid;
@@ -50,17 +38,12 @@ public class TreeNodeMapper: IEntityMapper<KX13.Models.CmsTree, TreeNode>
         // target.NodeLevel = source.NodeLevel;
         target.NodeName = source.NodeName;
         // target.NodeOrder = source.NodeOrder;
-        
-        // TODO tk: 2022-07-04 solve how to produce meaningful failures directly to handbook
-        if (_primaryKeyMappingContext.TryRequireMapFromSource<K13M.CmsUser>(u => u.UserId, source.NodeOwner ?? -1, out var targetNodeOwnerId))
+
+        if (mappingHelper.TranslateRequiredId<KX13M.CmsUser>(u => u.UserId, source.NodeOwner, out var ownerUserId))
         {
-            target.NodeOwner = targetNodeOwnerId;
+            target.NodeOwner = ownerUserId;
         }
-        else
-        {
-            return new ModelMappingFailedMissingDependencyInTargetInstance<TreeNode>(nameof(target.NodeOwner), source.NodeOwner, HandbookReferences.CmsTreeUserIsMissingInTargetInstance);
-        }
-        
+
         // target.NodeAliasPath = source.NodeAliasPath;
         // target.NodeClassName = source.NodeClass.ClassName;
         var customNodeData = new ContainerCustomData();
@@ -74,7 +57,11 @@ public class TreeNodeMapper: IEntityMapper<KX13.Models.CmsTree, TreeNode>
         // target.NodeHasLinks = source.NodeHasLinks;
         // target.NodeID = source.NodeId;
         // target.NodeSiteName =
-        target.NodeParentID = _primaryKeyMappingContext.RequireMapFromSource<K13M.CmsTree>(u => u.NodeId, source.NodeParentId ?? -1);
+        // target.NodeParentID = _pkContext.RequireMapFromSource<KX13.Models.CmsTree>(u => u.NodeId, source.NodeParentId ?? -1);
+        if (mappingHelper.TranslateRequiredId<KX13M.CmsTree>(t => t.NodeId, source.NodeParentId, out var nodeParentId))
+        {
+            target.NodeParentID = nodeParentId;
+        }
         // target.NodeSiteID =
         // TODO tk: 2022-06-30 guard linked node id
         // target.NodeLinkedNodeID = ;
@@ -141,6 +128,6 @@ public class TreeNodeMapper: IEntityMapper<KX13.Models.CmsTree, TreeNode>
             }
         }
 
-        return new ModelMappingSuccess<TreeNode>(target, newInstance);
+        return target;
     }
 }

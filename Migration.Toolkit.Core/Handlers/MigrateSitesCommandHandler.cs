@@ -64,7 +64,9 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.CmsSite>(var cmsSite, var newInstance):
+                case { Success : true } result:
+                {
+                    var (cmsSite, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(cmsSite, nameof(cmsSite));
 
                     if (newInstance)
@@ -93,6 +95,7 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
                     _primaryKeyMappingContext.SetMapping<KX13.Models.CmsSite>(r => r.SiteId, kx13CmsSite.SiteId, cmsSite.SiteId);
 
                     break;
+                }
                 default:
                     break;
             }

@@ -1,5 +1,6 @@
 using CMS.DataEngine;
 using CMS.DocumentEngine;
+using CMS.MediaLibrary;
 using CMS.OnlineForms;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,12 +40,12 @@ public static class DependencyInjectionExtensions
 
         // forms
         services.AddTransient<IRequestHandler<MigrateFormsCommand, GenericCommandResult>, MigrateFormsCommandHandler>();
-        services.AddTransient<IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm>, CmsFormMapper>();
+        services.AddTransient<IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm>, CmsFormMapperEf>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsForm, BizFormInfo>, CmsFormMapper>();
 
         // page type synchronizer
         services.AddTransient<MigratePageTypesCommandHandler>();
-        services.AddTransient<IEntityMapper<KX13.Models.CmsClass, KXO.Models.CmsClass>, CmsClassMapper>();
+        // services.AddTransient<IEntityMapper<KX13.Models.CmsClass, KXO.Models.CmsClass>, CmsClassMapper>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsClass, DataClassInfo>, CmsClassMapper>();
 
         // setting keys migrate command
@@ -67,9 +68,9 @@ public static class DependencyInjectionExtensions
         // pages
         services.AddTransient<MigratePagesCommand>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsTree, TreeNode>, TreeNodeMapper>();
-        services.AddTransient<IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTree>, CmsTreeMapper>();
-        services.AddTransient<IEntityMapper<KX13.Models.CmsDocument, KXO.Models.CmsDocument>, CmsDocumentMapper>();
-        services.AddTransient<IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>, CmsAclMapper>();
+        // services.AddTransient<IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTree>, CmsTreeMapper>();
+        // services.AddTransient<IEntityMapper<KX13.Models.CmsDocument, KXO.Models.CmsDocument>, CmsDocumentMapper>();
+        // services.AddTransient<IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>, CmsAclMapper>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath>, CmsPageUrlPathMapper>();
 
         // media libraries
@@ -81,7 +82,7 @@ public static class DependencyInjectionExtensions
         services.AddTransient<IRequestHandler<MigrateSitesCommand, GenericCommandResult>, MigrateSitesCommandHandler>();
 
         // cms forms
-        services.AddTransient<IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm>, CmsFormMapper>();
+        // services.AddTransient<IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm>, CmsFormMapper>();
         services.AddTransient<MigrateFormsCommandHandler>();
 
         services.AddMediatR(typeof(DependencyInjectionExtensions));
@@ -101,6 +102,11 @@ public static class DependencyInjectionExtensions
         services.AddTransient<IEntityMapper<KX13.Models.OmContactStatus, KXO.Models.OmContactStatus>, OmContactStatusMapper>();
         services.AddTransient<MigrateContactManagementCommandHandler>();
 
+        // attachments
+        services.AddTransient<MigrateAttachmentsCommandHandler>();
+        services.AddTransient<IEntityMapper<CmsAttachmentMapperSource, MediaFileInfo>, CmsAttachmentMapper>();
+        services.AddTransient<AttachmentConvertor>();
+        
         // IPipelineBehavior 
         return services;
     }

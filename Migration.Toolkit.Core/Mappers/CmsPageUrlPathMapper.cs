@@ -1,46 +1,36 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsPageUrlPathMapper : IEntityMapper<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath>
+public class CmsPageUrlPathMapper : EntityMapperBase<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath>
 {
-    private readonly ILogger<CmsPageUrlPathMapper> _logger;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
 
     public CmsPageUrlPathMapper(
         ILogger<CmsPageUrlPathMapper> logger,
-        
-        PrimaryKeyMappingContext primaryKeyMappingContext
-        )
+        PrimaryKeyMappingContext primaryKeyMappingContext,
+        IMigrationProtocol protocol
+    ) : base(logger, primaryKeyMappingContext, protocol)
     {
-        _logger = logger;
         _primaryKeyMappingContext = primaryKeyMappingContext;
     }
-    
-    public IModelMappingResult<KXO.Models.CmsPageUrlPath> Map(KX13.Models.CmsPageUrlPath? source, KXO.Models.CmsPageUrlPath? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsPageUrlPath>().Log(_logger);
-        }
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new Migration.Toolkit.KXO.Models.CmsPageUrlPath();
-            newInstance = true;
-        }
-        else if (source.PageUrlPathGuid != target.PageUrlPathGuid)
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsPageUrlPath>().Log(_logger);
-        }
-        
+    protected override CmsPageUrlPath? CreateNewInstance(KX13.Models.CmsPageUrlPath source, MappingHelper mappingHelper, AddFailure addFailure) => new();
+
+    protected override CmsPageUrlPath MapInternal(KX13.Models.CmsPageUrlPath source, CmsPageUrlPath target, bool newInstance,
+        MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        // if (source.PageUrlPathGuid != target.PageUrlPathGuid)
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsPageUrlPath>().Log(_logger);
+        // }
+
         // target.PageUrlPathId = source.PageUrlPathId;
         target.PageUrlPathGuid = source.PageUrlPathGuid;
         target.PageUrlPathCulture = source.PageUrlPathCulture;
@@ -48,9 +38,12 @@ public class CmsPageUrlPathMapper : IEntityMapper<KX13.Models.CmsPageUrlPath, KX
         target.PageUrlPathUrlPathHash = source.PageUrlPathUrlPathHash;
         target.PageUrlPathLastModified = source.PageUrlPathLastModified;
 
-        // target.PageUrlPathNodeId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsTree>(c => c.NodeId, source.PageUrlPathNodeId);
-        target.PageUrlPathSiteId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.PageUrlPathSiteId);
+        // target.PageUrlPathSiteId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.PageUrlPathSiteId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.CmsSite>(c => c.SiteId, source.PageUrlPathSiteId, out var siteId))
+        {
+            target.PageUrlPathSiteId = siteId;
+        }
 
-        return new ModelMappingSuccess<KXO.Models.CmsPageUrlPath>(target, newInstance).Log(_logger);
+        return target;
     }
 }

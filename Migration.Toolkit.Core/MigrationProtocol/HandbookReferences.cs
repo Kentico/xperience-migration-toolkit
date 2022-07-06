@@ -22,6 +22,8 @@ public static class HandbookReferences
     
     public static HandbookReference CmsTreeTreeIsLinkFromDifferentSite => new("CmsTree_TreeIsLinkFromDifferentSite");
     
+    public static HandbookReference TemporaryAttachmentMigrationIsNotSupported => new("TemporaryAttachmentMigrationIsNotSupported");
+    
     #endregion
 
 
@@ -33,6 +35,38 @@ public static class HandbookReferences
 
     #region "Errors - something need to be done"
 
+    public static HandbookReference MissingRequiredDependency<TSourceDependency>(string fieldName, object? sourceValue) =>
+        new HandbookReference("MissingRequiredDependency")
+            .WithData(new
+            {
+                DependencyType = typeof(TSourceDependency).Name,
+                FieldName = fieldName,
+                SourceValue = sourceValue
+            });
+
+    public static HandbookReference SourceEntityIsNull<TSource>() =>
+        new HandbookReference("SourceEntityIsNull")
+            .WithData(new
+            {
+                SourceEntityType = typeof(TSource).Name,
+            });
+    
+    public static HandbookReference FailedToCreateTargetInstance<TTarget>() =>
+        new HandbookReference("FailedToCreateTargetInstance")
+            .WithData(new
+            {
+                TargetEntityType = typeof(TTarget).Name,                
+            });
+    
+    public static HandbookReference MissingConfiguration<TCommand>(string configurationName) =>
+        new HandbookReference("MissingConfiguration")
+            .NeedsManualAction()
+            .WithData(new
+            {
+                command = typeof(TCommand).Name, 
+                configurationName
+            });
+    
     public static HandbookReference CmsUserEmailConstraintBroken => new("CmsUser_EmailConstraintBroken");
     public static HandbookReference CmsUserUserNameConstraintBroken => new("CmsUser_UserNameConstraintBroken");
     public static HandbookReference CmsTreeTreeRootIsMissing => new("CmsTree_TreeRootIsMissing");

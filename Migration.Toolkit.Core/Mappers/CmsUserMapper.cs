@@ -1,43 +1,33 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUser>
+public class CmsUserMapper : EntityMapperBase<KX13.Models.CmsUser, KXO.Models.CmsUser>
 {
     private readonly ILogger<CmsUserMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
 
     public CmsUserMapper(
         ILogger<CmsUserMapper> logger,
-        PrimaryKeyMappingContext primaryKeyMappingContext 
-    )
+        PrimaryKeyMappingContext primaryKeyMappingContext,
+        IMigrationProtocol protocol
+    ) : base(logger, primaryKeyMappingContext, protocol)
     {
         _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
     }
-    
-    public IModelMappingResult<KXO.Models.CmsUser> Map(KX13.Models.CmsUser? source, KXO.Models.CmsUser? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<KXO.Models.CmsUser>().Log(_logger);
-        }
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new KXO.Models.CmsUser();
-            newInstance = true;
-        }
-        else if (source.UserGuid != target.UserGuid)
+    protected override CmsUser? CreateNewInstance(KX13.Models.CmsUser tSourceEntity, MappingHelper mappingHelper, AddFailure addFailure) => new();
+
+    protected override CmsUser MapInternal(KX13.Models.CmsUser source, CmsUser target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        if (!newInstance && source.UserGuid != target.UserGuid)
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<KXO.Models.CmsUser>().Log(_logger);
+            throw new InvalidOperationException("Assertion failed, entity key mismatch.");
         }
 
         // do not try to insert pk
@@ -62,22 +52,34 @@ public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUse
         target.UserPasswordLastChanged = null;
         // TODO tk: 2022-05-18 deduce info
         target.UserRegistrationLinkExpiration = DateTime.Now.AddDays(365);
-        
+
         foreach (var sourceCmsUserRole in source.CmsUserRoles)
         {
-            var targetRoleId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsRole>(r => r.RoleId, sourceCmsUserRole.RoleId);
-            if (target.CmsUserRoles.All(x => x.RoleId != targetRoleId))
+            if (mappingHelper.TranslateRequiredId<KX13M.CmsRole>(r => r.RoleId, sourceCmsUserRole.RoleId, out var targetRoleId))
             {
-                target.CmsUserRoles.Add(new KXO.Models.CmsUserRole
+                if (target.CmsUserRoles.All(x => x.RoleId != targetRoleId))
                 {
-                    RoleId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsRole>(r => r.RoleId, sourceCmsUserRole.RoleId),
-                    User = target,
-                    ValidTo = sourceCmsUserRole.ValidTo
-                });    
+                    target.CmsUserRoles.Add(new KXO.Models.CmsUserRole
+                    {
+                        RoleId = targetRoleId,
+                        User = target,
+                        ValidTo = sourceCmsUserRole.ValidTo
+                    });
+                }
             }
         }
 
-        return new ModelMappingSuccess<KXO.Models.CmsUser>(target, newInstance).Log(_logger);
+        foreach (var sourceCmsUserSite in source.CmsUserSites)
+        {
+            var userSite = new CmsUserSite();
+            if (mappingHelper.TryTranslateId<KX13M.CmsSite>(s => s.SiteId, sourceCmsUserSite.SiteId, out var siteId))
+            {
+                userSite.SiteId = siteId.Value;
+                target.CmsUserSites.Add(userSite);
+            }
+        }
+
+        return target;
 
         // removed in kxo
         // target.MiddleName = source.MiddleName;
@@ -93,6 +95,6 @@ public class CmsUserMapper: IEntityMapper<KX13.Models.CmsUser, KXO.Models.CmsUse
         // target.UserHasAllowedCultures = source.UserHasAllowedCultures;
         // target.UserMfrequired = source.UserMfrequired;
         // target.UserPrivilegeLevel = source.UserPrivilegeLevel;
-        // target.UserMftimestep = source.UserMftimestep;
+        // target.UserMftimestep = source.UserMftimestep;;
     }
 }

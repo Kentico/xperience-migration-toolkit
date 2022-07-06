@@ -1,49 +1,29 @@
 ﻿using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsConsentArchiveMapper : IEntityMapper<KX13.Models.CmsConsentArchive, KXO.Models.CmsConsentArchive>
+public class CmsConsentArchiveMapper : EntityMapperBase<KX13.Models.CmsConsentArchive, KXO.Models.CmsConsentArchive>
 {
-    private readonly ILogger<CmsConsentArchiveMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
-
-    public CmsConsentArchiveMapper(ILogger<CmsConsentArchiveMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext)
+    public CmsConsentArchiveMapper(ILogger<CmsConsentArchiveMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext,
+        IMigrationProtocol protocol) : base(logger, primaryKeyMappingContext, protocol)
     {
-        _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
     }
-    
-    public IModelMappingResult<KXO.Models.CmsConsentArchive> Map(KX13.Models.CmsConsentArchive? source, KXO.Models.CmsConsentArchive? target)
+
+    protected override CmsConsentArchive? CreateNewInstance(KX13.Models.CmsConsentArchive source, MappingHelper mappingHelper, AddFailure addFailure) => new();
+
+    protected override CmsConsentArchive MapInternal(KX13.Models.CmsConsentArchive source, CmsConsentArchive target, bool newInstance,
+        MappingHelper mappingHelper, AddFailure addFailure)
     {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsConsentArchive>().Log(_logger);
-        }
-
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new Migration.Toolkit.KXO.Models.CmsConsentArchive();
-            newInstance = true;
-        }
-        else if (source.ConsentArchiveGuid!= target.ConsentArchiveGuid)
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentArchive>().Log(_logger);
-        }
-
-        var consentId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsConsent>(r => r.ConsentId, source.ConsentArchiveConsentId);
-
-        if (!consentId.HasValue)
-        {
-            _logger.LogTrace("Assertion failed, Consent not found.");
-            return new ModelMappingFailed<Migration.Toolkit.KXO.Models.CmsConsentArchive>($"Consent: {source.ConsentArchiveConsentId} for entity not found");
-        }
+        // if (source.ConsentArchiveGuid!= target.ConsentArchiveGuid)
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsConsentArchive>().Log(_logger);
+        // }
 
         // do not try to insert pk
         // target.ConsentArchiveId = source.ConsentArchiveId;
@@ -51,9 +31,13 @@ public class CmsConsentArchiveMapper : IEntityMapper<KX13.Models.CmsConsentArchi
         target.ConsentArchiveGuid = source.ConsentArchiveGuid;
         target.ConsentArchiveLastModified = source.ConsentArchiveLastModified;
         target.ConsentArchiveHash = source.ConsentArchiveHash;
-        target.ConsentArchiveConsentId = consentId.Value;
+        
+        //var consentId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsConsent>(r => r.ConsentId, source.ConsentArchiveConsentId);
+        if (mappingHelper.TranslateRequiredId<KX13.Models.CmsConsent>(r => r.ConsentId, source.ConsentArchiveConsentId, out var consentId))
+        {
+            target.ConsentArchiveConsentId = consentId;    
+        }
 
-
-        return new ModelMappingSuccess<KXO.Models.CmsConsentArchive>(target, newInstance).Log(_logger);
+        return target;
     }
 }

@@ -50,7 +50,6 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
     public async Task<GenericCommandResult> Handle(MigrateDataProtectionCommand request, CancellationToken cancellationToken)
     {
         var batchSize = request.BatchSize;
-        using var protocolScope = _migrationProtocol.CreateScope<MigrateDataProtectionCommandHandler>();
         
         await MigrateConsent(cancellationToken);
         await MigrateConsentArchive(cancellationToken);
@@ -81,7 +80,9 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.CmsConsent>(var cmsConsent, var newInstance):
+                case { Success : true } result:
+                {
+                    var (cmsConsent, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(cmsConsent, nameof(cmsConsent));
 
                     if (newInstance)
@@ -108,7 +109,9 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
                     )
                     {
                         await _kxoContext.DisposeAsync();
-                        _logger.LogError("Failed to migrate consent - consent guid: {consentGuid}. Consent needs manual migration. Consent name: {consentName}", kx13Consent.ConsentGuid, kx13Consent.ConsentName);
+                        _logger.LogError(
+                            "Failed to migrate consent - consent guid: {consentGuid}. Consent needs manual migration. Consent name: {consentName}",
+                            kx13Consent.ConsentGuid, kx13Consent.ConsentName);
                         _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
 
                         _migrationProtocol.NeedsManualAction(
@@ -124,6 +127,7 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
                     _primaryKeyMappingContext.SetMapping<KX13.Models.CmsConsent>(r => r.ConsentId, kx13Consent.ConsentId, cmsConsent.ConsentId);
 
                     break;
+                }
                 default:
                     break;
             }
@@ -149,7 +153,9 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.CmsConsentArchive>(var cmsConsentArchive, var newInstance):
+                case { Success : true } result:
+                {
+                    var (cmsConsentArchive, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(cmsConsentArchive, nameof(cmsConsentArchive));
 
                     if (newInstance)
@@ -165,7 +171,8 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
                     {
                         await _kxoContext.SaveChangesAsync(cancellationToken);
 
-                        _migrationProtocol.Success<KX13.Models.CmsConsentArchive, KXO.Models.CmsConsentArchive>(kx13ArchiveConsent, cmsConsentArchive, mapped);
+                        _migrationProtocol.Success<KX13.Models.CmsConsentArchive, KXO.Models.CmsConsentArchive>(kx13ArchiveConsent, cmsConsentArchive,
+                            mapped);
                         _logger.LogInformation(newInstance
                             ? $"CmsConsentArchive with ConsentArchiveGuid '{cmsConsentArchive.ConsentArchiveGuid}' was inserted."
                             : $"CmsConsentArchive with ConsentArchiveGuid '{cmsConsentArchive.ConsentArchiveGuid}' was updated.");
@@ -176,7 +183,9 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
                     )
                     {
                         await _kxoContext.DisposeAsync();
-                        _logger.LogError("Failed to migrate consent archive - consent archive guid: {consentArchiveGuid}. Use needs manual migration.", kx13ArchiveConsent.ConsentArchiveGuid);
+                        _logger.LogError(
+                            "Failed to migrate consent archive - consent archive guid: {consentArchiveGuid}. Use needs manual migration.",
+                            kx13ArchiveConsent.ConsentArchiveGuid);
                         _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
 
                         _migrationProtocol.NeedsManualAction(
@@ -189,9 +198,11 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
                         continue;
                     }
 
-                    _primaryKeyMappingContext.SetMapping<KX13.Models.CmsConsentArchive>(r => r.ConsentArchiveGuid, kx13ArchiveConsent.ConsentArchiveId, cmsConsentArchive.ConsentArchiveId);
+                    _primaryKeyMappingContext.SetMapping<KX13.Models.CmsConsentArchive>(r => r.ConsentArchiveGuid,
+                        kx13ArchiveConsent.ConsentArchiveId, cmsConsentArchive.ConsentArchiveId);
 
                     break;
+                }
                 default:
                     break;
             }
@@ -222,7 +233,9 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.CmsConsentAgreement>(var cmsConsentAgreement, var newInstance):
+                case { Success : true } result:
+                {
+                    var (cmsConsentAgreement, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(cmsConsentAgreement, nameof(cmsConsentAgreement));
 
                     if (newInstance)
@@ -236,6 +249,7 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
                     //_primaryKeyMappingContext.SetMapping<KX13.Models.CmsConsentAgreement>(r => r.ConsentAgreementGuid, kx13ConsentAgreement.ConsentAgreementId, cmsConsentAgreement.ConsentAgreementId);
 
                     break;
+                }
                 default:
                     break;
             }

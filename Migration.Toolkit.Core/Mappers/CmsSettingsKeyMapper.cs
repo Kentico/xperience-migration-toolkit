@@ -1,48 +1,50 @@
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.MigrationProtocol;
+using Migration.Toolkit.KX13.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>
+public class CmsSettingsKeyMapper : EntityMapperBase<Migration.Toolkit.KX13.Models.CmsSettingsKey, Migration.Toolkit.KXO.Models.CmsSettingsKey>
 {
-    private readonly ILogger<CmsSettingsKeyMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
-    private readonly IEntityMapper<K13M.CmsSettingsCategory, KXO.Models.CmsSettingsCategory> _cmsCategoryMapper;
+    private readonly IEntityMapper<KX13.Models.CmsSettingsCategory, KXO.Models.CmsSettingsCategory> _cmsCategoryMapper;
 
-    public CmsSettingsKeyMapper(ILogger<CmsSettingsKeyMapper> logger, PrimaryKeyMappingContext primaryKeyMappingContext,
-        IEntityMapper<K13M.CmsSettingsCategory, KXO.Models.CmsSettingsCategory> cmsCategoryMapper)
+    public CmsSettingsKeyMapper(ILogger<CmsSettingsKeyMapper> logger, PrimaryKeyMappingContext pkContext, IMigrationProtocol protocol,
+        IEntityMapper<CmsSettingsCategory, KXO.Models.CmsSettingsCategory> cmsCategoryMapper) : base(logger, pkContext, protocol)
     {
-        _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
         _cmsCategoryMapper = cmsCategoryMapper;
     }
 
-    public IModelMappingResult<Migration.Toolkit.KXO.Models.CmsSettingsKey> Map(Migration.Toolkit.KX13.Models.CmsSettingsKey? source, Migration.Toolkit.KXO.Models.CmsSettingsKey? target)
-    {
-        if (source is null)
-        {
-            _logger.LogTrace("Source entity is not defined.");
-            return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSettingsKey>().Log(_logger);
-        }
+    protected override KXO.Models.CmsSettingsKey? CreateNewInstance(KX13.Models.CmsSettingsKey source, MappingHelper mappingHelper,
+        AddFailure addFailure) => new();
 
-        var newInstance = false;
-        if (target is null)
-        {
-            _logger.LogTrace("Null target supplied, creating new instance.");
-            target = new Migration.Toolkit.KXO.Models.CmsSettingsKey();
-            newInstance = true;
-        }
-        else if (CmsSettingsKeyKey.From(source.KeyName, _primaryKeyMappingContext.MapFromSource<K13M.CmsSite>(s=>s.SiteId, source.SiteId)) != CmsSettingsKeyKey.From(target.KeyName, target.SiteId))
-        {
-            // assertion failed
-            _logger.LogTrace("Assertion failed, entity key mismatch.");
-            return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsSettingsKey>().Log(_logger);
-        }
+    protected override KXO.Models.CmsSettingsKey MapInternal(KX13.Models.CmsSettingsKey source, KXO.Models.CmsSettingsKey target, bool newInstance,
+        MappingHelper mappingHelper, AddFailure addFailure)
+    {
+        // if (source is null)
+        // {
+        //     _logger.LogTrace("Source entity is not defined.");
+        //     return new ModelMappingFailedSourceNotDefined<Migration.Toolkit.KXO.Models.CmsSettingsKey>().Log(_logger);
+        // }
+        //
+        // var newInstance = false;
+        // if (target is null)
+        // {
+        //     _logger.LogTrace("Null target supplied, creating new instance.");
+        //     target = new Migration.Toolkit.KXO.Models.CmsSettingsKey();
+        //     newInstance = true;
+        // }
+        // else if (CmsSettingsKeyKey.From(source.KeyName, _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsSite>(s=>s.SiteId, source.SiteId)) != CmsSettingsKeyKey.From(target.KeyName, target.SiteId))
+        // {
+        //     // assertion failed
+        //     _logger.LogTrace("Assertion failed, entity key mismatch.");
+        //     return new ModelMappingFailedKeyMismatch<Migration.Toolkit.KXO.Models.CmsSettingsKey>().Log(_logger);
+        // }
 
         // map entity
         // source.KeyId = target.KeyId;
-        
+
         if (newInstance)
         {
             target.KeyName = source.KeyName;
@@ -59,15 +61,17 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
             target.KeyFormControlSettings = source.KeyFormControlSettings;
             target.KeyExplanationText = source.KeyExplanationText;
         }
-        
+
         target.KeyValue = source.KeyValue;
-        
+
         // target.KeyCategoryId = source.KeyCategoryId; - mapped using EF
-        target.SiteId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsSite>(s => s.SiteId, source.SiteId);
+        if (mappingHelper.TranslateId<KX13.Models.CmsSite>(s => s.SiteId, source.SiteId, out var siteId))
+        {
+            target.SiteId = siteId;
+        }
         target.KeyLastModified = source.KeyLastModified;
         // target.KeyIsHidden = source.KeyIsHidden; - not mapped / internal
-        
-        var aggregatedResult = new AggregatedResult<Migration.Toolkit.KXO.Models.CmsSettingsKey>(target, newInstance);
+
         if (source.KeyCategory != null)
         {
             switch (_cmsCategoryMapper.Map(source.KeyCategory, target.KeyCategory))
@@ -79,29 +83,28 @@ public class CmsSettingsKeyMapper : IEntityMapper<Migration.Toolkit.KX13.Models.
                 }
                 case { Success: false } result:
                 {
-                    aggregatedResult.AddResult(result);
-                    return aggregatedResult.Log(_logger);
+                    addFailure(new MapperResultFailure<KXO.Models.CmsSettingsKey>(result.HandbookReference));
+                    break;
                 }
             }
         }
-
-        // return new ModelMappingSuccess<Migration.Toolkit.KXO.Models.CmsSettingsKey>(target, newInstance);
-        return aggregatedResult.Log(_logger);
+        
+        return target;
     }
 }
 
-public record CmsSettingsKeyKey(string KeyName, int? SiteId)//, Guid KeyGuid)
+public record CmsSettingsKeyKey(string KeyName, int? SiteId) //, Guid KeyGuid)
 {
     public override string ToString()
     {
-        return $"KN={KeyName.PadLeft(60,' ')} SID={SiteId}";
+        return $"KN={KeyName.PadLeft(60, ' ')} SID={SiteId}";
     }
 
     public static CmsSettingsKeyKey? From(Migration.Toolkit.KX13.Models.CmsSettingsKey? cmsSettingsKey) =>
-        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId);//, cmsSettingsKey.KeyGuid);
+        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId); //, cmsSettingsKey.KeyGuid);
 
     public static CmsSettingsKeyKey? From(Migration.Toolkit.KXO.Models.CmsSettingsKey? cmsSettingsKey) =>
-        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId);// , cmsSettingsKey.KeyGuid);
+        cmsSettingsKey == null ? null : new(cmsSettingsKey.KeyName, cmsSettingsKey.SiteId); // , cmsSettingsKey.KeyGuid);
 
     public static CmsSettingsKeyKey From(string? keyName, int? siteId) //, Guid keyGuid)
     {

@@ -92,7 +92,7 @@ public record MigrateSettingKeysCommand() : IRequest<MigrateSettingsKeysResult>,
     public Type[] Dependencies => new[] { typeof(MigrateSitesCommand) };
 }
 
-public record MigrateAttachmentsCommand() : IRequest<MigrateSettingsKeysResult>, ICommand
+public record MigrateAttachmentsCommand(string CultureCode) : IRequest<CommandResult>, ICommand
 {
     public static string Moniker => "attachments";
     public static string MonikerFriendly => "Attachments";

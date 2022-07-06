@@ -92,4 +92,9 @@ public class DebugMigrationProtocol: IMigrationProtocol
     {
         _logger.LogDebug("CommandError {request} => {exception}", request, exception);
     }
+
+    public void Append(HandbookReference? handbookReference)
+    {
+        _logger.LogDebug(handbookReference?.ToString());
+    }
 }

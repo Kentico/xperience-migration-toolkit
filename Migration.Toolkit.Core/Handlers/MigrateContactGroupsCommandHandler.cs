@@ -46,7 +46,7 @@ public class MigrateContactGroupsCommandHandler : IRequestHandler<MigrateContact
     
     public async Task<GenericCommandResult> Handle(MigrateContactGroupsCommand request, CancellationToken cancellationToken)
     {  
-        // var explicitSiteIdMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        // var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
         
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -69,7 +69,9 @@ public class MigrateContactGroupsCommandHandler : IRequestHandler<MigrateContact
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXOM.OmContactGroup>(var omContactGroup, var newInstance):
+                case { Success : true } result:
+                {
+                    var (omContactGroup, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(omContactGroup, nameof(omContactGroup));
 
                     if (newInstance)
@@ -95,9 +97,11 @@ public class MigrateContactGroupsCommandHandler : IRequestHandler<MigrateContact
                         throw;
                     }
 
-                    _primaryKeyMappingContext.SetMapping<KX13.Models.OmContactGroup>(r => r.ContactGroupId, kx13omContactGroup.ContactGroupId, omContactGroup.ContactGroupId);
+                    _primaryKeyMappingContext.SetMapping<KX13.Models.OmContactGroup>(r => r.ContactGroupId, kx13omContactGroup.ContactGroupId,
+                        omContactGroup.ContactGroupId);
 
                     break;
+                }
                 default:
                     break;
             }

@@ -57,6 +57,11 @@ public class NullMigrationProtocol: IMigrationProtocol
         
     }
 
+    public void Append(HandbookReference? handbookReference)
+    {
+        
+    }
+
     public void MappedTarget<TTarget>(IModelMappingResult<TTarget> mapped)
     {
         // TODO tk: 2022-05-18 log serialized mapping result conditionally

@@ -51,12 +51,12 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
         
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
         
-        var explicitSiteIdMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
         // TODO tk: 2022-05-19 reorder method arguments
         // await RequireMigratedCmsAcls(cancellationToken, kx13Context);
 
         var kx13MediaLibraries = kx13Context.MediaLibraries
-                .Where(x => explicitSiteIdMapping.Contains(x.LibrarySiteId))
+                .Where(x => migratedSiteIds.Contains(x.LibrarySiteId))
                 .OrderBy(t => t.LibraryId)
             ;
 
@@ -76,9 +76,11 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.MediaLibrary>(var cmsMediaLibrary, var newInstance):
+                case { Success : true } result:
+                {
+                    var (cmsMediaLibrary, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(cmsMediaLibrary, nameof(cmsMediaLibrary));
-                    
+
                     if (newInstance)
                     {
                         _kxoContext.MediaLibraries.Add(cmsMediaLibrary);
@@ -109,22 +111,23 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
                     );
 
                     break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mapped));
             }
         }
         
         // TODO tk: 2022-05-19 reorder method arguments
-        await RequireMigratedMediaFiles(cancellationToken, kx13Context, explicitSiteIdMapping);
+        await RequireMigratedMediaFiles(cancellationToken, kx13Context, migratedSiteIds);
         
         
         return new GenericCommandResult();
     }
 
-    private async Task RequireMigratedMediaFiles(CancellationToken cancellationToken, KX13Context kx13Context, List<int?> explicitSiteIdMapping)
+    private async Task RequireMigratedMediaFiles(CancellationToken cancellationToken, KX13Context kx13Context, List<int?> migratedSiteIds)
     {
         var kx13MediaFiles = kx13Context.MediaFiles
-            .Where(x => explicitSiteIdMapping.Contains(x.FileSiteId));
+            .Where(x => migratedSiteIds.Contains(x.FileSiteId));
 
         foreach (var kx13MediaFile in kx13MediaFiles)
         {
@@ -140,7 +143,9 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
 
             switch (mapped)
             {
-                case ModelMappingSuccess<KXO.Models.MediaFile>(var mediaFile, var newInstance):
+                case { Success : true } result:
+                {
+                    var (mediaFile, newInstance) = result;
                     ArgumentNullException.ThrowIfNull(mediaFile, nameof(mediaFile));
 
                     if (newInstance)
@@ -173,6 +178,7 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
                     );
 
                     break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mapped));
             }

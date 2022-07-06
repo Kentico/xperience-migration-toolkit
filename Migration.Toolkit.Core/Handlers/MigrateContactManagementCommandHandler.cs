@@ -19,7 +19,7 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
     private readonly ILogger<MigrateContactManagementCommandHandler> _logger;
     private readonly IDbContextFactory<KxoContext> _kxoContextFactory;
     private readonly IDbContextFactory<KX13Context> _kx13ContextFactory;
-    private readonly IEntityMapper<K13M.OmContact, KXOM.OmContact> _contactMapper;
+    private readonly IEntityMapper<KX13.Models.OmContact, KXOM.OmContact> _contactMapper;
     private readonly BulkDataCopyService _bulkDataCopyService;
     private readonly ToolkitConfiguration _toolkitConfiguration;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
@@ -50,7 +50,7 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
     
     public async Task<GenericCommandResult> Handle(MigrateContactManagementCommand request, CancellationToken cancellationToken)
     {  
-        // var explicitSiteIdMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        // var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
 
         // TODO tk: 2022-06-13 check field length
         // _bulkDataCopyService.CheckIfDataExistsInTargetTable("OM_Contact");
@@ -89,83 +89,83 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
         _logger.LogTrace("Bulk data copy request: {request}", bulkCopyRequest);
         _bulkDataCopyService.CopyTableToTable(bulkCopyRequest);
         return new GenericCommandResult();
-        
-        await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
-
-        var contactsCount = kx13Context.OmContacts.Count();
-        _logger.LogInformation("Total OmContact count {count}", contactsCount);
-
-        var chunkSize = 5000;
-        for (var chunkIndex = 0; chunkIndex < contactsCount + chunkSize; chunkIndex += chunkSize)
-        {
-            var contactChunk = await kx13Context.OmContacts
-                .Include(c => c.ContactStatus)
-                .AsSplitQuery().Skip(chunkIndex).Take(chunkSize).ToListAsync(cancellationToken: cancellationToken);
-
-            var contactChunkGuids = contactChunk.Select(x => x.ContactGuid).ToList();
-
-            var targetContacts = await _kxoContext.OmContacts
-                .Include(c => c.ContactStatus)
-                .Where(u => contactChunkGuids.Contains(u.ContactGuid))
-                .ToDictionaryAsync(x => x.ContactGuid, cancellationToken: cancellationToken);
-
-            var savedContacts = new List<(K13M.OmContact, KXOM.OmContact)>();
-            foreach (var kx13OmContact in contactChunk)
-            {
-                _migrationProtocol.FetchedSource(kx13OmContact);
-                _logger.LogTrace("Migrating Contact with ContactGroupGuid {contactGuid}", kx13OmContact.ContactGuid);
-
-                var kxoOmContact = targetContacts.TryGetValue(kx13OmContact.ContactGuid, out var target) ? target : null;
-
-                _migrationProtocol.FetchedTarget(kxoOmContact);
-
-                var mapped = _contactMapper.Map(kx13OmContact, kxoOmContact);
-                _migrationProtocol.MappedTarget(mapped);
-
-                switch (mapped)
-                {
-                    case ModelMappingSuccess<KXOM.OmContact>(var omContact, var newInstance):
-                        ArgumentNullException.ThrowIfNull(omContact, nameof(omContact));
-
-                        if (newInstance)
-                        {
-                            _kxoContext.OmContacts.Add(omContact);
-                        }
-                        else
-                        {
-                            _kxoContext.OmContacts.Update(omContact);
-                        }
-                        savedContacts.Add((kx13OmContact, omContact));
-
-                        try
-                        {
-                            _migrationProtocol.Success(kx13OmContact, omContact, mapped);
-                            _logger.LogInformation(
-                                "OmContact: with ContactGuid '{contactGuid}' was {operation}.", omContact.ContactGuid,
-                                newInstance ? "inserted" : "updated");
-                        }
-                        catch (Exception ex) // TODO tk: 2022-06-13 handle exceptions
-                        {
-                            throw;
-                        }
-
-                        break;
-                    default:
-                        break;
-                }
-            }
-            
-            await _kxoContext.SaveChangesAsync(cancellationToken);
-            
-            foreach (var (kx13OmContact, omContact) in savedContacts)
-            {
-                _primaryKeyMappingContext.SetMapping<KX13.Models.OmContact>(r => r.ContactId, kx13OmContact.ContactId, omContact.ContactId);    
-            }
-            
-            _logger.LogInformation("OmContact chunk of size {size} completed", contactChunkGuids.Count);
-        }
-
-        return new GenericCommandResult();
+        //
+        // await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
+        //
+        // var contactsCount = kx13Context.OmContacts.Count();
+        // _logger.LogInformation("Total OmContact count {count}", contactsCount);
+        //
+        // var chunkSize = 5000;
+        // for (var chunkIndex = 0; chunkIndex < contactsCount + chunkSize; chunkIndex += chunkSize)
+        // {
+        //     var contactChunk = await kx13Context.OmContacts
+        //         .Include(c => c.ContactStatus)
+        //         .AsSplitQuery().Skip(chunkIndex).Take(chunkSize).ToListAsync(cancellationToken: cancellationToken);
+        //
+        //     var contactChunkGuids = contactChunk.Select(x => x.ContactGuid).ToList();
+        //
+        //     var targetContacts = await _kxoContext.OmContacts
+        //         .Include(c => c.ContactStatus)
+        //         .Where(u => contactChunkGuids.Contains(u.ContactGuid))
+        //         .ToDictionaryAsync(x => x.ContactGuid, cancellationToken: cancellationToken);
+        //
+        //     var savedContacts = new List<(KX13.Models.OmContact, KXOM.OmContact)>();
+        //     foreach (var kx13OmContact in contactChunk)
+        //     {
+        //         _migrationProtocol.FetchedSource(kx13OmContact);
+        //         _logger.LogTrace("Migrating Contact with ContactGroupGuid {contactGuid}", kx13OmContact.ContactGuid);
+        //
+        //         var kxoOmContact = targetContacts.TryGetValue(kx13OmContact.ContactGuid, out var target) ? target : null;
+        //
+        //         _migrationProtocol.FetchedTarget(kxoOmContact);
+        //
+        //         var mapped = _contactMapper.Map(kx13OmContact, kxoOmContact);
+        //         _migrationProtocol.MappedTarget(mapped);
+        //
+        //         switch (mapped)
+        //         {
+        //             case ModelMappingSuccess<KXOM.OmContact>(var omContact, var newInstance):
+        //                 ArgumentNullException.ThrowIfNull(omContact, nameof(omContact));
+        //
+        //                 if (newInstance)
+        //                 {
+        //                     _kxoContext.OmContacts.Add(omContact);
+        //                 }
+        //                 else
+        //                 {
+        //                     _kxoContext.OmContacts.Update(omContact);
+        //                 }
+        //                 savedContacts.Add((kx13OmContact, omContact));
+        //
+        //                 try
+        //                 {
+        //                     _migrationProtocol.Success(kx13OmContact, omContact, mapped);
+        //                     _logger.LogInformation(
+        //                         "OmContact: with ContactGuid '{contactGuid}' was {operation}.", omContact.ContactGuid,
+        //                         newInstance ? "inserted" : "updated");
+        //                 }
+        //                 catch (Exception ex) // TODO tk: 2022-06-13 handle exceptions
+        //                 {
+        //                     throw;
+        //                 }
+        //
+        //                 break;
+        //             default:
+        //                 break;
+        //         }
+        //     }
+        //     
+        //     await _kxoContext.SaveChangesAsync(cancellationToken);
+        //     
+        //     foreach (var (kx13OmContact, omContact) in savedContacts)
+        //     {
+        //         _primaryKeyMappingContext.SetMapping<KX13.Models.OmContact>(r => r.ContactId, kx13OmContact.ContactId, omContact.ContactId);    
+        //     }
+        //     
+        //     _logger.LogInformation("OmContact chunk of size {size} completed", contactChunkGuids.Count);
+        // }
+        //
+        // return new GenericCommandResult();
     }
 
     public void Dispose()

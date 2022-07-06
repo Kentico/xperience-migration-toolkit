@@ -41,7 +41,7 @@ services
 
 services.UseKx13DbContext(settings);
 services.UseKxoDbContext(settings);
-services.UseKxoApi(config.GetRequiredSection("Settings").GetRequiredSection("TargetKxoApiSettings"));
+services.UseKxoApi(config.GetRequiredSection("Settings").GetRequiredSection("TargetKxoApiSettings"), settings.TargetCmsDirPath);
 services.AddSingleton(settings);
 services.UseToolkitCore();
 
@@ -128,6 +128,8 @@ void PrintCommandDescriptions()
     WriteCommandDesc($"starts migration of {Green(MigrateMediaLibrariesCommand.MonikerFriendly)}", $"migrate --{MigrateMediaLibrariesCommand.Moniker}");
     WriteCommandDesc($"starts migration of {Green(MigrateSitesCommand.MonikerFriendly)}", $"migrate --{MigrateSitesCommand.Moniker}");
     WriteCommandDesc($"starts migration of {Green(MigrateUsersCommand.MonikerFriendly)}", $"migrate --{MigrateUsersCommand.Moniker}");
+    WriteCommandDesc($"starts migration of {Green(MigrateAttachmentsCommand.MonikerFriendly)}", $"migrate --{MigrateAttachmentsCommand.Moniker}");
+    
     // WriteCommandDesc($"starts migration of {Green(MigrateWebFarmsCommand.MonikerFriendly)}", $"migrate --{MigrateWebFarmsCommand.Moniker}");
     // Console.WriteLine($"Run with option {Yellow("--dry")} to execute command without persistence");
 }
@@ -250,6 +252,28 @@ while (argsQ.TryDequeue(out var arg))
     {
         commands.Add(new MigrateUsersCommand());
         continue;
+    }
+    
+    if (arg == $"--{MigrateAttachmentsCommand.Moniker}")
+    {
+        if (RequireParameter("--culture", out var culture))
+        {
+            try
+            {
+                if (CultureInfo.GetCultureInfo(culture) is CultureInfo cultureInfo) // TODO tk: 2022-05-18 also check in kentico db for validity
+                {
+                    cultureCode = cultureInfo.Name;
+                }
+            }
+            catch (CultureNotFoundException cnfex)
+            {
+                Console.WriteLine($"{Red($"Culture '{culture}' not found!")}");
+                break;
+            }
+
+            commands.Add(new MigrateAttachmentsCommand(cultureCode));
+            continue;
+        }
     }
 
     // if (arg == $"--{MigrateWebFarmsCommand.Moniker}")

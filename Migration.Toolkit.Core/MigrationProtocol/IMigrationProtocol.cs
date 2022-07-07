@@ -13,7 +13,7 @@ public interface IMigrationProtocol
     void MappedTarget<TTarget>(IModelMappingResult<TTarget> mapped);
     void FetchedTarget<TTarget>(TTarget? target);
     void FetchedSource<TSource>(TSource? source);
-    void Success<TSource, TTarget>(TSource source, TTarget target, IModelMappingResult<TTarget> mapped);
+    void Success<TSource, TTarget>(TSource source, TTarget target, IModelMappingResult<TTarget>? mapped);
     IDisposable CreateScope<TScopeType>();
     void Warning<T>(HandbookReference handbookRef, T? entity);
     void Warning<TSource, TTarget>(HandbookReference handbookRef, TSource? source, TTarget? target);

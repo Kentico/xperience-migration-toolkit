@@ -183,6 +183,7 @@ namespace Migration.Toolkit.KX13.Context
         public virtual DbSet<ContentEvent> ContentEvents { get; set; } = null!;
         public virtual DbSet<ContentFaq> ContentFaqs { get; set; } = null!;
         public virtual DbSet<ContentFile> ContentFiles { get; set; } = null!;
+        public virtual DbSet<ContentFile1> ContentFile1s { get; set; } = null!;
         public virtual DbSet<ContentImageGallery> ContentImageGalleries { get; set; } = null!;
         public virtual DbSet<ContentJob> ContentJobs { get; set; } = null!;
         public virtual DbSet<ContentKbarticle> ContentKbarticles { get; set; } = null!;
@@ -450,6 +451,8 @@ namespace Migration.Toolkit.KX13.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.UseCollation("SQL_Latin1_General_CP1_CI_AS");
+
             modelBuilder.Entity<AnalyticsCampaign>(entity =>
             {
                 entity.Property(e => e.CampaignDisplayName).HasDefaultValueSql("('')");
@@ -4034,6 +4037,11 @@ namespace Migration.Toolkit.KX13.Context
             modelBuilder.Entity<ContentFile>(entity =>
             {
                 entity.Property(e => e.FileName).HasDefaultValueSql("('')");
+            });
+
+            modelBuilder.Entity<ContentFile1>(entity =>
+            {
+                entity.Property(e => e.FileName).HasDefaultValueSql("(N'')");
             });
 
             modelBuilder.Entity<ContentImageGallery>(entity =>

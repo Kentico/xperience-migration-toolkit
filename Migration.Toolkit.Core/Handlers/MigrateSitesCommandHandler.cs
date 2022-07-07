@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Migration.Toolkit.Common;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
 using Migration.Toolkit.Core.MigrationProtocol;
@@ -16,6 +17,7 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
     private readonly IDbContextFactory<KxoContext> _kxoContextFactory;
     private readonly IDbContextFactory<KX13Context> _kx13ContextFactory;
     private readonly IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSite> _cmsSiteMapper;
+    private readonly ToolkitConfiguration _toolkitConfiguration;
     private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
     private readonly IMigrationProtocol _migrationProtocol;
 
@@ -26,6 +28,7 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
         IDbContextFactory<KXO.Context.KxoContext> kxoContextFactory,
         IDbContextFactory<KX13.Context.KX13Context> kx13ContextFactory,
         IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSite> cmsSiteMapper,
+        ToolkitConfiguration toolkitConfiguration,
         PrimaryKeyMappingContext primaryKeyMappingContext,
         IMigrationProtocol migrationProtocol
     )
@@ -34,6 +37,7 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
         _kxoContextFactory = kxoContextFactory;
         _kx13ContextFactory = kx13ContextFactory;
         _cmsSiteMapper = cmsSiteMapper;
+        _toolkitConfiguration = toolkitConfiguration;
         _primaryKeyMappingContext = primaryKeyMappingContext;
         _migrationProtocol = migrationProtocol;
         _kxoContext = _kxoContextFactory.CreateDbContext();

@@ -32,7 +32,7 @@ public record MigrateContactGroupsCommand(): IRequest<GenericCommandResult>, ICo
     public Type[] Dependencies => Type.EmptyTypes;
  }
 
-public record MigrateContactManagementCommand(): IRequest<GenericCommandResult>, ICommand
+public record MigrateContactManagementCommand(): IRequest<CommandResult>, ICommand
 {
     public static string Moniker => "contact-management";
     public static string MonikerFriendly => "Contact management";

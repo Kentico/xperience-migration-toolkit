@@ -59,7 +59,6 @@ public class CmsFormMapper : EntityMapperBase<KX13.Models.CmsForm, BizFormInfo>
         // target.FormAfterSubmitMode = source.FormAfterSubmitMode;
         // target.FormAfterSubmitRelatedValue = source.FormAfterSubmitRelatedValue;
 
-        // TODO tk: 2022-05-20 form class migration required
         // target.FormClassID = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId);
         if (mappingHelper.TranslateRequiredId<KX13.Models.CmsClass>(c => c.ClassId, source.FormClassId, out var formClassId))
         {

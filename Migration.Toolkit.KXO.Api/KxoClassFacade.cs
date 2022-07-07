@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CMS.DataEngine;
 using CMS.OnlineForms;
 using Microsoft.Extensions.Logging;
@@ -18,10 +19,12 @@ public class KxoClassFacade
         _kxoApiInitializer.EnsureApiIsInitialized();
     }
     
-    public void SetClass(DataClassInfo dataClassInfo)
+    public DataClassInfo SetClass(DataClassInfo dataClassInfo)
     {
         // TODO tk: 2022-05-30  dataClassInfo.ClassConnectionString - check, might cause unexpected behavior
         DataClassInfoProvider.SetDataClassInfo(dataClassInfo);
+        Debug.Assert(dataClassInfo.ClassID != 0, "dataClassInfo.ClassID != 0");
+        return dataClassInfo;
     }
 
     public DataClassInfo GetClass(Guid classGuid)

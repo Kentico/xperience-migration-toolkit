@@ -3,6 +3,7 @@ using CMS.MediaLibrary;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.Helpers;
 using Migration.Toolkit.Core.MigrationProtocol;
 
 namespace Migration.Toolkit.Core.Mappers;
@@ -60,9 +61,8 @@ public class CmsAttachmentMapper: EntityMapperBase<CmsAttachmentMapperSource, Me
         // target.FileCreatedWhen = source.;
         // target.FileModifiedWhen = source.FileModifiedWhen;
 
-        // TODO tk: 2022-06-29 custom data not migrated
-        // target.FileCustomData = source.AttachmentCustomData;
-
+        KenticoHelper.CopyCustomData(target.FileCustomData, cmsAttachment.AttachmentCustomData);
+        
         return target;
     }
 }

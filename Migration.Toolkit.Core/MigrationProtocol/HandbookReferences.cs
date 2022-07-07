@@ -23,17 +23,16 @@ public static class HandbookReferences
     public static HandbookReference CmsTreeTreeIsLinkFromDifferentSite => new("CmsTree_TreeIsLinkFromDifferentSite");
     
     public static HandbookReference TemporaryAttachmentMigrationIsNotSupported => new("TemporaryAttachmentMigrationIsNotSupported");
+
+    public static HandbookReference LinkedDataAlreadyMaterializedInTargetInstance =>
+        new HandbookReference("LinkedDataAlreadyMaterializedInTargetInstance");
     
     #endregion
 
 
-    #region "Not supported right now"
-
-    public static HandbookReference MediaFileMigrateFileManually => new("MediaFile_MigrateFileManually");
-
-    #endregion
-
     #region "Errors - something need to be done"
+    
+    public static HandbookReference MediaFileIsMissingOnSourceFilesystem => new("MediaFileIsMissingOnSourceFilesystem");
 
     public static HandbookReference MissingRequiredDependency<TSourceDependency>(string fieldName, object? sourceValue) =>
         new HandbookReference("MissingRequiredDependency")
@@ -48,14 +47,34 @@ public static class HandbookReferences
         new HandbookReference("SourceEntityIsNull")
             .WithData(new
             {
-                SourceEntityType = typeof(TSource).Name,
+                SourceEntityType = typeof(TSource).FullName,
+            });
+    
+    public static HandbookReference SourceValueIsRequired<TSource>(string valueName) =>
+        new HandbookReference("SourceValueIsRequired")
+            .NeedsManualAction()
+            .WithData(new
+            {
+                SourceEntityType = typeof(TSource).FullName,
+                ValueName = valueName
             });
     
     public static HandbookReference FailedToCreateTargetInstance<TTarget>() =>
         new HandbookReference("FailedToCreateTargetInstance")
+            .NeedsManualAction()
             .WithData(new
             {
-                TargetEntityType = typeof(TTarget).Name,                
+                TargetEntityType = typeof(TTarget).FullName,                
+            });
+    
+    public static HandbookReference ErrorCreatingTargetInstance<TTarget>(Exception exception) =>
+        new HandbookReference("FailedToCreateTargetInstance")
+            .NeedsManualAction()
+            .WithData(new
+            {
+                TargetEntityType = typeof(TTarget).FullName,
+                Exception = exception.ToString(),
+                
             });
     
     public static HandbookReference MissingConfiguration<TCommand>(string configurationName) =>
@@ -63,8 +82,8 @@ public static class HandbookReferences
             .NeedsManualAction()
             .WithData(new
             {
-                command = typeof(TCommand).Name, 
-                configurationName
+                Command = typeof(TCommand).FullName, 
+                ConfigurationName = configurationName
             });
     
     public static HandbookReference CmsUserEmailConstraintBroken => new("CmsUser_EmailConstraintBroken");
@@ -73,6 +92,20 @@ public static class HandbookReferences
     public static HandbookReference CmsTreeUserIsMissingInTargetInstance => new("CmsTree_UserIsMissingInTargetInstance");
     public static HandbookReference CmsTreeTreeParentIsMissing => new("CmsTree_TreeParentIsMissing");
     public static HandbookReference BulkCopyColumnMismatch(string tableName) => new("BulkCopyColumnMismatch", $"TableName={tableName}");
+
+    public static HandbookReference DataMustNotExistInTargetInstanceTable(string tableName) =>
+        new HandbookReference("DataMustNotExistInTargetInstanceTable")
+            .WithData(new { tableName });
+
+    public static HandbookReference ValueTruncationSkip(string tableName) =>
+        new HandbookReference("ValueTruncationSkip").NeedsManualAction().WithData(new { tableName });
+
+    public static HandbookReference FaultyData<TSource>() => new HandbookReference("FaultyData")
+        .NeedsManualAction()
+        .WithData(new
+        {
+            SourceEntityType = typeof(TSource).Name,
+        });
 
     #endregion
 }

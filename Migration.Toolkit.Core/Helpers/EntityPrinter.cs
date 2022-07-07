@@ -1,8 +1,10 @@
+using CMS.DataEngine;
+using CMS.MediaLibrary;
 using Migration.Toolkit.Common.Helpers;
 
 namespace Migration.Toolkit.Core.Helpers;
 
-public static class LogHelper
+public static class EntityPrinter
 {
     public static string PrintKxoModelInfo<T>(T model)
     {
@@ -28,5 +30,26 @@ public static class LogHelper
             null => $"{currentTypeName}: <null>",
             _ => $"TODO: {typeof(T).FullName}"
         };
+    }
+
+    public static string GetEntityIdentityPrint<T>(T model)
+    {
+        var currentTypeName = ReflectionHelper<T>.CurrentType.Name;
+
+        return model switch
+        {
+            MediaLibraryInfo mfi => $"ID={mfi.LibraryID}, GUID={mfi.LibraryGUID}, Name={mfi.LibraryName}",
+            MediaFileInfo mf => $"ID={mf.FileID}, GUID={mf.FileGUID}, Name={mf.FileName}",
+            DataClassInfo dci => $"ID={dci.ClassID}, GUID={dci.ClassGUID}, Name={dci.ClassName}",
+            
+            KXOM.CmsForm cf => $"ID={cf.FormId}, GUID={cf.FormGuid}, Name={cf.FormName}",
+            
+            KX13M.CmsAttachment ca13 => $"ID={ca13.AttachmentId}, GUID={ca13.AttachmentGuid}, Name={ca13.AttachmentName}",
+            
+            null => $"<null> of {currentTypeName}",
+            _ => $"TODO: {ReflectionHelper<T>.CurrentType.FullName}"
+        };
+        
+        // throw new NotImplementedException($"No entity identity print defined for type '{ReflectionHelper<T>.CurrentType.FullName}'");
     }
 }

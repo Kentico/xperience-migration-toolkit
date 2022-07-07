@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
+using Migration.Toolkit.Core.Helpers;
+using Org.BouncyCastle.Tls.Crypto;
 
 namespace Migration.Toolkit.Core.MigrationProtocol;
 
@@ -23,6 +25,7 @@ public class HandbookReference
                 sb.Append(", ");
             }
         }
+
         return sb.ToString();
     }
 
@@ -37,6 +40,47 @@ public class HandbookReference
         this.AdditionalInfo = additionalInfo;
     }
 
+    public HandbookReference WithId(string idName, object idValue)
+    {
+        this.WithData(idName, idValue);
+        return this;
+    }
+    
+    public HandbookReference WithMessage(string message)
+    {
+        this.Data ??= new();
+        
+        var msgNum = 0;
+        string msgKey;
+        do
+        {
+            msgKey = $"Message#{msgNum++}";
+        } while (this.Data.ContainsKey(msgKey));
+
+        this.WithData(msgKey, message);
+        
+        return this;
+    }
+
+    public HandbookReference WithData(string key, object value)
+    {
+        this.Data ??= new();
+        this.Data.Add(key, value);
+
+        return this;
+    }
+
+    public HandbookReference WithData<TValue>(Dictionary<string, TValue> data)
+    {
+        this.Data ??= new();
+        foreach (var (key, value) in data)
+        {
+            this.Data.Add(key, value);
+        }
+
+        return this;
+    }
+
     public HandbookReference WithData(object data)
     {
         this.Data ??= new();
@@ -46,9 +90,16 @@ public class HandbookReference
             );
         foreach (var (key, value) in dataUpdate)
         {
-            this.Data.Add(key, value);   
+            this.Data.Add(key, value);
         }
-        
+
+        return this;
+    }
+    
+    public HandbookReference WithIdentityPrint<T>(T model)
+    {
+        this.Data ??= new();
+        this.Data.Add("Entity", EntityPrinter.GetEntityIdentityPrint(model));
         return this;
     }
 
@@ -57,4 +108,4 @@ public class HandbookReference
         this.NeedManualAction = true;
         return this;
     }
-} 
+}

@@ -16,7 +16,7 @@ public class KxoMediaFileFacade
 
     public void SetMediaFile(MediaFileInfo mfi, bool newInstance)
     {
-        Debug.Assert(newInstance && mfi.FileID == 0, "newInstance && mfi.FileID == 0");
+        Debug.Assert((newInstance && mfi.FileID == 0) || (!newInstance && mfi.FileID != 0), "newInstance && mfi.FileID == 0");
         
         if (newInstance)
         {
@@ -34,6 +34,11 @@ public class KxoMediaFileFacade
         return MediaFileInfoProvider.GetMediaFiles("").Where(nameof(MediaFileInfo.FileGUID), QueryOperator.Equals, mediaFileGuid).SingleOrDefault();
     }
 
+    public MediaLibraryInfo GetMediaLibraryInfo(Guid mediaLibraryGuid)
+    {
+        return MediaLibraryInfoProvider.ProviderObject.Get(mediaLibraryGuid);
+    }
+    
     public void EnsureMediaFilePathExistsInLibrary(MediaFileInfo mfi, int libraryId, string siteName)
     {
         var librarySubDir = Path.GetDirectoryName(mfi.FilePath);
@@ -56,5 +61,14 @@ public class KxoMediaFileFacade
         MediaLibraryInfo.Provider.Set(newLibrary);
         
         return newLibrary; 
+    }
+    
+    public MediaLibraryInfo SetMediaLibrary(MediaLibraryInfo mfi)
+    {
+        MediaLibraryInfo.Provider.Set(mfi);
+        
+        Debug.Assert(mfi.LibraryID != 0, "mfi.LibraryID != 0");
+        
+        return mfi; 
     }
 }

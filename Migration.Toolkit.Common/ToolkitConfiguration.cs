@@ -2,6 +2,13 @@ using System.Linq.Expressions;
 
 namespace Migration.Toolkit.Common;
 
+public enum AutofixEnum
+{
+    DiscardData,
+    AttemptFix,
+    Error,
+}
+
 public class ToolkitConfiguration
 {
     public string? SourceConnectionString { get; set; }
@@ -12,6 +19,10 @@ public class ToolkitConfiguration
     
     public EntityConfigurations? EntityConfigurations { get; set; }
     public string? TargetAttachmentMediaLibraryName { get; set; }
+    public bool? MigrateOnlyMediaFileInfo { get; set; } = true;
+
+    public AutofixEnum? UseOmActivityNodeRelationAutofix { get; set; } = AutofixEnum.Error;
+    public AutofixEnum? UseOmActivitySiteRelationAutofix { get; set; } = AutofixEnum.Error;
 
     public Dictionary<int?, int?> RequireSiteIdExplicitMapping<TEntityType>(Expression<Func<TEntityType, object>> keyNameSelector)
     {

@@ -35,5 +35,6 @@ public static class Extensions
     public static TEnum AsEnum<TEnum>(this string? value) where TEnum : struct, Enum
         => Enum.TryParse<TEnum>(value, out var val) ? val : default(TEnum);
 
-    public static int? NullWhenZero(this int? value) => value == 0 ? null : value;
+    public static int? NullIfZero(this int? value) => value == 0 ? null : value;
+    public static int? NullIfZero(this int value) => value == 0 ? null : value;
 }

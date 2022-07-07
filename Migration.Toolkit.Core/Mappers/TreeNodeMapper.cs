@@ -1,16 +1,20 @@
+using System.Diagnostics;
 using CMS.DocumentEngine;
 using CMS.DocumentEngine.Internal;
 using CMS.Helpers;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.Helpers;
 using Migration.Toolkit.Core.MigrationProtocol;
 using Migration.Toolkit.Core.Services;
 using Migration.Toolkit.KX13.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
-public class TreeNodeMapper: EntityMapperBase<KX13.Models.CmsTree, TreeNode>
+public record CmsTreeMapperSource(KX13M.CmsTree CmsTree, string CultureCode);
+
+public class TreeNodeMapper: EntityMapperBase<CmsTreeMapperSource, TreeNode>
 {
     private readonly ILogger<TreeNodeMapper> _logger;
     private readonly CoupledDataService _coupledDataService;
@@ -21,44 +25,45 @@ public class TreeNodeMapper: EntityMapperBase<KX13.Models.CmsTree, TreeNode>
         _coupledDataService = coupledDataService;
     }
 
-    protected override TreeNode? CreateNewInstance(CmsTree source, MappingHelper mappingHelper, AddFailure addFailure) 
-        => TreeNode.New(source.NodeClass.ClassName);
+    protected override TreeNode? CreateNewInstance(CmsTreeMapperSource source, MappingHelper mappingHelper, AddFailure addFailure) 
+        => TreeNode.New(source.CmsTree.NodeClass.ClassName);
 
-    protected override TreeNode MapInternal(CmsTree source, TreeNode target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
+    protected override TreeNode MapInternal(CmsTreeMapperSource source, TreeNode target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
     {
-        if (!newInstance && source.NodeGuid != target.NodeGUID)
+        var (cmsTree, cultureCode) = source;
+        
+        if (!newInstance && cmsTree.NodeGuid != target.NodeGUID)
         {
             // assertion failed
             _logger.LogTrace("Assertion failed, entity key mismatch.");
             throw new InvalidOperationException("Assertion failed, entity key mismatch.");
         }
+        
+        // mapping of linked nodes is not supported
+        Debug.Assert(cmsTree.NodeLinkedNodeId == null, "cmsTree.NodeLinkedNodeId == null");
+        Debug.Assert(cmsTree.NodeLinkedNodeSiteId == null, "cmsTree.NodeLinkedNodeSiteId == null");
 
-        target.NodeGUID = source.NodeGuid;
-        target.NodeAlias = source.NodeAlias;
+        target.NodeGUID = cmsTree.NodeGuid;
+        target.NodeAlias = cmsTree.NodeAlias;
         // target.NodeLevel = source.NodeLevel;
-        target.NodeName = source.NodeName;
+        target.NodeName = cmsTree.NodeName;
         // target.NodeOrder = source.NodeOrder;
 
-        if (mappingHelper.TranslateRequiredId<KX13M.CmsUser>(u => u.UserId, source.NodeOwner, out var ownerUserId))
+        if (mappingHelper.TranslateRequiredId<KX13M.CmsUser>(u => u.UserId, cmsTree.NodeOwner, out var ownerUserId))
         {
             target.NodeOwner = ownerUserId;
         }
 
         // target.NodeAliasPath = source.NodeAliasPath;
         // target.NodeClassName = source.NodeClass.ClassName;
-        var customNodeData = new ContainerCustomData();
-        customNodeData.LoadData(source.NodeCustomData);
-        foreach (var columnName in customNodeData.ColumnNames)
-        {
-            target.NodeCustomData.SetValue(columnName, customNodeData.GetValue(columnName));
-        }
+        KenticoHelper.CopyCustomData(target.NodeCustomData, cmsTree.NodeCustomData);
 
         // target.NodeHasChildren = source.NodeHasChildren;
         // target.NodeHasLinks = source.NodeHasLinks;
         // target.NodeID = source.NodeId;
         // target.NodeSiteName =
         // target.NodeParentID = _pkContext.RequireMapFromSource<KX13.Models.CmsTree>(u => u.NodeId, source.NodeParentId ?? -1);
-        if (mappingHelper.TranslateRequiredId<KX13M.CmsTree>(t => t.NodeId, source.NodeParentId, out var nodeParentId))
+        if (mappingHelper.TranslateRequiredId<KX13M.CmsTree>(t => t.NodeId, cmsTree.NodeParentId, out var nodeParentId))
         {
             target.NodeParentID = nodeParentId;
         }
@@ -68,26 +73,26 @@ public class TreeNodeMapper: EntityMapperBase<KX13.Models.CmsTree, TreeNode>
         // target.NodeOriginalNodeID = ;
         // TODO tk: 2022-06-30 if different from current site, just skip
         // target.NodeLinkedNodeSiteID = ;
-
-        var selectedCulture = "en-US"; // TODO tk: 2022-06-30 get from configuration
-        var sourceDocument = source.CmsDocuments.Single(x => x.DocumentCulture == selectedCulture);
+        
+        var sourceDocument = cmsTree.CmsDocuments.Single(x => x.DocumentCulture == cultureCode);
         target.DocumentCulture = sourceDocument.DocumentCulture;
-        // TODO tk: 2022-06-30 map content
-        // target.DocumentContent = sourceDocument.DocumentContent;
+        target.DocumentContent.LoadContentXml(sourceDocument.DocumentContent ?? string.Empty);
         target.DocumentName = sourceDocument.DocumentName;
-        // target.DocumentCreatedWhen = sourceDocument.DocumentCreatedWhen;
 
-        var customDocumentData = new ContainerCustomData();
-        customDocumentData.LoadData(sourceDocument.DocumentCustomData);
-        foreach (var columnName in customDocumentData.ColumnNames)
-        {
-            target.DocumentCustomData.SetValue(columnName, customDocumentData.GetValue(columnName));
-        }
+        KenticoHelper.CopyCustomData(target.DocumentCustomData, sourceDocument.DocumentCustomData);
 
         // target.DocumentID = sourceDocument.DocumentId;
         // target.DocumentIsArchived = sourceDocument.DocumentIsArchived;
+        
         // target.DocumentLastPublished = sourceDocument.DocumentLastPublished;
+        target.SetValue(nameof(target.DocumentLastPublished), sourceDocument.DocumentLastPublished);
+        
         // target.DocumentModifiedWhen = sourceDocument.DocumentModifiedWhen;
+        target.SetValue(nameof(target.DocumentModifiedWhen), sourceDocument.DocumentModifiedWhen);
+        
+        // target.DocumentCreatedWhen = sourceDocument.DocumentCreatedWhen;
+        target.SetValue(nameof(target.DocumentCreatedWhen), sourceDocument.DocumentCreatedWhen);
+        
         target.DocumentPublishFrom = sourceDocument.DocumentPublishFrom.GetValueOrDefault();
         target.DocumentPublishTo = sourceDocument.DocumentPublishTo.GetValueOrDefault();
         target.DocumentSearchExcluded = sourceDocument.DocumentSearchExcluded.GetValueOrDefault();
@@ -98,19 +103,31 @@ public class TreeNodeMapper: EntityMapperBase<KX13.Models.CmsTree, TreeNode>
         // target.DocumentWorkflowActionStatus = sourceDocument.DocumentWorkflowActionStatus;
         target.DocumentGUID = sourceDocument.DocumentGuid.GetValueOrDefault();
         // target.DocumentWorkflowStepID = sourceDocument.DocumentWorkflowStepId;
-        // target.DocumentCreatedByUserID = sourceDocument.DocumentCreatedByUserId;
-        // target.DocumentModifiedByUserID = sourceDocument.DocumentModifiedByUserId;
+
+        if (mappingHelper.TranslateRequiredId<KX13M.CmsUser>(u => u.UserId, sourceDocument.DocumentCreatedByUserId, out var createdByUserId))
+        {
+            // target.DocumentCreatedByUserID = sourceDocument.DocumentCreatedByUserId;
+            target.SetValue(nameof(target.DocumentCreatedByUserID), createdByUserId); // TODO tk: 2022-07-06 not working
+        }
+
+        if (mappingHelper.TranslateRequiredId<KX13M.CmsUser>(u => u.UserId, sourceDocument.DocumentModifiedByUserId, out var modifiedByUserId))
+        {
+            // target.DocumentModifiedByUserID = sourceDocument.DocumentModifiedByUserId;
+            target.SetValue(nameof(target.DocumentModifiedByUserID), modifiedByUserId); // TODO tk: 2022-07-06 not working
+        }
+
         // target.DocumentPublishedVersionHistoryID = sourceDocument.DocumentPublishedVersionHistoryId;
         // target.DocumentCheckedOutByUserID = sourceDocument.DocumentCreatedByUserId;
         target.DocumentWorkflowCycleGUID = sourceDocument.DocumentWorkflowCycleGuid.GetValueOrDefault();
         // target.CoupledClassIDColumn = 
 
         // Set coupled data
-        var fieldsInfo = new DocumentFieldsInfo(source.NodeClass.ClassName);
-        if (source.NodeClass.ClassIsCoupledClass)
+        var fieldsInfo = new DocumentFieldsInfo(cmsTree.NodeClass.ClassName);
+        if (cmsTree.NodeClass.ClassIsCoupledClass)
         {
-            var coupledDataRow = _coupledDataService.GetSourceCoupledDataRow(source.NodeClass?.ClassTableName, fieldsInfo.TypeInfo.IDColumn,
-                sourceDocument.DocumentForeignKeyValue);
+            Debug.Assert(cmsTree.NodeClass.ClassTableName != null, "cmsTree.NodeClass.ClassTableName != null");
+            
+            var coupledDataRow = _coupledDataService.GetSourceCoupledDataRow(cmsTree.NodeClass.ClassTableName, fieldsInfo.TypeInfo.IDColumn, sourceDocument.DocumentForeignKeyValue);
             if (coupledDataRow != null)
             {
                 foreach (var (key, value) in coupledDataRow)
@@ -123,11 +140,12 @@ public class TreeNodeMapper: EntityMapperBase<KX13.Models.CmsTree, TreeNode>
             }
             else
             {
-                _logger.LogWarning("Coupled data is missing for source document {documentId} of class {className}", sourceDocument.DocumentId,
-                    source.NodeClass.ClassName);
+                _logger.LogWarning("Coupled data is missing for source document {documentId} of class {className}", sourceDocument.DocumentId, cmsTree.NodeClass.ClassName);
             }
         }
 
         return target;
     }
+
+    
 }

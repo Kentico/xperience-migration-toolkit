@@ -67,15 +67,18 @@ public static class DependencyInjectionExtensions
 
         // pages
         services.AddTransient<MigratePagesCommand>();
-        services.AddTransient<IEntityMapper<KX13.Models.CmsTree, TreeNode>, TreeNodeMapper>();
+        services.AddTransient<IEntityMapper<CmsTreeMapperSource, TreeNode>, TreeNodeMapper>();
         // services.AddTransient<IEntityMapper<KX13.Models.CmsTree, KXO.Models.CmsTree>, CmsTreeMapper>();
         // services.AddTransient<IEntityMapper<KX13.Models.CmsDocument, KXO.Models.CmsDocument>, CmsDocumentMapper>();
         // services.AddTransient<IEntityMapper<KX13.Models.CmsAcl, KXO.Models.CmsAcl>, CmsAclMapper>();
         services.AddTransient<IEntityMapper<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath>, CmsPageUrlPathMapper>();
 
         // media libraries
-        services.AddTransient<IEntityMapper<KX13.Models.MediaFile, KXO.Models.MediaFile>, CmsMediaFileMapper>();
+        // services.AddTransient<IEntityMapper<KX13.Models.MediaFile, KXO.Models.MediaFile>, CmsMediaFileMapper>();
+        services.AddTransient<IEntityMapper<MediaFileInfoMapperSource, MediaFileInfo>, MediaFileInfoMapper>();
+        
         services.AddTransient<IEntityMapper<KX13.Models.MediaLibrary, KXO.Models.MediaLibrary>, CmsMediaLibraryMapper>();
+        services.AddTransient<IEntityMapper<KX13.Models.MediaLibrary, MediaLibraryInfo>, MediaLibraryInfoMapper>();
 
         // sites
         services.AddTransient<IEntityMapper<KX13.Models.CmsSite, KXO.Models.CmsSite>, CmsSiteMapper>();

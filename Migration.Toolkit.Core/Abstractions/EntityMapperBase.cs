@@ -74,6 +74,70 @@ public abstract class EntityMapperBase<TSourceEntity, TTargetEntity>: IEntityMap
             _addFailure = addFailure;
         }
 
+        public Guid Require(Guid? value, string valueName)
+        {
+            if (value is Guid v && v != Guid.Empty)
+            {
+                return v;
+            }
+
+            var failure = HandbookReferences
+                    .SourceValueIsRequired<TSourceEntity>(valueName)
+                    .AsFailure<TTargetEntity>()
+                ;    
+                
+            _addFailure(failure);
+            return Guid.Empty;
+        }
+        
+        public int Require(int? value, string valueName)
+        {
+            if (value is int v)
+            {
+                return v;
+            }
+
+            var failure = HandbookReferences
+                    .SourceValueIsRequired<TSourceEntity>(valueName)
+                    .AsFailure<TTargetEntity>()
+                ;    
+                
+            _addFailure(failure);
+            return -1;
+        }
+        
+        public bool Require(bool? value, string valueName)
+        {
+            if (value is bool v)
+            {
+                return v;
+            }
+
+            var failure = HandbookReferences
+                    .SourceValueIsRequired<TSourceEntity>(valueName)
+                    .AsFailure<TTargetEntity>()
+                ;    
+                
+            _addFailure(failure);
+            return false;
+        }
+        
+        public DateTime Require(DateTime? value, string valueName)
+        {
+            if (value is DateTime v)
+            {
+                return v;
+            }
+
+            var failure = HandbookReferences
+                    .SourceValueIsRequired<TSourceEntity>(valueName)
+                    .AsFailure<TTargetEntity>()
+                ;    
+                
+            _addFailure(failure);
+            return DateTime.MinValue;
+        }
+
         public bool TranslateId<TKeyOwner>(Expression<Func<TKeyOwner, object>> keyNameSelector, int? sourceId, out int? translatedId)
         {
             if (sourceId == null)

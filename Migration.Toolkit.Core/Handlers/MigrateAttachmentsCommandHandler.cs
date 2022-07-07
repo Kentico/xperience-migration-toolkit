@@ -49,62 +49,7 @@ public class MigrateAttachmentsCommandHandler : IRequestHandler<MigrateAttachmen
         _attachmentMapper = attachmentMapper;
         _migrationProtocol = migrationProtocol;
     }
-
-    private async Task<KX13M.CmsDocument?> GetKx13CmsDocument(int documentId)
-    {
-        await using var dbContext = await _kx13ContextFactory.CreateDbContextAsync();
-        return await dbContext.CmsDocuments
-            .Include(d => d.DocumentNode)
-            .Where(a => a.DocumentId == documentId).SingleOrDefaultAsync();
-    }
     
-    private IUploadedFile? CreateUploadFileFromAttachment(KX13M.CmsAttachment attachment)
-    {
-        if (attachment.AttachmentBinary != null)
-        {
-            var ms = new MemoryStream(attachment.AttachmentBinary);
-            return DummyUploadedFile.FromStream(ms, attachment.AttachmentMimeType, attachment.AttachmentSize, attachment.AttachmentName);
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private ConcurrentDictionary<(string libraryName, int siteId), int> _mediaLibraryIdCache = new();
-    private int EnsureMediaFileLibrary((string libraryName, int siteId) arg, KxoContext db)
-    {
-        var (libraryName, siteId) = arg;
-        var tml = db.MediaLibraries.SingleOrDefault(ml => ml.LibrarySiteId == siteId && ml.LibraryName == libraryName);
-        return tml?.LibraryId ?? _mediaFileFacade.CreateMediaLibrary(siteId, libraryName, "", libraryName, libraryName).LibraryID;
-    }
-    private bool TryEnsureTargetLibraryExists(string targetLibraryName, int targetSiteId, out int targetLibraryId)
-    {
-        using var dbContext = _kxoContextFactory.CreateDbContext();
-        try
-        {
-            targetLibraryId = _mediaLibraryIdCache.GetOrAdd((targetLibraryName, targetSiteId), EnsureMediaFileLibrary, dbContext);
-            
-            return true;
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "creating target media library failed");
-            _migrationProtocol.Append(HandbookReferences.FailedToCreateTargetInstance<MediaLibraryInfo>()
-                .NeedsManualAction()
-                .WithData(new
-                {
-                    exception,
-                    targetLibraryName,
-                    targetSiteId,
-                })
-            );
-        }
-
-        targetLibraryId = 0;
-        return false;
-    }
-
     public async Task<CommandResult> Handle(MigrateAttachmentsCommand request, CancellationToken cancellationToken)
     {
         var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
@@ -130,7 +75,7 @@ public class MigrateAttachmentsCommandHandler : IRequestHandler<MigrateAttachmen
             
             if (kx13CmsAttachment.AttachmentFormGuid != null)
             {
-                _logger.LogWarning("Attachment '{attachmentGuid}' is temporary => skipping", kx13CmsAttachment.AttachmentGuid);
+                _logger.LogWarning("Attachment '{AttachmentGuid}' is temporary => skipping", kx13CmsAttachment.AttachmentGuid);
                 _migrationProtocol.Append(HandbookReferences.TemporaryAttachmentMigrationIsNotSupported.WithData(new
                 {
                     kx13CmsAttachment.AttachmentId,
@@ -160,60 +105,119 @@ public class MigrateAttachmentsCommandHandler : IRequestHandler<MigrateAttachmen
             }
             
             var uploadedFile = CreateUploadFileFromAttachment(kx13CmsAttachment);
-            var targetMediaFile = _mediaFileFacade.GetMediaFile(kx13CmsAttachment.AttachmentGuid);
+            if (uploadedFile == null)
+            {
+                _migrationProtocol.Append(HandbookReferences
+                    .FailedToCreateTargetInstance<MediaFileInfo>()
+                    .WithIdentityPrint(kx13CmsAttachment)
+                    .WithMessage("Failed to create dummy upload file containing data")
+                );
+                continue;
+            }
             
-            _migrationProtocol.FetchedTarget(targetMediaFile);
+            var mediaFile = _mediaFileFacade.GetMediaFile(kx13CmsAttachment.AttachmentGuid);
+            
+            _migrationProtocol.FetchedTarget(mediaFile);
 
             var librarySubFolder = "";
             if (kx13AttachmentDocument != null)
             {
                 librarySubFolder = kx13AttachmentDocument.DocumentNode.NodeAliasPath;
             }
-            
-            var mapped = _attachmentMapper.Map(new CmsAttachmentMapperSource(kx13CmsAttachment, targetMediaLibraryId, uploadedFile, librarySubFolder), targetMediaFile);
-            _migrationProtocol.MappedTarget(mapped);
-            
-            switch (mapped)
-            {
-                case (var mediaFileInfo, var newInstance) { Success: true }:
-                {
-                    Debug.Assert(mediaFileInfo != null, nameof(mediaFileInfo) + " != null");
 
-                    try
+            var mapped = _attachmentMapper.Map(new CmsAttachmentMapperSource(kx13CmsAttachment, targetMediaLibraryId, uploadedFile, librarySubFolder), mediaFile);
+            _migrationProtocol.MappedTarget(mapped);
+
+            if (mapped is (var mediaFileInfo, var newInstance) { Success: true })
+            {
+                Debug.Assert(mediaFileInfo != null, nameof(mediaFileInfo) + " != null");
+
+                try
+                {
+                    if (newInstance)
                     {
-                        if (newInstance)
+                        _mediaFileFacade.EnsureMediaFilePathExistsInLibrary(mediaFileInfo, targetMediaLibraryId, targetSite.SiteName);
+                    }
+
+                    _mediaFileFacade.SetMediaFile(mediaFileInfo, newInstance);
+
+                    _migrationProtocol.Success(kx13AttachmentDocument, mediaFileInfo, mapped);
+                    _logger.LogEntitySetAction(newInstance, mediaFileInfo);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogEntitySetError(exception, newInstance, mediaFileInfo);
+                    _migrationProtocol.Append(HandbookReferences.ErrorCreatingTargetInstance<MediaFileInfo>(exception)
+                        .NeedsManualAction()
+                        .WithIdentityPrint(mediaFileInfo)
+                        .WithData(new
                         {
-                            _mediaFileFacade.EnsureMediaFilePathExistsInLibrary(mediaFileInfo, targetMediaLibraryId, targetSite.SiteName);    
-                        }
-                        _mediaFileFacade.SetMediaFile(mediaFileInfo, newInstance);
-                        
-                        _migrationProtocol.Success(kx13AttachmentDocument, mediaFileInfo, mapped);
-                        _logger.LogInformation(newInstance
-                            ? $"MediaFile: {mediaFileInfo.FileName} with NodeGuid '{mediaFileInfo.FileGUID}' was inserted"
-                            : $"MediaFile: {mediaFileInfo.FileName} with NodeGuid '{mediaFileInfo.FileName}' was updated");
-                    }
-                    catch (Exception exception)
-                    {
-                        _logger.LogError(exception, "creating target media file failed");
-                        _migrationProtocol.Append(HandbookReferences.FailedToCreateTargetInstance<MediaFileInfo>()
-                            .NeedsManualAction()
-                            .WithData(new
-                            {
-                                exception,
-                                targetLibraryName,
-                                targetSiteId,
-                                mediaFileInfo.FileGUID,
-                                mediaFileInfo.FileName,
-                                mediaFileInfo.FileSiteID
-                            })
-                        );
-                    }
-                    break;
+                            targetLibraryName,
+                            targetSiteId,
+                            mediaFileInfo.FileGUID,
+                            mediaFileInfo.FileName,
+                            mediaFileInfo.FileSiteID
+                        })
+                    );
                 }
             }
         }
 
         return new GenericCommandResult();
+    }
+    
+     private async Task<KX13M.CmsDocument?> GetKx13CmsDocument(int documentId)
+    {
+        await using var dbContext = await _kx13ContextFactory.CreateDbContextAsync();
+        return await dbContext.CmsDocuments
+            .Include(d => d.DocumentNode)
+            .Where(a => a.DocumentId == documentId).SingleOrDefaultAsync();
+    }
+    
+    private IUploadedFile? CreateUploadFileFromAttachment(KX13M.CmsAttachment attachment)
+    {
+        if (attachment.AttachmentBinary != null)
+        {
+            var ms = new MemoryStream(attachment.AttachmentBinary);
+            return DummyUploadedFile.FromStream(ms, attachment.AttachmentMimeType, attachment.AttachmentSize, attachment.AttachmentName);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private readonly ConcurrentDictionary<(string libraryName, int siteId), int> _mediaLibraryIdCache = new();
+    private int EnsureMediaFileLibrary((string libraryName, int siteId) arg, KxoContext db)
+    {
+        var (libraryName, siteId) = arg;
+        var tml = db.MediaLibraries.SingleOrDefault(ml => ml.LibrarySiteId == siteId && ml.LibraryName == libraryName);
+        return tml?.LibraryId ?? _mediaFileFacade.CreateMediaLibrary(siteId, libraryName, "", libraryName, libraryName).LibraryID;
+    }
+    private bool TryEnsureTargetLibraryExists(string targetLibraryName, int targetSiteId, out int targetLibraryId)
+    {
+        using var dbContext = _kxoContextFactory.CreateDbContext();
+        try
+        {
+            targetLibraryId = _mediaLibraryIdCache.GetOrAdd((targetLibraryName, targetSiteId), EnsureMediaFileLibrary, dbContext);
+            
+            return true;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "creating target media library failed");
+            _migrationProtocol.Append(HandbookReferences.ErrorCreatingTargetInstance<MediaLibraryInfo>(exception)
+                .NeedsManualAction()
+                .WithData(new
+                {
+                    targetLibraryName,
+                    targetSiteId,
+                })
+            );
+        }
+
+        targetLibraryId = 0;
+        return false;
     }
 
     public void Dispose()

@@ -24,6 +24,11 @@ public class DummyUploadedFile: IUploadedFile
     {
         return new DummyUploadedFile(stream, contentType, length, fileName);
     }
+    
+    public static IUploadedFile FromByteArray(byte[] byteArray, string contentType, long length, string fileName)
+    {
+        return new DummyUploadedFile(new MemoryStream(byteArray), contentType, length, fileName);
+    }
 
     public Stream OpenReadStream() => InputStream;
 

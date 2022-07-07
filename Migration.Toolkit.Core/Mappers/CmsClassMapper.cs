@@ -1,4 +1,5 @@
 ﻿using CMS.DataEngine;
+using CMS.FormEngine;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
 using Migration.Toolkit.Core.Abstractions;
@@ -60,8 +61,27 @@ public class CmsClassMapper :
         // target.ClassIsProduct = source.ClassIsProduct.UseKenticoDefault();
         target.ClassIsCustomTable = source.ClassIsCustomTable;
         target.ClassShowColumns = source.ClassShowColumns;
-        // TODO tk: 2022-06-17 konvertovat - zahodit mappings na neexistující Custom fieldy v OM_Contact
-        target.ClassContactMapping = source.ClassContactMapping;
+        
+        // target.ClassContactMapping = source.ClassContactMapping;
+        FormInfo mapInfo = new FormInfo(source.ClassContactMapping);
+        var newMappings = new FormInfo();
+        if (mapInfo.ItemsList.Count > 0)
+        {
+            var ffiLookup = mapInfo.ItemsList.OfType<FormFieldInfo>().ToLookup(f => f.MappedToField, f => f);
+
+            foreach (var formFieldInfos in ffiLookup)
+            {
+                if (formFieldInfos.Count() > 1)
+                {
+                    _logger.LogWarning("Multiple mappings with same value in 'MappedToField': {Detail}", string.Join("|", formFieldInfos.Select(f => f.ToXML(null, false))));
+                }
+
+                newMappings.AddFormItem(formFieldInfos.First());
+            }
+        }
+
+        target.ClassContactMapping = newMappings.GetXmlDefinition();
+            
         target.ClassContactOverwriteEnabled = source.ClassContactOverwriteEnabled.UseKenticoDefault();
         target.ClassConnectionString = source.ClassConnectionString;
         // target.ClassIsProductSection = source.ClassIsProductSection.UseKenticoDefault();
@@ -87,7 +107,7 @@ public class CmsClassMapper :
         // target.ClassSKUDefaultProductType = source.ClassSkudefaultProductType;
         
         // target.ClassInheritsFromClassID = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsClass>(c => c.ClassId, source.ClassInheritsFromClassId).UseKenticoDefault();
-        if (mappingHelper.TranslateId<KX13.Models.CmsClass>(c => c.ClassId, source.ClassInheritsFromClassId.NullWhenZero(), out var classId))
+        if (mappingHelper.TranslateId<KX13.Models.CmsClass>(c => c.ClassId, source.ClassInheritsFromClassId.NullIfZero(), out var classId))
         {
             target.ClassInheritsFromClassID = classId.UseKenticoDefault();
         }

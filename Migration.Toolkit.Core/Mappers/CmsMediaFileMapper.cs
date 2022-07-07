@@ -6,10 +6,9 @@ using Migration.Toolkit.KXO.Models;
 
 namespace Migration.Toolkit.Core.Mappers;
 
+[Obsolete("Use variant with kentico info object or finish implementation", true)]
 public class CmsMediaFileMapper: EntityMapperBase<KX13.Models.MediaFile, KXO.Models.MediaFile>
 {
-    private readonly ILogger<CmsMediaFileMapper> _logger;
-    private readonly PrimaryKeyMappingContext _primaryKeyMappingContext;
     private readonly IMigrationProtocol _protocol;
 
     public CmsMediaFileMapper(
@@ -18,8 +17,6 @@ public class CmsMediaFileMapper: EntityMapperBase<KX13.Models.MediaFile, KXO.Mod
         IMigrationProtocol protocol
         ): base(logger, primaryKeyMappingContext, protocol)
     {
-        _logger = logger;
-        _primaryKeyMappingContext = primaryKeyMappingContext;
         _protocol = protocol;
     }
 
@@ -51,28 +48,33 @@ public class CmsMediaFileMapper: EntityMapperBase<KX13.Models.MediaFile, KXO.Mod
 
         target.FileLibraryId = source.FileLibraryId;
         
-        // target.FileSiteId = _primaryKeyMappingContext.RequireMapFromSource<KX13.Models.CmsSite>(c => c.SiteId, source.FileSiteId);
         if (mappingHelper.TranslateRequiredId<KX13.Models.CmsSite>(c => c.SiteId, source.FileSiteId, out var siteId))
         {
             target.FileSiteId = siteId;
         }
         
-        // target.FileCreatedByUserId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsUser>(c => c.UserId, source.FileCreatedByUserId);
         if (mappingHelper.TranslateId<KX13.Models.CmsUser>(c => c.UserId, source.FileCreatedByUserId, out var createdByUserId))
         {
             target.FileCreatedByUserId = createdByUserId;
         }
         
-        // target.FileModifiedByUserId = _primaryKeyMappingContext.MapFromSource<KX13.Models.CmsUser>(c => c.UserId, source.FileModifiedByUserId);
         if (mappingHelper.TranslateId<KX13.Models.CmsUser>(c => c.UserId, source.FileModifiedByUserId, out var modifiedByUserId))
         {
             target.FileModifiedByUserId = modifiedByUserId;
         }
         
-        // TODO tk: 2022-05-20 foreign binary dep => ref to handbook
         target.FilePath = source.FilePath;
         
-        _protocol.NeedsManualAction(HandbookReferences.MediaFileMigrateFileManually, "Document must be migrated manually", source, target);
+        _protocol.Append(HandbookReferences.MediaFileIsMissingOnSourceFilesystem
+            .WithId(nameof(source.FileId), source.FileId)
+            .WithData(new
+            {
+                source.FilePath,
+                source.FileGuid,
+                source.FileLibraryId,
+                source.FileSiteId
+            })
+        );
 
         return target;
     }

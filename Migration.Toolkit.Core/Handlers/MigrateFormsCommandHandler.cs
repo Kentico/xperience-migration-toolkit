@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Xml.Linq;
 using CMS.DataEngine;
 using MediatR;
@@ -23,7 +24,6 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
     private readonly IDbContextFactory<KX13Context> _kx13ContextFactory;
     private readonly IEntityMapper<CmsClass, DataClassInfo> _dataClassMapper;
     private readonly IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm> _cmsFormMapper;
-    private readonly KxoFormFacade _kxoFormFacade;
     private readonly KxoClassFacade _kxoClassFacade;
     private readonly BulkDataCopyService _bulkDataCopyService;
     private readonly ToolkitConfiguration _toolkitConfiguration;
@@ -38,7 +38,6 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
         IDbContextFactory<KX13.Context.KX13Context> kx13ContextFactory,
         IEntityMapper<KX13.Models.CmsClass, DataClassInfo> dataClassMapper,
         IEntityMapper<KX13.Models.CmsForm, KXO.Models.CmsForm> cmsFormMapper,
-        KxoFormFacade kxoFormFacade,
         KxoClassFacade kxoClassFacade,
         BulkDataCopyService bulkDataCopyService,
         ToolkitConfiguration toolkitConfiguration,
@@ -51,7 +50,6 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
         _kx13ContextFactory = kx13ContextFactory;
         _dataClassMapper = dataClassMapper;
         _cmsFormMapper = cmsFormMapper;
-        _kxoFormFacade = kxoFormFacade;
         _kxoClassFacade = kxoClassFacade;
         _bulkDataCopyService = bulkDataCopyService;
         _toolkitConfiguration = toolkitConfiguration;
@@ -94,28 +92,30 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
             var kxoDataClass = _kxoClassFacade.GetClass(kx13Class.ClassGuid);
             _migrationProtocol.FetchedTarget(kxoDataClass);
 
-            SaveUsingKxoApi(kx13Class, kxoDataClass);
-
+            var classSuccessFullySaved = MapAndSaveUsingKxoApi(kx13Class, kxoDataClass);
+            if (!classSuccessFullySaved)
+            {
+                continue;
+            }
+            
             foreach (var kx13CmsForm in kx13Class.CmsForms)
             {
                 _migrationProtocol.FetchedSource(kx13CmsForm);
-
+                
                 var kxoCmsForm = _kxoContext.CmsForms.FirstOrDefault(f => f.FormGuid == kx13CmsForm.FormGuid);
-
+                
                 _migrationProtocol.FetchedTarget(kxoCmsForm);
 
                 var mapped = _cmsFormMapper.Map(kx13CmsForm, kxoCmsForm);
                 _migrationProtocol.MappedTarget(mapped);
 
-                switch (mapped)
+                if (mapped is { Success : true } result)
                 {
-                    case { Success : true } result:
+                    var (cmsForm, newInstance) = result;
+                    ArgumentNullException.ThrowIfNull(cmsForm, nameof(cmsForm));
+
+                    try
                     {
-                        var (cmsForm, newInstance) = result;
-                        ArgumentNullException.ThrowIfNull(cmsForm, nameof(cmsForm));
-
-                        _migrationProtocol.Success(kx13Class, cmsForm, mapped);
-
                         if (newInstance)
                         {
                             _kxoContext.CmsForms.Add(cmsForm);
@@ -126,22 +126,33 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                         }
 
                         await _kxoContext.SaveChangesAsync(cancellationToken);
-
-                        _logger.LogInformation(newInstance
-                            ? $"CmsForm: {cmsForm.FormName} was inserted."
-                            : $"CmsForm: {cmsForm.FormName} was updated.");
+                        _logger.LogEntitySetAction(newInstance, cmsForm);
 
                         _primaryKeyMappingContext.SetMapping<KX13.Models.CmsForm>(
                             r => r.FormId,
                             kx13Class.ClassId,
                             cmsForm.FormId
                         );
+                    }
+                    catch (Exception ex)
+                    {
+                        await _kxoContext.DisposeAsync(); // reset context errors
+                        _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
 
-                        break;
+                        _migrationProtocol.Append(HandbookReferences
+                            .ErrorCreatingTargetInstance<KXOM.CmsForm>(ex)
+                            .NeedsManualAction()
+                            .WithIdentityPrint(cmsForm)
+                        );
+                        _logger.LogEntitySetError(ex, newInstance, cmsForm);
+                        
+                        continue;
                     }
                 }
 
-
+                Debug.Assert(kx13Class.ClassTableName != null, "kx13Class.ClassTableName != null");
+                var csi = new ClassStructureInfo(kx13Class.ClassXmlSchema, kx13Class.ClassXmlSchema, kx13Class.ClassTableName);
+                
                 XNamespace nsSchema = "http://www.w3.org/2001/XMLSchema";
                 XNamespace msSchema = "urn:schemas-microsoft-com:xml-msdata";
                 var xDoc = XDocument.Parse(kx13Class.ClassXmlSchema);
@@ -149,52 +160,52 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                     .Where(x => x.Attribute(msSchema + "AutoIncrement")?.Value == "true")
                     .Select(x => x.Attribute("name").Value).ToImmutableHashSet();
 
+                Debug.Assert(autoIncrementColumns.Count == 1, "autoIncrementColumns.Count == 1");
+                // TODO tk: 2022-07-08 not true : autoIncrementColumns.First() == csi.IDColumn
+                // Debug.Assert(autoIncrementColumns.First() == csi.IDColumn, "autoIncrementColumns.First() == csi.IDColumn");
 
                 var r = (kx13Class.ClassTableName, kx13Class.ClassGuid, autoIncrementColumns);
-                _logger.LogTrace("Class '{classGuild}' Resolved as: {result}", kx13Class.ClassGuid, r);
-
-
+                _logger.LogTrace("Class '{ClassGuild}' Resolved as: {Result}", kx13Class.ClassGuid, r);
+                
                 // check if data is present in target tables
                 if (_bulkDataCopyService.CheckIfDataExistsInTargetTable(kx13Class.ClassTableName))
                 {
-                    _logger.LogWarning("Data exists in target coupled data table '{tableName}' - cannot migrate, skipping form data migration.", r.ClassTableName);
-                    // TODO tk: 2022-06-01 migrate data manually or delete all data
+                    _logger.LogWarning("Data exists in target coupled data table '{TableName}' - cannot migrate, skipping form data migration", r.ClassTableName);
+                    _migrationProtocol.Append(HandbookReferences
+                        .DataMustNotExistInTargetInstanceTable(kx13Class.ClassTableName)
+                    );
                     continue;
                 }
 
                 var bulkCopyRequest = new BulkCopyRequest(
                     kx13Class.ClassTableName, s => !autoIncrementColumns.Contains(s), reader => true,
-                    1500
+                    20000
                 );
 
-                _logger.LogTrace("Bulk data copy request: {request}", bulkCopyRequest);
+                _logger.LogTrace("Bulk data copy request: {Request}", bulkCopyRequest);
                 _bulkDataCopyService.CopyTableToTable(bulkCopyRequest);
             }
-            // await SaveUsingEntityFramework(cancellationToken, kx13CmsClassesDocumentType, kxoCmsClass, kxoContext);
         }
 
         return new GenericCommandResult();
     }
 
-    private void SaveUsingKxoApi(CmsClass kx13Class, DataClassInfo kxoDataClass)
+    private bool MapAndSaveUsingKxoApi(CmsClass kx13Class, DataClassInfo kxoDataClass)
     {
         var mapped = _dataClassMapper.Map(kx13Class, kxoDataClass);
         _migrationProtocol.MappedTarget(mapped);
 
-        switch (mapped)
+        if (mapped is { Success : true } result)
         {
-            case { Success : true } result:
-            {
-                var (dataClassInfo, newInstance) = result;
-                ArgumentNullException.ThrowIfNull(dataClassInfo, nameof(dataClassInfo));
+            var (dataClassInfo, newInstance) = result;
+            ArgumentNullException.ThrowIfNull(dataClassInfo, nameof(dataClassInfo));
 
+            try
+            {
                 _kxoClassFacade.SetClass(dataClassInfo);
 
                 _migrationProtocol.Success(kx13Class, dataClassInfo, mapped);
-
-                _logger.LogInformation(newInstance
-                    ? $"CmsClass: {dataClassInfo.ClassName} was inserted."
-                    : $"CmsClass: {dataClassInfo.ClassName} was updated.");
+                _logger.LogEntitySetAction(newInstance, dataClassInfo);
 
                 _primaryKeyMappingContext.SetMapping<KX13.Models.CmsClass>(
                     r => r.ClassId,
@@ -202,9 +213,20 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
                     dataClassInfo.ClassID
                 );
 
-                break;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _migrationProtocol.Append(HandbookReferences
+                    .ErrorCreatingTargetInstance<DataClassInfo>(ex)
+                    .NeedsManualAction()
+                    .WithIdentityPrint(dataClassInfo)
+                );
+                _logger.LogEntitySetError(ex, newInstance, dataClassInfo);
             }
         }
+        
+        return false;
     }
 
     public void Dispose()

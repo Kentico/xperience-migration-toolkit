@@ -12,6 +12,7 @@ using Migration.Toolkit.KXO.Context;
 
 namespace Migration.Toolkit.Core.Handlers;
 
+[Obsolete("Currently unneeded leaving for future use is needed", true)]
 public class MigrateContactGroupsCommandHandler : IRequestHandler<MigrateContactGroupsCommand, GenericCommandResult>, IDisposable
 {
     private readonly ILogger<MigrateContactGroupsCommandHandler> _logger;

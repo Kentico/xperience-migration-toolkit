@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
 using Migration.Toolkit.Core.Abstractions;
 using Migration.Toolkit.Core.Contexts;
+using Migration.Toolkit.Core.Mappers;
 using Migration.Toolkit.Core.MigrationProtocol;
 using Migration.Toolkit.Core.Services.BulkCopy;
 using Migration.Toolkit.KX13.Context;
@@ -27,7 +28,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
     private readonly ILogger<MigratePagesCommandHandler> _logger;
     private readonly IDbContextFactory<KxoContext> _kxoContextFactory;
     private readonly IDbContextFactory<KX13Context> _kx13ContextFactory;
-    private readonly IEntityMapper<CmsTree, TreeNode> _nodeMapper;
+    private readonly IEntityMapper<CmsTreeMapperSource, TreeNode> _nodeMapper;
     private readonly IEntityMapper<CmsPageUrlPath, KXO.Models.CmsPageUrlPath> _pageUrlPathMapper;
 
     private readonly BulkDataCopyService _bulkDataCopyService;
@@ -43,7 +44,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         ILogger<MigratePagesCommandHandler> logger,
         IDbContextFactory<KXO.Context.KxoContext> kxoContextFactory,
         IDbContextFactory<KX13.Context.KX13Context> kx13ContextFactory,
-        IEntityMapper<KX13.Models.CmsTree, TreeNode> nodeMapper,
+        IEntityMapper<CmsTreeMapperSource, TreeNode> nodeMapper,
         IEntityMapper<KX13.Models.CmsPageUrlPath, KXO.Models.CmsPageUrlPath> pageUrlPathMapper,
         BulkDataCopyService bulkDataCopyService,
         ToolkitConfiguration toolkitConfiguration,
@@ -92,6 +93,24 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         // "CMS.BookingEvent",
     });
 
+    private KX13M.CmsTree? GetFullSourceCmsTree(int siteId, string cultureCode, Guid nodeGuid)
+    {
+        using var kx13Context = _kx13ContextFactory.CreateDbContext();
+
+        return kx13Context.CmsTrees
+            .Include(t => t.NodeParent)
+            .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
+            .Include(t => t.NodeClass)
+            .Include(t => t.CmsPageUrlPaths)
+            .Include(t => t.NodeLinkedNode)
+            .Where(x => x.NodeSiteId == siteId && x.NodeGuid == nodeGuid)
+            .OrderBy(t => t.NodeLevel)
+            .ThenBy(t => t.NodeParentId)
+            .ThenBy(t => t.NodeId)
+            .AsNoTracking()
+            .SingleOrDefault();
+    }
+
     public async Task<CommandResult> Handle(MigratePagesCommand request, CancellationToken cancellationToken)
     {
         var cultureCode = request.CultureCode;
@@ -103,15 +122,16 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 
         var kx13CmsTrees = kx13Context.CmsTrees
-                .Include(t => t.NodeParent)
-                .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
-                .Include(t => t.NodeClass)
-                .Include(t => t.CmsPageUrlPaths)
-                .Include(t => t.NodeLinkedNode)
-                .Where(x => migratedSiteIds.Contains(x.NodeSiteId))
-                .OrderBy(t => t.NodeLevel)
-                .ThenBy(t => t.NodeParentId)
-                .ThenBy(t => t.NodeId)
+            .Include(t => t.NodeParent)
+            .Include(t => t.CmsDocuments.Where(x => x.DocumentCulture == cultureCode))
+            .Include(t => t.NodeClass)
+            .Include(t => t.CmsPageUrlPaths)
+            .Include(t => t.NodeLinkedNode)
+            .Where(x => migratedSiteIds.Contains(x.NodeSiteId))
+            .OrderBy(t => t.NodeLevel)
+            .ThenBy(t => t.NodeParentId)
+            .ThenBy(t => t.NodeId)
+            .AsNoTrackingWithIdentityResolution();
             // TODO tk: 2022-05-18  .Where(x=>x.IsPublished)
             ;
 
@@ -121,10 +141,43 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
 
         // TODO tk: 2022-07-06 PageUrlPathInfoProvider.ProviderObject.Set();
         
-        foreach (var kx13CmsTree in kx13CmsTrees)
+        foreach (var kx13CmsTreeOriginal in kx13CmsTrees)
         {
-            _migrationProtocol.FetchedSource(kx13CmsTree);
-            var kx13CmsDocument = kx13CmsTree.CmsDocuments.Single();
+            _migrationProtocol.FetchedSource(kx13CmsTreeOriginal);
+            
+            var kx13CmsTree = kx13CmsTreeOriginal;
+            var migrationOfLinkedNode = false;
+            if (kx13CmsTree.NodeLinkedNode != null)
+            {
+                if (kx13CmsTree.NodeLinkedNode.NodeSiteId != kx13CmsTree.NodeSiteId)
+                {
+                    // skip & write to protocol
+                    _logger.LogWarning("Linked node with NodeGuid {NodeGuid} is linked from different site - unable to migrate.", kx13CmsTreeOriginal.NodeGuid);
+                    _migrationProtocol.Warning(HandbookReferences.CmsTreeTreeIsLinkFromDifferentSite, kx13CmsTree);
+                    continue;
+                }
+
+                // materialize linked node & write to protocol
+                var linkedNode = GetFullSourceCmsTree(kx13CmsTree.NodeSiteId, cultureCode, kx13CmsTree.NodeLinkedNode.NodeGuid);
+                // kx13CmsTree = EfCoreHelper.Clone(kx13Context, kx13CmsTreeOriginal);
+                
+                Debug.Assert(kx13CmsTree != null, nameof(kx13CmsTree) + " != null");
+                Debug.Assert(linkedNode != null, nameof(linkedNode) + " != null");
+
+                var originalCmsDocument = linkedNode.CmsDocuments.Single();
+                originalCmsDocument.DocumentGuid = Guid.NewGuid();
+                originalCmsDocument.DocumentId = 0;
+
+                kx13CmsTree.CmsDocuments.Add(originalCmsDocument);
+                kx13CmsTree.NodeLinkedNodeId = null;
+                kx13CmsTree.NodeLinkedNodeSiteId = null;
+                migrationOfLinkedNode = true;
+                
+                _logger.LogTrace("Linked node with NodeGuid {NodeGuid} was materialized", kx13CmsTree.NodeGuid);
+            }
+            
+            var kx13CmsDocument = kx13CmsTree.CmsDocuments.SingleOrDefault();
+            Debug.Assert(kx13CmsDocument != null, nameof(kx13CmsDocument) + " != null");
             
             if (classEntityConfiguration.ExcludeCodeNames.Contains(kx13CmsTree.NodeClass.ClassName, StringComparer.InvariantCultureIgnoreCase))
             {
@@ -162,7 +215,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
 
                 continue;
             }
-
+            
             var isPublished = _pageFacade.IsPublished(new IsPublishedArgument(
                 kx13CmsDocument.DocumentCanBePublished, kx13CmsDocument.DocumentWorkflowStepId,
                 kx13CmsDocument.DocumentIsArchived, kx13CmsDocument.DocumentCheckedOutVersionHistoryId,
@@ -197,25 +250,17 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
 
             _migrationProtocol.FetchedTarget(kxoTreeNode);
 
+            if (migrationOfLinkedNode && kxoTreeNode != null)
+            {
+                _logger.LogWarning("Linked node is already materialized in target instance, if you want to migrate again delete it in target instance.");
+                _migrationProtocol.Append(HandbookReferences.LinkedDataAlreadyMaterializedInTargetInstance.WithData(new { kx13CmsTree.NodeGuid, kx13CmsTree.NodeAliasPath }));
+                continue;
+            }
+            
             var kxoTreeNodeParent = new DocumentQuery()
                 .Where("NodeID", QueryOperator.Equals, mappedParentNodeId)
                 .Culture(cultureCode)
                 .Single();
-
-            if (kx13CmsTree.NodeLinkedNode != null)
-            {
-                // TODO tk: 2022-06-30 check for linked documents, materialize linked, skip linked from other sites
-                if (kx13CmsTree.NodeLinkedNode.NodeSiteId != kx13CmsTree.NodeSiteId)
-                {
-                    // skip & write to protocol
-                    _logger.LogWarning("Page with DocumentGuid {DocumentGuid} is linked from different site - unable to migrate.", kx13CmsDocument.DocumentGuid);
-                    _migrationProtocol.Warning(HandbookReferences.CmsTreeTreeIsLinkFromDifferentSite, kx13CmsTree);
-                    continue;
-                }
-
-                // materialize linked node & write to protocol
-                var brea = 1;
-            }
             
             // TODO tk: 2022-06-30 migration path for internal kentico documents (CMS.File)
             
@@ -224,7 +269,8 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
             // TODO tk: 2022-06-30 check column names (in mapper)
             // newNode.ColumnNames;
 
-            var mapped = _nodeMapper.Map(kx13CmsTree, kxoTreeNode);
+            var source = new CmsTreeMapperSource(kx13CmsTree, cultureCode);
+            var mapped = _nodeMapper.Map(source, kxoTreeNode);
             _migrationProtocol.MappedTarget(mapped);
 
             switch (mapped)
@@ -257,15 +303,24 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                     
                     try
                     {
+                        var treeProvider = new TreeProvider
+                        {
+                            UpdateUser = false,
+                            UpdateTimeStamps = false,
+                            LogEvents = false,
+                            LogIntegration = false,
+                            UpdatePaths = false,
+                        };
+                        treeNode.TreeProvider = treeProvider;
                         if (newInstance)
                         {
-                            treeNode.Insert(kxoTreeNodeParent);
+                            treeNode.Insert(kxoTreeNodeParent, false);
                         }
                         else
                         {
-                            treeNode.Update();
+                            treeNode.Update(false);
                         }
-                        
+
                         // await _kxoContext.SaveChangesAsync(cancellationToken);
 
                         // self reference satisfaction
@@ -335,6 +390,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
             }
         }
 
+        // TODO tk: 2022-07-07 update & migrate paths
         // TODO tk: 2022-06-08 method cannot be used in current impl, synced documents must be reflected in url path search 
         // await RequireMigratedCmsPageUrlPaths(cancellationToken, kx13Context, migratedSiteIds);
         

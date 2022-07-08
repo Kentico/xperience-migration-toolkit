@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using CMS.DataEngine;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -101,59 +102,67 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
     public async Task<MigrateSettingsKeysResult> Handle(MigrateSettingKeysCommand request, CancellationToken cancellationToken)
     {
         var entityConfiguration = _toolkitConfiguration.EntityConfigurations.GetEntityConfiguration<KX13.Models.CmsSettingsKey>();
-        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
         
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 
         // not needed right naw as category will be migrated when needed 
         // await RequireMigratedCmsSettingsCategories(kx13Context, cancellationToken);
-
-        // TODO tk: 2022-06-17 Přenášet jen ty které nesjsou IsHidden (cílová instnce)
         
         _logger.LogInformation($"CmsSettingsKey synchronization starting");
         var cmsSettingsKeys = kx13Context.CmsSettingsKeys
-                .Include(sk => sk.KeyCategory.CategoryResource)
-                .Include(sk => sk.KeyCategory.CategoryParent.CategoryResource)
-                .Include(sk => sk.KeyCategory.CategoryParent.CategoryParent.CategoryResource)
+                // .Include(sk => sk.KeyCategory.CategoryResource)
+                // .Include(sk => sk.KeyCategory.CategoryParent.CategoryResource)
+                // .Include(sk => sk.KeyCategory.CategoryParent.CategoryParent.CategoryResource)
                 .Where(csk => migratedSiteIds.Contains(csk.SiteId) || csk.SiteId == null)
+                .AsNoTrackingWithIdentityResolution()
             // .Where(k => k.KeyIsCustom == true)
             ;
 
-        var presentSettingsKeyNames = _kxoContext.CmsSettingsKeys.Select(x => x.KeyName).ToImmutableHashSet();
+        // var presentSettingsKeyNames = _kxoContext.CmsSettingsKeys.Select(x => x.KeyName).ToImmutableHashSet();
         
         foreach (var kx13CmsSettingsKey in cmsSettingsKeys)
         {
-            if (!presentSettingsKeyNames.Contains(kx13CmsSettingsKey.KeyName) && kx13CmsSettingsKey.KeyIsCustom.GetValueOrDefault(false))
-            {
-                _logger.LogWarning("Setting with key '{key}' is not supported.", kx13CmsSettingsKey.KeyName);
-                // TODO tk: 2022-06-01 protocol needs attention?
-                continue;
-            }
+            // if (!presentSettingsKeyNames.Contains(kx13CmsSettingsKey.KeyName) && kx13CmsSettingsKey.KeyIsCustom.GetValueOrDefault(false))
+            // {
+            //     _logger.LogWarning("Setting with key '{key}' is not supported.", kx13CmsSettingsKey.KeyName);
+            //     // TODO tk: 2022-06-01 protocol needs attention?
+            //     continue;
+            // }
             
             _migrationProtocol.FetchedSource(kx13CmsSettingsKey);
 
-            var kxoCmsSettingsKey = _kxoContext.CmsSettingsKeys
-                .Include(sk => sk.KeyCategory.CategoryResource)
-                .Include(sk => sk.KeyCategory.CategoryParent.CategoryResource)
-                .Include(sk => sk.KeyCategory.CategoryParent.CategoryParent.CategoryResource)
-                .FirstOrDefault(k => k.KeyName == kx13CmsSettingsKey.KeyName && k.SiteId == kx13CmsSettingsKey.SiteId);
+            var kxoGlobalSettingsKey = GetKxoSettingsKey(kx13CmsSettingsKey, null);
+            
+            var canBeMigrated = !kxoGlobalSettingsKey?.KeyIsHidden ?? false;
+            var kxoCmsSettingsKey = kx13CmsSettingsKey.SiteId is null ? kxoGlobalSettingsKey : GetKxoSettingsKey(kx13CmsSettingsKey, kx13CmsSettingsKey.SiteId);
 
-            if (kxoCmsSettingsKey == null && kx13CmsSettingsKey.KeyIsCustom == false)
+            if (!canBeMigrated)
             {
-                _logger.LogWarning("Setting with key '{key}' is no longer supported.", kx13CmsSettingsKey.KeyName);
-                // TODO tk: 2022-06-01 protocol needs attention?
+                _logger.LogWarning("Setting with key '{Key}' is currently not supported for migration", kx13CmsSettingsKey.KeyName);
+                _migrationProtocol.Append(
+                    HandbookReferences
+                        .NotCurrentlySupportedSkip<SettingsKeyInfo>()
+                        .WithId(nameof(kx13CmsSettingsKey.KeyId), kx13CmsSettingsKey.KeyId)
+                        .WithData(new
+                        {
+                            kx13CmsSettingsKey.KeyName,
+                            kx13CmsSettingsKey.SiteId,
+                            kx13CmsSettingsKey.KeyGuid
+                        })
+                );
                 continue;
             }
-            else if(kxoCmsSettingsKey == null)
-            {
-                _logger.LogWarning("Setting with key '{key}' not exists in target database (creating new keys with tool is not currently supported).", kx13CmsSettingsKey.KeyName);
-                // TODO tk: 2022-06-01 protocol needs attention?
-                continue;
-            }
-            else
-            {
-                _migrationProtocol.FetchedTarget(kxoCmsSettingsKey);
-            }
+            // else if(kxoCmsSettingsKey == null)
+            // {
+            //     _logger.LogWarning("Setting with key '{key}' not exists in target database (creating new keys with tool is not currently supported).", kx13CmsSettingsKey.KeyName);
+            //     // TODO tk: 2022-06-01 protocol needs attention?
+            //     continue;
+            // }
+            // else
+            // {
+            _migrationProtocol.FetchedTarget(kxoCmsSettingsKey);
+            // }
 
             if (entityConfiguration.ExcludeCodeNames.Contains(kx13CmsSettingsKey.KeyName))
             {
@@ -164,37 +173,45 @@ public class MigrateSettingKeysCommandHandler: IRequestHandler<MigrateSettingKey
 
             var mapped = _mapper.Map(kx13CmsSettingsKey, kxoCmsSettingsKey);
             _migrationProtocol.MappedTarget(mapped);
-            
-            switch (mapped)
+
+            if (mapped is { Success: true } result)
             {
-                case {Success: true } result:
-                    ArgumentNullException.ThrowIfNull(result.Item, nameof(result.Item));
+                ArgumentNullException.ThrowIfNull(result.Item, nameof(result.Item));
 
-                    if (result.NewInstance)
-                    {
-                        _kxoContext.CmsSettingsKeys.Add(result.Item);
-                    }
-                    else
-                    {
-                        _kxoContext.CmsSettingsKeys.Update(result.Item);
-                    }
+                if (result.NewInstance)
+                {
+                    _kxoContext.CmsSettingsKeys.Add(result.Item);
+                }
+                else
+                {
+                    _kxoContext.CmsSettingsKeys.Update(result.Item);
+                }
 
-                    await _kxoContext.SaveChangesAsync(cancellationToken);
-                    
-                    _migrationProtocol.Success(kx13CmsSettingsKey, kxoCmsSettingsKey, mapped);
+                await _kxoContext.SaveChangesAsync(cancellationToken);
+                
+                // await _kxoContext.DisposeAsync();
+                // _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
+                
+                _migrationProtocol.Success(kx13CmsSettingsKey, kxoCmsSettingsKey, mapped);
 
-                    _logger.LogInformation(result.NewInstance
-                        ? $"CmsSettingsKey: {result.Item.KeyName} was inserted."
-                        : $"CmsSettingsKey: {result.Item.KeyName} was updated.");
-
-                    // kxoContext.SaveChangesWithIdentityInsert<KXO.Models.CmsClass>();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mapped));
+                _logger.LogInformation(result.NewInstance
+                    ? $"CmsSettingsKey: {result.Item.KeyName} was inserted."
+                    : $"CmsSettingsKey: {result.Item.KeyName} was updated.");
             }
         }
 
         return new MigrateSettingsKeysResult();
+    }
+
+    private KXO.Models.CmsSettingsKey? GetKxoSettingsKey(KX13.Models.CmsSettingsKey kx13CmsSettingsKey, int? siteId)
+    {
+        using var kxoContext = _kxoContextFactory.CreateDbContext();
+        
+        return kxoContext.CmsSettingsKeys
+            // .Include(sk => sk.KeyCategory.CategoryResource)
+            // .Include(sk => sk.KeyCategory.CategoryParent.CategoryResource)
+            // .Include(sk => sk.KeyCategory.CategoryParent.CategoryParent.CategoryResource)
+            .SingleOrDefault(k => k.KeyName == kx13CmsSettingsKey.KeyName && k.SiteId == siteId);
     }
 
     public void Dispose()

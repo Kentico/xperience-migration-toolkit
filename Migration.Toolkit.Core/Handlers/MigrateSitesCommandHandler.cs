@@ -50,13 +50,13 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
         foreach (var kx13CmsSite in kx13Context.CmsSites)
         {
             _migrationProtocol.FetchedSource(kx13CmsSite);
-            _logger.LogTrace("Migrating site {siteName} with UserGuid {siteGuid}", kx13CmsSite.SiteName, kx13CmsSite.SiteGuid);
+            _logger.LogTrace("Migrating site {SiteName} with UserGuid {SiteGuid}", kx13CmsSite.SiteName, kx13CmsSite.SiteGuid);
 
             var targetSiteId = _primaryKeyMappingContext.MapFromSourceOrNull<KX13.Models.CmsSite>(s => s.SiteId, kx13CmsSite.SiteId);
             if (targetSiteId is null)
             {
                 // TODO tk: 2022-05-26 add site guid mapping
-                _logger.LogWarning("Site '{siteName}' with Guid {guid} migration skipped", kx13CmsSite.SiteName, kx13CmsSite.SiteGuid);
+                _logger.LogWarning("Site '{SiteName}' with Guid {Guid} migration skipped", kx13CmsSite.SiteName, kx13CmsSite.SiteGuid);
                 continue;
             }
             
@@ -66,42 +66,35 @@ public class MigrateSitesCommandHandler: IRequestHandler<MigrateSitesCommand, Ge
             var mapped = _cmsSiteMapper.Map(kx13CmsSite, kxoCmsSite);
             _migrationProtocol.MappedTarget(mapped);
 
-            switch (mapped)
+            if (mapped is { Success : true } result)
             {
-                case { Success : true } result:
+                var (cmsSite, newInstance) = result;
+                ArgumentNullException.ThrowIfNull(cmsSite, nameof(cmsSite));
+
+                if (newInstance)
                 {
-                    var (cmsSite, newInstance) = result;
-                    ArgumentNullException.ThrowIfNull(cmsSite, nameof(cmsSite));
-
-                    if (newInstance)
-                    {
-                        _kxoContext.CmsSites.Add(cmsSite);
-                    }
-                    else
-                    {
-                        _kxoContext.CmsSites.Update(cmsSite);
-                    }
-
-                    try
-                    {
-                        await _kxoContext.SaveChangesAsync(cancellationToken);
-
-                        _migrationProtocol.Success(kx13CmsSite, cmsSite, mapped);
-                        _logger.LogInformation(newInstance
-                            ? $"CmsSite: {cmsSite.SiteName} with SiteGuid '{cmsSite.SiteGuid}' was inserted."
-                            : $"CmsSite: {cmsSite.SiteName} with SiteGuid '{cmsSite.SiteGuid}' was updated.");
-                    }
-                    catch (Exception ex)
-                    {
-                        throw;
-                    }
-
-                    _primaryKeyMappingContext.SetMapping<KX13.Models.CmsSite>(r => r.SiteId, kx13CmsSite.SiteId, cmsSite.SiteId);
-
-                    break;
+                    _kxoContext.CmsSites.Add(cmsSite);
                 }
-                default:
-                    break;
+                else
+                {
+                    _kxoContext.CmsSites.Update(cmsSite);
+                }
+
+                try
+                {
+                    await _kxoContext.SaveChangesAsync(cancellationToken);
+
+                    _migrationProtocol.Success(kx13CmsSite, cmsSite, mapped);
+                    _logger.LogInformation(newInstance
+                        ? $"CmsSite: {cmsSite.SiteName} with SiteGuid '{cmsSite.SiteGuid}' was inserted."
+                        : $"CmsSite: {cmsSite.SiteName} with SiteGuid '{cmsSite.SiteGuid}' was updated.");
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+                _primaryKeyMappingContext.SetMapping<KX13.Models.CmsSite>(r => r.SiteId, kx13CmsSite.SiteId, cmsSite.SiteId);
             }
         }
 

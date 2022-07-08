@@ -117,8 +117,8 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
     {
         var cultureCode = request.CultureCode;
 
-        var siteMappings = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId);
-        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var siteMappings = _toolkitConfiguration.RequireExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId);
+        var migratedSiteIds = _toolkitConfiguration.RequireExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
         var classEntityConfiguration = _toolkitConfiguration.EntityConfigurations.GetEntityConfiguration<KX13.Models.CmsClass>();
 
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
@@ -288,7 +288,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                         treeNode.Update(false);
                     }
 
-                    MigratePageUrlPaths(kx13Context, kx13CmsTree, kx13CmsDocument, cultureCode, treeNode);
+                    MigratePageUrlPaths(kx13CmsTree, kx13CmsDocument, cultureCode, treeNode);
 
                     treeNode.Publish();
 
@@ -342,9 +342,10 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         return new GenericCommandResult();
     }
 
-    private void MigratePageUrlPaths(KX13Context kx13Context, CmsTree kx13CmsTree, CmsDocument kx13CmsDocument, string cultureCode, TreeNode treeNode)
+    private void MigratePageUrlPaths(CmsTree kx13CmsTree, CmsDocument kx13CmsDocument, string cultureCode, TreeNode treeNode)
     {
         using var kxoContext = _kxoContextFactory.CreateDbContext();
+        using var kx13Context = _kx13ContextFactory.CreateDbContext();
         
         var pageUrlPathsByHash =
             kxoContext.CmsPageUrlPaths.Include(x => x.PageUrlPathNode)

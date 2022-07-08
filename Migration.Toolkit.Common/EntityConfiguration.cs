@@ -25,6 +25,19 @@ public class EntityConfigurations : Dictionary<string, EntityConfiguration>
         var tableName = ReflectionHelper<TModel>.GetFirstAttributeOrNull<TableAttribute>()?.Name;
         return GetEntityConfiguration(tableName);
     }
+
+    public void SetEntityConfiguration<TModel>(EntityConfiguration config)
+    {
+        var tableName = ReflectionHelper<TModel>.GetFirstAttributeOrNull<TableAttribute>()?.Name;
+        if (this.ContainsKey(tableName))
+        {
+            this[tableName] = config;
+        }
+        else
+        {
+            this.Add(tableName, config);
+        }
+    }
 }
 
 public class EntityConfiguration

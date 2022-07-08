@@ -39,7 +39,7 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
 
     public Task<CommandResult> Handle(MigrateContactManagementCommand request, CancellationToken cancellationToken)
     {
-        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireExplicitMapping<CmsSite>(s => s.SiteId).Keys.ToList();
         if (MigrateContacts() is { } ccr) return Task.FromResult(ccr);
         if (MigrateContactActivities(migratedSiteIds) is { } acr) return Task.FromResult(acr);
 

@@ -24,7 +24,7 @@ public class ToolkitConfiguration
     public AutofixEnum? UseOmActivityNodeRelationAutofix { get; set; } = AutofixEnum.Error;
     public AutofixEnum? UseOmActivitySiteRelationAutofix { get; set; } = AutofixEnum.Error;
 
-    public Dictionary<int?, int?> RequireSiteIdExplicitMapping<TEntityType>(Expression<Func<TEntityType, object>> keyNameSelector)
+    public Dictionary<int?, int?> RequireExplicitMapping<TEntityType>(Expression<Func<TEntityType, object>> keyNameSelector)
     {
         var memberName = keyNameSelector.GetMemberName();
         var migratedSiteIds = EntityConfigurations?.GetEntityConfiguration<TEntityType>()?.ExplicitPrimaryKeyMapping[memberName];
@@ -34,5 +34,28 @@ public class ToolkitConfiguration
         }
 
         return migratedSiteIds.ToDictionary(kvp => (int?)int.Parse(kvp.Key), kvp => kvp.Value);
+    }
+
+    public void AddExplicitMapping<TEntityType>(Expression<Func<TEntityType, object>> keyNameSelector, int sourceId, int targetId)
+    {
+        var memberName = keyNameSelector.GetMemberName();
+        if (EntityConfigurations == null) throw new InvalidOperationException();
+        var entityConfiguration = EntityConfigurations.GetEntityConfiguration<TEntityType>();
+        var explicitPrimaryKeyMapping = entityConfiguration.ExplicitPrimaryKeyMapping;
+        if (!explicitPrimaryKeyMapping.ContainsKey(memberName))
+        {
+            explicitPrimaryKeyMapping.Add(memberName, new());
+        }
+
+        if (!explicitPrimaryKeyMapping[memberName].ContainsKey(sourceId.ToString()))
+        {
+            explicitPrimaryKeyMapping[memberName].Add(sourceId.ToString(), targetId);
+        }
+        else
+        {
+            explicitPrimaryKeyMapping[memberName][sourceId.ToString()] = targetId;
+        }
+
+        EntityConfigurations.SetEntityConfiguration<TEntityType>(entityConfiguration);
     }
 }

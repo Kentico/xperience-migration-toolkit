@@ -54,7 +54,7 @@ public class MigratePageTypesCommandHandler : IRequestHandler<MigratePageTypesCo
         Debug.Assert(_toolkitConfiguration.EntityConfigurations != null, "_toolkitConfiguration.EntityConfigurations != null");
         var entityConfiguration = _toolkitConfiguration.EntityConfigurations.GetEntityConfiguration<KX13.Models.CmsClass>();
         
-        var siteIdExplicitMapping = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId);
+        var siteIdExplicitMapping = _toolkitConfiguration.RequireExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId);
         var migratedSiteIds = siteIdExplicitMapping.Keys.ToList();
 
         var cmsClassesDocumentTypes = kx13Context.CmsClasses.Include(c => c.Sites)

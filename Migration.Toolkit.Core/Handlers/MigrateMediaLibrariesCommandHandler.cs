@@ -60,7 +60,7 @@ public class MigrateMediaLibrariesCommandHandler : IRequestHandler<MigrateMediaL
     {
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 
-        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
 
         var kx13MediaLibraries = kx13Context.MediaLibraries
                 .Include(ml => ml.LibrarySite)

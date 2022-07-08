@@ -1,4 +1,6 @@
-﻿namespace Migration.Toolkit.Core.MigrationProtocol;
+﻿using Migration.Toolkit.Common.Helpers;
+
+namespace Migration.Toolkit.Core.MigrationProtocol;
 
 public static class HandbookReferences
 {
@@ -100,6 +102,12 @@ public static class HandbookReferences
     public static HandbookReference ValueTruncationSkip(string tableName) =>
         new HandbookReference("ValueTruncationSkip").NeedsManualAction().WithData(new { tableName });
 
+    public static HandbookReference NotCurrentlySupportedSkip<TSource>() =>
+        new HandbookReference("NotCurrentlySupportedSkip").WithData(new
+        {
+            Type = ReflectionHelper<TSource>.CurrentType.Name
+        });
+    
     public static HandbookReference FaultyData<TSource>() => new HandbookReference("FaultyData")
         .NeedsManualAction()
         .WithData(new

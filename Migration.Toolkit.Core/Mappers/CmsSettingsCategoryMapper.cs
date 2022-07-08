@@ -22,10 +22,8 @@ public class CmsSettingsCategoryMapper : EntityMapperBase<Migration.Toolkit.KX13
     }
 
     protected override KXO.Models.CmsSettingsCategory? CreateNewInstance(CmsSettingsCategory source, MappingHelper mappingHelper,
-        AddFailure addFailure)
-    {
-        throw new NotImplementedException();
-    }
+        AddFailure addFailure) => new();
+    
 
     protected override KXOM.CmsSettingsCategory MapInternal(KX13.Models.CmsSettingsCategory source, KXOM.CmsSettingsCategory target, bool newInstance, MappingHelper mappingHelper, AddFailure addFailure)
     {

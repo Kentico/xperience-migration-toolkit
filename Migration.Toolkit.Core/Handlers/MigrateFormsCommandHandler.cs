@@ -60,7 +60,7 @@ public class MigrateFormsCommandHandler : IRequestHandler<MigrateFormsCommand, G
 
     public async Task<GenericCommandResult> Handle(MigrateFormsCommand request, CancellationToken cancellationToken)
     {
-        var migratedSiteIds = _toolkitConfiguration.RequireSiteIdExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
+        var migratedSiteIds = _toolkitConfiguration.RequireExplicitMapping<KX13.Models.CmsSite>(s => s.SiteId).Keys.ToList();
 
         await using var kx13Context = await _kx13ContextFactory.CreateDbContextAsync(cancellationToken);
 

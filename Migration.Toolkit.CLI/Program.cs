@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using Migration.Toolkit.Core.Services;
 using Migration.Toolkit.KX13;
 using Migration.Toolkit.KXO;
 using Migration.Toolkit.KXO.Api;
+using Migration.Toolkit.KXO.Context;
 
 // https://docs.microsoft.com/en-us/dotnet/core/extensions/configuration
 
@@ -86,7 +88,6 @@ bool RequireNumberParameter(string paramName, out int? paramValue)
             paramValue = null;
             return false;
         }
-        
     }
 
     Console.WriteLine(Red($"Parameter {paramName} is reqiured."));
@@ -135,6 +136,7 @@ void PrintCommandDescriptions()
 }
 
 var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+var kxoContext = scope.ServiceProvider.GetRequiredService<IDbContextFactory<KxoContext>>().CreateDbContext();
 
 var argsQ = new Queue<string>(args);
 var commands = new List<ICommand>();
@@ -143,10 +145,18 @@ var bypassDependencyCheck = false;
 while (argsQ.TryDequeue(out var arg))
 {
     var cultureCode = "";
-
-    // TODO tk: 2022-06-23 siteId konfigurovatelné přes cmd argument
-    // TODO tk: 2022-06-23 ! konfigurovat site přes SiteName (ponechat aktuální přístup)
     
+    // TODO tk: 2022-06-23 ! konfigurovat site přes SiteName (ponechat aktuální přístup)
+    if (RequireNumberParameter("--siteId", out var siteId) && siteId is int sid && kxoContext.CmsSites.FirstOrDefault()?.SiteId is int targetSiteId)
+    {
+        toolkitConfiguration.AddExplicitMapping<Migration.Toolkit.KX13.Models.CmsSite>(s => s.SiteId, sid, targetSiteId);
+        // mappingContext.SetMapping<Migration.Toolkit.KX13.Models.CmsSite>(s => s.SiteId, sid, targetSiteId);
+    }
+    else
+    {
+        return;
+    }
+
     if (arg.IsIn("help", "h"))
     {
         PrintCommandDescriptions();
@@ -160,6 +170,11 @@ while (argsQ.TryDequeue(out var arg))
     }
 
     if (arg == "--culture")
+    {
+        continue;
+    }
+    
+    if (arg == "--site")
     {
         continue;
     }
@@ -285,6 +300,8 @@ while (argsQ.TryDequeue(out var arg))
     // Console.WriteLine($"Invalid arguments, for help call with command {Yellow("help")}, usable commands:");
     // PrintCommandDescriptions();
 }
+
+kxoContext.Dispose();
 
 var satisfiedDependencies = new HashSet<Type>();
 var dependenciesSatisfied = true;

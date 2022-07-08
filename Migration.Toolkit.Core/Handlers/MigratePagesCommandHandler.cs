@@ -93,6 +93,8 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
         // "CMS.BookingEvent",
     });
 
+    private record PageUrlPathKey(int PageUrlPathSiteId, string PageUrlPathUrlPathHash, string PageUrlPathCulture);
+    
     private KX13M.CmsTree? GetFullSourceCmsTree(int siteId, string cultureCode, Guid nodeGuid)
     {
         using var kx13Context = _kx13ContextFactory.CreateDbContext();
@@ -134,13 +136,7 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
             .AsNoTrackingWithIdentityResolution();
             // TODO tk: 2022-05-18  .Where(x=>x.IsPublished)
             ;
-
-        // var pageUrlPathsByHash =
-        //     _kxoContext.CmsPageUrlPaths.Include(x => x.PageUrlPathNode)
-        //         .ToDictionary(x => new { x.PageUrlPathSiteId, x.PageUrlPathUrlPathHash, x.PageUrlPathCulture });
-
-        // TODO tk: 2022-07-06 PageUrlPathInfoProvider.ProviderObject.Set();
-        
+            
         foreach (var kx13CmsTreeOriginal in kx13CmsTrees)
         {
             _migrationProtocol.FetchedSource(kx13CmsTreeOriginal);
@@ -262,139 +258,132 @@ public class MigratePagesCommandHandler : IRequestHandler<MigratePagesCommand, C
                 .Culture(cultureCode)
                 .Single();
             
-            // TODO tk: 2022-06-30 migration path for internal kentico documents (CMS.File)
-            
-            // TODO tk: 2022-06-30 use API for tree/document creation
-            //var newNode = TreeNode.New(kx13CmsTree.NodeClass.ClassName);
-            // TODO tk: 2022-06-30 check column names (in mapper)
-            // newNode.ColumnNames;
-
             var source = new CmsTreeMapperSource(kx13CmsTree, cultureCode);
             var mapped = _nodeMapper.Map(source, kxoTreeNode);
             _migrationProtocol.MappedTarget(mapped);
 
-            switch (mapped)
+            if (mapped is { Success : true } result)
             {
-                // case { Success: false } result: case is covered
-                case {Success : true} result:
+                var (treeNode, newInstance) = result;
+
+                ArgumentNullException.ThrowIfNull(treeNode, nameof(treeNode));
+
+                try
                 {
-                    var (treeNode, newInstance) = result;
-                    
-                    ArgumentNullException.ThrowIfNull(treeNode, nameof(treeNode));
-                    
-                    // TODO tk: 2022-06-30 check PageUrlPath constraint
-                    // foreach (var newPageUrlPath in treeNode.CmsPageUrlPaths)
-                    // {
-                    //     if (pageUrlPathsByHash.TryGetValue(
-                    //             new
-                    //             {
-                    //                 newPageUrlPath.PageUrlPathSiteId, newPageUrlPath.PageUrlPathUrlPathHash,
-                    //                 newPageUrlPath.PageUrlPathCulture
-                    //             }, out var targetPath))
-                    //     {
-                    //         _logger.LogError("Target PageUrlPath already exists {TargetUrlPathHash} for Site {Site} and culture {Culture}", newPageUrlPath.PageUrlPathUrlPathHash, newPageUrlPath.PageUrlPathSiteId, newPageUrlPath.PageUrlPathCulture);
-                    //         continue;
-                    //         // if (targetPath.PageUrlPathNode.NodeGuid == newPageUrlPath.PageUrlPathNode.NodeGuid && targetPath.PageUrlPathUrlPath == newPageUrlPath.PageUrlPathUrlPath)
-                    //         // {
-                    //         //     _logger.LogInformation("PageUrlPath was matched by NodeGuid '{NodeGuid}' and PageUrlPathUrlPath '{PageUrlPathUrlPath}'",  newPageUrlPath.PageUrlPathNode.NodeGuid, newPageUrlPath.PageUrlPathUrlPath);
-                    //         // }
-                    //     }
-                    // }
-                    
-                    try
+                    var treeProvider = new TreeProvider
                     {
-                        var treeProvider = new TreeProvider
-                        {
-                            UpdateUser = false,
-                            UpdateTimeStamps = false,
-                            LogEvents = false,
-                            LogIntegration = false,
-                            UpdatePaths = false,
-                        };
-                        treeNode.TreeProvider = treeProvider;
-                        if (newInstance)
-                        {
-                            treeNode.Insert(kxoTreeNodeParent, false);
-                        }
-                        else
-                        {
-                            treeNode.Update(false);
-                        }
-
-                        // await _kxoContext.SaveChangesAsync(cancellationToken);
-
-                        // self reference satisfaction
-                        // if (kx13CmsTree.NodeOriginalNodeId == kx13CmsTree.NodeId)
-                        // {
-                        //     treeNode.NodeOriginalNodeId = treeNode.NodeId;
-                        //     await _kxoContext.SaveChangesAsync(cancellationToken);
-                        // }
-                        
-                        _migrationProtocol.Success(kx13CmsTree, treeNode, mapped);
-                        _logger.LogInformation(newInstance
-                            ? $"CmsTree: {treeNode.NodeName} with NodeGuid '{treeNode.NodeGUID}' was inserted"
-                            : $"CmsTree: {treeNode.NodeName} with NodeGuid '{treeNode.NodeGUID}' was updated");
+                        UpdateUser = false,
+                        UpdateTimeStamps = false,
+                        LogEvents = false,
+                        LogIntegration = false,
+                        UpdatePaths = false,
+                    };
+                    treeNode.TreeProvider = treeProvider;
+                    if (newInstance)
+                    {
+                        treeNode.Insert(kxoTreeNodeParent, false);
                     }
-                    catch (DbUpdateException dbUpdateException) when (
-                        dbUpdateException.InnerException is SqlException sqlException &&
-                        sqlException.Message.Contains("Cannot insert duplicate key row in object") &&
-                        sqlException.Message.Contains("IX_CMS_PageUrlPath_PageUrlPathUrlPathHash_PageUrlPathCulture_PageUrlPathSiteID") &&
-                        sqlException.Message.Contains("CMS_PageUrlPath")
-                    )
+                    else
                     {
-                        //PageUrlPathUrlPathHash, PageUrlPathCulture, PageUrlPathSiteID
-                        await _kxoContext.DisposeAsync();
-                        // TODO tk: 2022-05-18 protocol - request manual migration
-                        _logger.LogError(sqlException, "Failed to migrate page url path, possibly due to duplicated PageUrlPathHash.");
-                        _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
-                    
-                        _migrationProtocol.NeedsManualAction(
-                            HandbookReferences.CmsUserUserNameConstraintBroken,
-                            $"Failed to migrate page. PageNodeGuid: {kx13CmsTree.NodeGuid}. Needs manual migration.",
-                            kx13CmsTree,
-                            treeNode,
-                            mapped
-                        );
-                        continue;
-                    }
-                    catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
-                    {
-                        throw;
+                        treeNode.Update(false);
                     }
 
-                    _primaryKeyMappingContext.SetMapping<KX13.Models.CmsTree>(
-                        r => r.NodeId,
-                        kx13CmsTree.NodeId,
-                        treeNode.NodeID
-                    );
+                    MigratePageUrlPaths(kx13Context, kx13CmsTree, kx13CmsDocument, cultureCode, treeNode);
 
-                    // foreach (var kx13CmsDocument in kx13CmsTree.CmsDocuments)
-                    // {
-                    //     var kxoCmdDocument = treeNode.CmsDocuments.FirstOrDefault(x => x.DocumentGuid == kx13CmsDocument.DocumentGuid);
-                    //     if (kxoCmdDocument == null)
-                    //     {
-                    //         // TODO tk: 2022-05-18 report inconsistency
-                    //         _logger.LogWarning("Inconsistency: new cmsDocument should be present, but it isn't. NodeGuid={nodeGuid}", treeNode.NodeGuid);
-                    //         continue;
-                    //     }
-                    //     
-                    //     _primaryKeyMappingContext.SetMapping<KX13.Models.CmsDocument>(
-                    //         r => r.DocumentId,
-                    //         kx13CmsDocument.DocumentId,
-                    //         kxoCmdDocument.DocumentId
-                    //     );    
-                    // }
-                    
-                    break;
+                    treeNode.Publish();
+
+                    _migrationProtocol.Success(kx13CmsTree, treeNode, mapped);
+                    _logger.LogInformation(newInstance
+                        ? $"CmsTree: {treeNode.NodeName} with NodeGuid '{treeNode.NodeGUID}' was inserted"
+                        : $"CmsTree: {treeNode.NodeName} with NodeGuid '{treeNode.NodeGUID}' was updated");
                 }
+                catch (DbUpdateException dbUpdateException) when (
+                    dbUpdateException.InnerException is SqlException sqlException &&
+                    sqlException.Message.Contains("Cannot insert duplicate key row in object") &&
+                    sqlException.Message.Contains("IX_CMS_PageUrlPath_PageUrlPathUrlPathHash_PageUrlPathCulture_PageUrlPathSiteID") &&
+                    sqlException.Message.Contains("CMS_PageUrlPath")
+                )
+                {
+                    await _kxoContext.DisposeAsync();
+                    _logger.LogError(sqlException, "Failed to migrate page url path, possibly due to duplicated PageUrlPathHash.");
+                    _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
+
+                    _migrationProtocol.NeedsManualAction(
+                        HandbookReferences.CmsUserUserNameConstraintBroken,
+                        $"Failed to migrate page. PageNodeGuid: {kx13CmsTree.NodeGuid}. Needs manual migration.",
+                        kx13CmsTree,
+                        treeNode,
+                        mapped
+                    );
+                    continue;
+                }
+                catch (Exception ex) // TODO tk: 2022-05-18 handle exceptions
+                {
+                    await _kxoContext.DisposeAsync();
+                    _kxoContext = await _kxoContextFactory.CreateDbContextAsync(cancellationToken);
+
+                    _migrationProtocol.Append(HandbookReferences
+                        .ErrorCreatingTargetInstance<TreeNode>(ex)
+                        .NeedsManualAction()
+                        .WithIdentityPrint(treeNode)
+                    );
+                    _logger.LogEntitySetError(ex, newInstance, treeNode);
+                    continue;
+                }
+
+                _primaryKeyMappingContext.SetMapping<KX13.Models.CmsTree>(
+                    r => r.NodeId,
+                    kx13CmsTree.NodeId,
+                    treeNode.NodeID
+                );
             }
         }
 
-        // TODO tk: 2022-07-07 update & migrate paths
-        // TODO tk: 2022-06-08 method cannot be used in current impl, synced documents must be reflected in url path search 
-        // await RequireMigratedCmsPageUrlPaths(cancellationToken, kx13Context, migratedSiteIds);
-        
         return new GenericCommandResult();
+    }
+
+    private void MigratePageUrlPaths(KX13Context kx13Context, CmsTree kx13CmsTree, CmsDocument kx13CmsDocument, string cultureCode, TreeNode treeNode)
+    {
+        using var kxoContext = _kxoContextFactory.CreateDbContext();
+        
+        var pageUrlPathsByHash =
+            kxoContext.CmsPageUrlPaths.Include(x => x.PageUrlPathNode)
+                .ToDictionary(x => new PageUrlPathKey(x.PageUrlPathSiteId, x.PageUrlPathUrlPathHash, x.PageUrlPathCulture));
+
+        var kx13PageUrlPaths = kx13Context
+            .CmsPageUrlPaths.Where(p => p.PageUrlPathNodeId == kx13CmsTree.NodeId && p.PageUrlPathCulture == kx13CmsDocument.DocumentCulture);
+
+        foreach (var kx13PageUrlPath in kx13PageUrlPaths)
+        {
+            var pageUrlPathKey = new PageUrlPathKey(treeNode.NodeSiteID, kx13PageUrlPath.PageUrlPathUrlPathHash, treeNode.DocumentCulture);
+            
+            var exists = PageUrlPathInfoProvider.ProviderObject.Get(kx13PageUrlPath.PageUrlPathGuid) != null;
+            if (exists)
+            {
+                _logger.LogWarning("PageUrlPath skipped, already exists in target instance: {Info}", pageUrlPathKey);
+                // TODO tk: 2022-07-08 report
+                continue;
+            }
+
+            var pageUrlPath = PageUrlPathInfo.New();
+            pageUrlPath.PageUrlPathCulture = treeNode.DocumentCulture;
+            pageUrlPath.PageUrlPathNodeID = treeNode.NodeID;
+            pageUrlPath.PageUrlPathSiteID = treeNode.NodeSiteID;
+            pageUrlPath.PageUrlPathGUID = kx13PageUrlPath.PageUrlPathGuid;
+            pageUrlPath.PageUrlPathUrlPath = kx13PageUrlPath.PageUrlPathUrlPath;
+            pageUrlPath.PageUrlPathUrlPathHash = kx13PageUrlPath.PageUrlPathUrlPathHash;
+            pageUrlPath.PageUrlPathLastModified = kx13PageUrlPath.PageUrlPathLastModified;
+            if (pageUrlPathsByHash.ContainsKey(pageUrlPathKey))
+            {
+                _logger.LogWarning("PageUrlPath skipped, already exists in target instance: {Info}", pageUrlPathKey);
+                // TODO tk: 2022-07-08 report
+                continue;
+            }
+
+            PageUrlPathInfoProvider.ProviderObject.Set(pageUrlPath);
+
+            _logger.LogEntitySetAction(true, pageUrlPath);
+        }
     }
 
     // private async Task RequireMigratedCmsAcls(KX13Context kx13Context, List<int?> migratedSiteIds, CancellationToken cancellationToken)

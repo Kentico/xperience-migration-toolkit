@@ -231,27 +231,20 @@ public class MigrateDataProtectionCommandHandler : IRequestHandler<MigrateDataPr
             var mapped = _consentAgreementMapper.Map(kx13ConsentAgreement, kxoConsentAgreement);
             _migrationProtocol.MappedTarget(mapped);
 
-            switch (mapped)
+            if (mapped is { Success : true } result)
             {
-                case { Success : true } result:
+                var (cmsConsentAgreement, newInstance) = result;
+                ArgumentNullException.ThrowIfNull(cmsConsentAgreement, nameof(cmsConsentAgreement));
+
+                if (newInstance)
                 {
-                    var (cmsConsentAgreement, newInstance) = result;
-                    ArgumentNullException.ThrowIfNull(cmsConsentAgreement, nameof(cmsConsentAgreement));
-
-                    if (newInstance)
-                    {
-                        consentAgreementNews.Add(cmsConsentAgreement);
-                    }
-                    else
-                    {
-                        consentAgreementUpdates.Add(cmsConsentAgreement);
-                    }
-                    //_primaryKeyMappingContext.SetMapping<KX13.Models.CmsConsentAgreement>(r => r.ConsentAgreementGuid, kx13ConsentAgreement.ConsentAgreementId, cmsConsentAgreement.ConsentAgreementId);
-
-                    break;
+                    consentAgreementNews.Add(cmsConsentAgreement);
                 }
-                default:
-                    break;
+                else
+                {
+                    consentAgreementUpdates.Add(cmsConsentAgreement);
+                }
+                //_primaryKeyMappingContext.SetMapping<KX13.Models.CmsConsentAgreement>(r => r.ConsentAgreementGuid, kx13ConsentAgreement.ConsentAgreementId, cmsConsentAgreement.ConsentAgreementId);
             }
 
             index++;

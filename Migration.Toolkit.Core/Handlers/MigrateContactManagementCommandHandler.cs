@@ -157,35 +157,35 @@ public class MigrateContactManagementCommandHandler : IRequestHandler<MigrateCon
             }
         }
         
-        if (columnName.Equals(nameof(KXO.Models.OmContact.ContactStateId), StringComparison.InvariantCultureIgnoreCase) && value is int sourceStateId)
-        {
-            switch (_primaryKeyMappingContext.MapSourceId<CmsState>(u => u.StateId, sourceStateId.NullIfZero()))
-            {
-                case (true, var id):
-                    return ValueInterceptorResult.ReplaceValue(id);
-                case { Success: false }:
-                {
-                    _migrationProtocol.Append(HandbookReferences.MissingRequiredDependency<KXO.Models.CmsState>(columnName, value)
-                        .WithData(currentRow));
-                    return ValueInterceptorResult.SkipRow;
-                }
-            }
-        }
-        
-        if (columnName.Equals(nameof(KXO.Models.OmContact.ContactCountryId), StringComparison.InvariantCultureIgnoreCase) && value is int sourceCountryId)
-        {
-            switch (_primaryKeyMappingContext.MapSourceId<CmsCountry>(u => u.CountryId, sourceCountryId.NullIfZero()))
-            {
-                case (true, var id):
-                    return ValueInterceptorResult.ReplaceValue(id);
-                case { Success: false }:
-                {
-                    _migrationProtocol.Append(HandbookReferences.MissingRequiredDependency<KXO.Models.CmsCountry>(columnName, value)
-                        .WithData(currentRow));
-                    return ValueInterceptorResult.SkipRow;
-                }
-            }
-        }
+        // if (columnName.Equals(nameof(KXO.Models.OmContact.ContactStateId), StringComparison.InvariantCultureIgnoreCase) && value is int sourceStateId)
+        // {
+        //     switch (_primaryKeyMappingContext.MapSourceId<CmsState>(u => u.StateId, sourceStateId.NullIfZero()))
+        //     {
+        //         case (true, var id):
+        //             return ValueInterceptorResult.ReplaceValue(id);
+        //         case { Success: false }:
+        //         {
+        //             _migrationProtocol.Append(HandbookReferences.MissingRequiredDependency<KXO.Models.CmsState>(columnName, value)
+        //                 .WithData(currentRow));
+        //             return ValueInterceptorResult.SkipRow;
+        //         }
+        //     }
+        // }
+        //
+        // if (columnName.Equals(nameof(KXO.Models.OmContact.ContactCountryId), StringComparison.InvariantCultureIgnoreCase) && value is int sourceCountryId)
+        // {
+        //     switch (_primaryKeyMappingContext.MapSourceId<CmsCountry>(u => u.CountryId, sourceCountryId.NullIfZero()))
+        //     {
+        //         case (true, var id):
+        //             return ValueInterceptorResult.ReplaceValue(id);
+        //         case { Success: false }:
+        //         {
+        //             _migrationProtocol.Append(HandbookReferences.MissingRequiredDependency<KXO.Models.CmsCountry>(columnName, value)
+        //                 .WithData(currentRow));
+        //             return ValueInterceptorResult.SkipRow;
+        //         }
+        //     }
+        // }
         
         
 

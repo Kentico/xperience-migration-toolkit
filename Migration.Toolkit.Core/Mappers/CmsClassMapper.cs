@@ -1,5 +1,7 @@
-﻿using CMS.DataEngine;
+﻿using CMS.Core;
+using CMS.DataEngine;
 using CMS.FormEngine;
+using CMS.OnlineForms;
 using Microsoft.Extensions.Logging;
 using Migration.Toolkit.Common;
 using Migration.Toolkit.Core.Abstractions;
@@ -46,6 +48,13 @@ public class CmsClassMapper :
         target.ClassIsDocumentType = source.ClassIsDocumentType;
         target.ClassIsCoupledClass = source.ClassIsCoupledClass;
         target.ClassXmlSchema = _formInfoDefinitionConvertor.ConvertToKxo(source.ClassXmlSchema);
+        // new DataType()
+        // DataTypeManager.FieldTypes
+            // FormComponentsMetadataBuilder.
+            // Service.Resolve<IFormComponentDefinitionProvider>()
+            // ComponentDefinitionStore
+            // FormComponentDefinitionProvider
+            
         target.ClassFormDefinition = _formInfoDefinitionConvertor.ConvertToKxo(source.ClassFormDefinition);
         target.ClassNodeNameSource = source.ClassNodeNameSource;
         target.ClassTableName = source.ClassTableName;
@@ -63,24 +72,27 @@ public class CmsClassMapper :
         target.ClassShowColumns = source.ClassShowColumns;
         
         // target.ClassContactMapping = source.ClassContactMapping;
-        FormInfo mapInfo = new FormInfo(source.ClassContactMapping);
-        var newMappings = new FormInfo();
-        if (mapInfo.ItemsList.Count > 0)
+        if (source.ClassContactMapping != null)
         {
-            var ffiLookup = mapInfo.ItemsList.OfType<FormFieldInfo>().ToLookup(f => f.MappedToField, f => f);
-
-            foreach (var formFieldInfos in ffiLookup)
+            FormInfo mapInfo = new FormInfo(source.ClassContactMapping);
+            var newMappings = new FormInfo();
+            if (mapInfo.ItemsList.Count > 0)
             {
-                if (formFieldInfos.Count() > 1)
+                var ffiLookup = mapInfo.ItemsList.OfType<FormFieldInfo>().ToLookup(f => f.MappedToField, f => f);
+
+                foreach (var formFieldInfos in ffiLookup)
                 {
-                    _logger.LogWarning("Multiple mappings with same value in 'MappedToField': {Detail}", string.Join("|", formFieldInfos.Select(f => f.ToXML(null, false))));
+                    if (formFieldInfos.Count() > 1 && formFieldInfos.Key != null)
+                    {
+                        _logger.LogWarning("Multiple mappings with same value in 'MappedToField': {Detail}", string.Join("|", formFieldInfos.Select(f => f.ToXML("FF", false))));
+                    }
+
+                    newMappings.AddFormItem(formFieldInfos.First());
                 }
-
-                newMappings.AddFormItem(formFieldInfos.First());
             }
-        }
 
-        target.ClassContactMapping = newMappings.GetXmlDefinition();
+            target.ClassContactMapping = newMappings.GetXmlDefinition();
+        }
             
         target.ClassContactOverwriteEnabled = source.ClassContactOverwriteEnabled.UseKenticoDefault();
         target.ClassConnectionString = source.ClassConnectionString;

@@ -1,4 +1,5 @@
 using CMS.DataEngine;
+using CMS.DocumentEngine;
 using CMS.MediaLibrary;
 using Migration.Toolkit.Common.Helpers;
 
@@ -41,7 +42,9 @@ public static class EntityPrinter
             MediaLibraryInfo mfi => $"ID={mfi.LibraryID}, GUID={mfi.LibraryGUID}, Name={mfi.LibraryName}",
             MediaFileInfo mf => $"ID={mf.FileID}, GUID={mf.FileGUID}, Name={mf.FileName}",
             DataClassInfo dci => $"ID={dci.ClassID}, GUID={dci.ClassGUID}, Name={dci.ClassName}",
-            
+            PageUrlPathInfo pupi => $"ID={pupi.PageUrlPathID}, GUID={pupi.PageUrlPathGUID}, UrlPath={pupi.PageUrlPathUrlPath}",
+            TreeNode tn => $"NodeID={tn.NodeID}, DocumentID={tn.DocumentID}, NodeGUID={tn.NodeGUID}, DocumentGUID={tn.DocumentGUID}, DocumentCulture={tn.DocumentCulture}, DocumentName={tn.DocumentName}",
+                
             KXOM.CmsForm cf => $"ID={cf.FormId}, GUID={cf.FormGuid}, Name={cf.FormName}",
             
             KX13M.CmsAttachment ca13 => $"ID={ca13.AttachmentId}, GUID={ca13.AttachmentGuid}, Name={ca13.AttachmentName}",

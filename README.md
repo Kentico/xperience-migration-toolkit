@@ -8,7 +8,11 @@
 <!-- ABOUT THE PROJECT -->
 # Xperience by Kentico: Kentico Migration Tool
 
-The Migration tool transfers content and other data from **Kentico Xperience 13**, **Kentico 12** or **Kentico 11** to **Xperience by Kentico**.
+[![7-day bug-fix policy](https://img.shields.io/badge/-7--days_bug--fixing_policy-grey?labelColor=orange&logo=data:image/svg+xml;base64,PHN2ZyBjbGFzcz0ic3ZnLWljb24iIHN0eWxlPSJ3aWR0aDogMWVtOyBoZWlnaHQ6IDFlbTt2ZXJ0aWNhbC1hbGlnbjogbWlkZGxlO2ZpbGw6IGN1cnJlbnRDb2xvcjtvdmVyZmxvdzogaGlkZGVuOyIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik04ODguNDkgMjIyLjY4NnYtMzEuNTRsLTY1LjY3Mi0wLjk1NWgtMC4yMDVhNDY1LjcxNSA0NjUuNzE1IDAgMCAxLTE0NC4zMTUtMzEuMzM0Yy03Ny4wMDUtMzEuMTk4LTEyNi4yOTQtNjYuNzY1LTEyNi43MDMtNjcuMTA3bC0zOS44LTI4LjY3Mi0zOS4xODUgMjguNDY4Yy0yLjA0OCAxLjUwMS00OS45MDMgMzYuMDQ0LTEyNi45MDggNjcuMzFhNDQ3LjQyIDQ0Ny40MiAwIDAgMS0xNDQuNTIgMzEuMzM1bC02NS44NzcgMC45NTZ2Mzc4Ljg4YzAgODcuMDQgNDkuODM0IDE4NC42NjEgMTM3LjAxIDI2Ny44MSAzNy41NDcgMzUuODQgNzkuMjU4IDY2LjM1NSAxMjAuODMzIDg4LjIgNDMuMjggMjIuNzMzIDg0LjI0IDM0LjYxMiAxMTguODUyIDM0LjYxMiAzNC40MDYgMCA3NS43NzYtMTIuMTUyIDExOS42MDMtMzUuMTU4YTU0Ny45NzcgNTQ3Ljk3NyAwIDAgMCAxMjAuMDEzLTg3LjY1NCA1MTUuMjA5IDUxNS4yMDkgMCAwIDAgOTYuMTg4LTEyMi44OGMyNy4xMDItNDkuNTYyIDQwLjgyMy05OC4zMDQgNDAuODIzLTE0NC45OTlsLTAuMTM2LTM0Ny4yMDR6TTUxMC4wOSAxNDMuNDI4bDEuNzA2LTEuMzY1IDEuNzc1IDEuMzY1YzUuODAzIDQuMTY1IDU5LjUyOSA0MS44NDggMTQwLjM1NiA3NC43NTIgNzkuMTkgMzIuMDg2IDE1My42IDM1LjYzNSAxNjcuNjYzIDM2LjA0NWwyLjU5NCAwLjA2OCAwLjIwNSAzMTUuNzM0YzAuMTM3IDY5LjQ5NS00Mi41OTggMTUwLjE4Ni0xMTcuMDc3IDIyMS40NTdDNjQxLjU3IDg1NC4yODkgNTYzLjEzIDg5Ni40NzggNTEyIDg5Ni40NzhjLTIzLjY4OSAwLTU1LjU3LTkuODk5LTg5LjcwMi0yNy43ODVhNDc4LjgyMiA0NzguODIyIDAgMCAxLTEwNS42MDktNzcuMjc4QzI0Mi4yMSA3MjAuMjEzIDE5OS40NzUgNjM5LjUyMiAxOTkuNDc1IDU2OS44OVYyNTQuMjI1bDIuNzMtMC4xMzZjMy4yNzggMCA4Mi42MDQtMS41MDIgMTY3LjY2NC0zNS45NzdhNzM5Ljk0MiA3MzkuOTQyIDAgMCAwIDE0MC4yMi03NC42MTV2LTAuMDY5eiIgIC8+PHBhdGggZD0iTTcxMy4zMTggMzY4LjY0YTMyLjIyMiAzMi4yMjIgMCAwIDAtNDUuMzI5IDBMNDQ5LjE5NSA1ODcuNDM1bC05My4xODQtOTMuMTE2YTMyLjIyMiAzMi4yMjIgMCAwIDAtNDUuMzMgMCAzMi4yMjIgMzIuMjIyIDAgMCAwIDAgNDUuMjZsMTE1Ljg1IDExNS44NWEzMi4yOSAzMi4yOSAwIDAgMCA0NS4zMjggMEw3MTMuMzIgNDEzLjlhMzIuMjIyIDMyLjIyMiAwIDAgMCAwLTQ1LjMzeiIgIC8+PC9zdmc+)](https://github.com/Kentico/.github/blob/main/SUPPORT.md#full-support)
+
+## Description
+
+The Kentico Migration Tool transfers content and other data from **Kentico Xperience 13**, **Kentico 12** or **Kentico 11** to **Xperience by Kentico**.
 
 ## Prerequisites & Compatibility
 
@@ -20,14 +24,14 @@ The migration currently supports the Kentico Xperience 13, Kentico 12 or Kentico
 
 * The source of the migration data must be a Kentico Xperience 13 instance, with **Refresh 5** ([hotfix](https://devnet.kentico.com/download/hotfixes) 13.0.64) or newer applied.
 * The development model (Core or MVC 5) does not affect the migration - both are supported.
-* The source instance's database and file system must be accessible from the environment where you run the Migration toolkit.
+* The source instance's database and file system must be accessible from the environment where you run the Kentico Migration Tool.
 * All features described in this repository are available for migration from Kentico Xperience 13.
 
 #### Kentico 12
 
 * The source of the migration data can be any hotfix version of the Kentico 12.
-* Only MVC development model is supported by the migration tool. Any Portal Engine project that you wish to migrate to Xperience by Kentico needs to be [migrated to MVC](https://www.youtube.com/watch?v=g2oeHU0h1e0) first.
-* The source instance's database and file system must be accessible from the environment where you run the Migration toolkit.
+* Only MVC development model is supported by this tool. Any Portal Engine project that you wish to migrate to Xperience by Kentico needs to be [migrated to MVC](https://www.youtube.com/watch?v=g2oeHU0h1e0) first.
+* The source instance's database and file system must be accessible from the environment where you run the this tool.
 * Migration of Page Builder content is not supported. Only structured data of pages is migrated.
   * As a result, [source instance API discovery](/Migration.Toolkit.CLI/README.md#source-instance-api-discovery) is also not available.
 * This repository describes the migration of Kentico Xperience 13 feature set. Only features relevant to Kentico 12 are migrated for this version.
@@ -35,33 +39,33 @@ The migration currently supports the Kentico Xperience 13, Kentico 12 or Kentico
 #### Kentico 11
 
 * The source of the migration data can be any hotfix version of the Kentico 11. If you encounter any issues, it is recommended to update to the latest hotfix.
-* Only MVC development model is supported by the migration tool. Any Portal Engine project that you wish to migrate to Xperience by Kentico needs to be [migrated to MVC](https://www.youtube.com/watch?v=g2oeHU0h1e0) first.
-* The source instance's database and file system must be accessible from the environment where you run the Migration toolkit.
+* Only MVC development model is supported by this tool. Any Portal Engine project that you wish to migrate to Xperience by Kentico needs to be [migrated to MVC](https://www.youtube.com/watch?v=g2oeHU0h1e0) first.
+* The source instance's database and file system must be accessible from the environment where you run this tool.
 * Only structured data of pages is migrated as Page Builder is not present in Kentico 11.
   * As a result, [source instance API discovery](/Migration.Toolkit.CLI/README.md#source-instance-api-discovery) is also not available.
 * This repository describes the migration of Kentico Xperience 13 feature set. Only features relevant to Kentico 11 are migrated for this version.
 
 ### Target
 
-* The migration toolkit is periodically updated to support migration to the **latest version** of Xperience by Kentico. However, there may be delays between Xperience by Kentico releases and toolkit updates.
+* The Kentico Migration Tool is periodically updated to support migration to the **latest version** of Xperience by Kentico. However, there may be delays between Xperience by Kentico releases and tool updates.
   * Currently, Xperience by Kentico **29.1.0** is tested and supported.
-* The target instance's database and file system must be accessible from the environment where you run the Migration toolkit.
-* The target instance's database must be empty except for data from the source instance created by previous runs of the Migration toolkit to avoid conflicts and inconsistencies.
+* The target instance's database and file system must be accessible from the environment where you run this tool.
+* The target instance's database must be empty except for data from the source instance created by previous runs of this tool to avoid conflicts and inconsistencies.
 
 ## Supported data and limitations
 
-The Migration toolkit does not transfer all data available in the source instance. Xperience by Kentico currently provides a smaller, more focused set of features. As a result, some objects are discarded or migrated to a suitable alternative.
+The Kentico Migration Tool does not transfer all data available in the source instance. Xperience by Kentico currently provides a smaller, more focused set of features. As a result, some objects are discarded or migrated to a suitable alternative.
 
-The Migration toolkit only supports content and objects **stored in the database** and related binary data on the file system, such as media library files. Code, customizations, and any other types of content need to be migrated manually to the target project and adjusted for Xperience by Kentico.
+This tool only supports content and objects **stored in the database** and related binary data on the file system, such as media library files. Code, customizations, and any other types of content need to be migrated manually to the target project and adjusted for Xperience by Kentico.
 
-Currently, the Migration toolkit supports the following types of data:
+Currently, the Kentico Migration Tool supports the following types of data:
 
 * **Sites**
-  * The toolkit migrates each site on the source to a [website channel](https://docs.kentico.com/x/34HFC) object in Xperience by Kentico.
+  * The tool migrates each site on the source to a [website channel](https://docs.kentico.com/x/34HFC) object in Xperience by Kentico.
 * **Cultures**
   * The set of cultures used across all sites in the source gets mapped to a [language](https://docs.kentico.com/x/OxT_Cw) in the _Languages_ application.
 * **Content types** (_Page types_ in earlier Kentico versions)
-  * The Migration toolkit attempts to map the _Data type_ and _Form control_ of page type fields to an appropriate equivalent in Xperience by Kentico. This mapping is not always possible and does not work for custom data types or form controls. We recommend checking your content type fields after the migration and adjusting them if necessary.
+  * The Kentico Migration Tool attempts to map the _Data type_ and _Form control_ of page type fields to an appropriate equivalent in Xperience by Kentico. This mapping is not always possible and does not work for custom data types or form controls. We recommend checking your content type fields after the migration and adjusting them if necessary.
   * The migration includes only page types assigned to at least one site on the source instance.
   * Xperience by Kentico currently does not support:
     * Macro expressions in page type field default values or other settings. Content type fields containing macros will not work correctly after the migration.
@@ -113,7 +117,7 @@ Currently, the Migration toolkit supports the following types of data:
     * Alternative forms under classes and UI-related configuration of class fields (field labels, Form controls, etc.). After the migration, you must manually create the appropriate [UI forms](https://docs.kentico.com/x/V6rWCQ) in Xperience by Kentico.
     * Custom settings under modules, which are currently not supported in Xperience by Kentico
     * Module permissions (permissions work differently in Xperience by Kentico - see [Role management](https://docs.kentico.com/x/7IVwCg) and [UI page permission checks](https://docs.kentico.com/x/8IKyCg))
-    * As with all object types, the migration toolkit does not transfer code files to the target project. You must manually move all code files generated for your custom classes (_Info_, _InfoProvider_, etc.).
+    * As with all object types, the Kentico Migration Tool does not transfer code files to the target project. You must manually move all code files generated for your custom classes (_Info_, _InfoProvider_, etc.).
 * **Custom tables**
   * Custom tables are not supported in Xperience by Kentico. Data from custom tables is migrated to the target instance as custom modules.
   * The migration only transfers data from custom tables to the custom module (_CMS\_Resource_) database table.
@@ -126,12 +130,12 @@ Currently, the Migration toolkit supports the following types of data:
 
 ### Unsupported data
 
-The following types of data exist in Xperience by Kentico but are currently **not supported** by the Migration toolkit:
+The following types of data exist in Xperience by Kentico but are currently **not supported** by the Kentico Migration Tool:
 
 * **Contact groups**
   * Static contact groups are currently not supported in Xperience by Kentico.
   * The condition format for dynamic contact groups is not compatible. To migrate contact groups:
-    1. Migrate your contacts using the toolkit.
+    1. Migrate your contacts using the tool.
     2. Create the [contact groups](https://docs.kentico.com/x/o4PWCQ) manually in Xperience by Kentico.
     3. Build equivalent conditions.
     4. Recalculate the contact groups.
@@ -143,7 +147,7 @@ The following types of data exist in Xperience by Kentico but are currently **no
 <!-- GETTING STARTED -->
 ## Get started
 
-Follow the steps below to run the Migration toolkit:
+Follow the steps below to run the Kentico Migration Tool:
 
 1. Clone or download the Migration.Toolkit source code from this repository.
 2. Open the `Migration.Toolkit.sln` solution in Visual Studio.
@@ -187,6 +191,10 @@ Please provide all available information about the problem or error when submitt
 
 Distributed under the MIT License. See [`LICENSE.md`](./LICENSE.md) for more information.
 
-## Questions & Support
+## Support
 
-See the [Kentico home repository](https://github.com/Kentico/Home/blob/master/README.md) for more information about the products and general advice on submitting questions.
+This contribution has **Full support by 7-day bug-fix policy**.
+
+See [`SUPPORT.md`](https://github.com/Kentico/.github/blob/main/SUPPORT.md#full-support) for more information.
+
+For any security issues see [`SECURITY.md`](https://github.com/Kentico/.github/blob/main/SECURITY.md).
